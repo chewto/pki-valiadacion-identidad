@@ -1,15 +1,13 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   InformacionIdentidad,
   Respuesta,
 } from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
-import { Form, Button } from "reactstrap";
+import { Form, Button, Alert } from "reactstrap";
 import {
   normalizeDocumento,
   normalizeNombre,
-} from "../nucleo/validadores/validacion-identidad/validadores-info";
-import {
   ValidadorNombre,
   validadorDocumento,
 } from "../nucleo/validadores/validacion-identidad/validadores-info";
@@ -18,35 +16,58 @@ import {
   formdataKeys,
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
-import { MuestraDatos } from "../componentes/validacion-identidad/muestra-datos";
 import { FormularioDocumentos } from "../componentes/validacion-identidad/formulario-documentos";
-import { FormularioSelfie } from "../componentes/validacion-identidad/selfie-movil";
+import { useParams } from "react-router-dom";
+import { useGetFetch } from "../nucleo/hooks/useGetFetch";
+import { SpinnerLoading } from "../componentes/shared/spinner-loading";
+import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
+import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 
 export const ValidacionIdentidad: React.FC = () => {
   const formulario = new FormData();
 
+  // const {data, loading, error} = useGetFetch('234234')
+
   const [informacion, setInformacion] = useState<InformacionIdentidad>({
-    nombres: "Jesus Enrique",
-    apellidos: "Lozada Salzar",
+    nombres: "jesus enrique",
+    apellidos: "lozada salazar",
     numero_documento: "30265611",
     anverso: "",
     reverso: "",
     foto_persona: "",
   });
 
-  const [data, setData] = useState<Respuesta>({
+  const [respuesta, setRespuesta] = useState<Respuesta>({
     coincidencia_documento_rostro: false,
     persona_reconocida: "",
     registradoDB_antes: false,
   });
 
-  const esMobile = () => {
-    const regex =
-      /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-    return regex.test(navigator.userAgent);
-  };
+  const [loadingPost, setLoadingPost] = useState<boolean>(false);
+  const [mostrarMensaje, setMostrar] = useState<boolean>(false);
+  const [mostrarAlert, setMostrarAlert] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
-  const movil = esMobile();
+  const loading = true;
+
+  let { idFirma } = useParams<string>();
+
+  useEffect(() => {
+    document.title = "Validacion identidad";
+    // setInformacion(
+    //   ...informacion,
+    //   nombres: data.nombres,
+    //   apellidos: data.apellidos,
+    //   numero_document: data.numeroDocumento
+    // )
+    console.log(idFirma);
+  }, [idFirma]);
+
+  useEffect(() => {
+    console.log(loadingPost);
+    console.log(respuesta);
+    console.log(mostrarAlert);
+  }, [loadingPost, respuesta, mostrarAlert]);
 
   const enviar = (evento: React.FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
@@ -61,8 +82,6 @@ export const ValidacionIdentidad: React.FC = () => {
 
     const apellidoNormalizado: string = normalizeNombre(informacion.apellidos);
     const apellidoValidado: boolean = ValidadorNombre(apellidoNormalizado);
-
-    console.log(nombreNormalizado, apellidoNormalizado, documentoNormalizado);
 
     if (nombreValidado && apellidoValidado && documentoValidado) {
       ValidadorFormdata(formulario, formdataKeys.nombres, nombreNormalizado);
@@ -107,66 +126,76 @@ export const ValidacionIdentidad: React.FC = () => {
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-      console.log("enviado");
+      setMostrar(true);
+      setLoadingPost(true);
 
-      axios
-        .post(
-          "http://127.0.0.1:5000/verificacion-rostro-documento",
-          formulario,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        )
-        .then((res) => setData(res.data))
-        .then(() => console.log(data));
+      axios({
+        method: "post",
+        url: URLS.validacionDocumentoRostro,
+        data: formulario,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((res) => {
+          console.log(res);
+          setRespuesta(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+          setError(true);
+        })
+        .finally(() => {
+          setLoadingPost(false);
+        });
     } else {
-      console.log("los campos de las imagenes no han sido rellenados");
+      setMostrarAlert(true);
+
+      setTimeout(() => {
+        setMostrarAlert(false);
+      }, 3000);
     }
   };
 
   return (
     <>
       <main className="main-container">
-        <div className="container">
-          <div className="data-container">
-            <MuestraDatos
-              informacion={informacion}
-              setInformacion={setInformacion}
-            />
-          </div>
+        <div className="content-container">
+          {!loading && <SpinnerLoading />}
+          <h2 className="title">Validacion de identidad</h2>
           <div className="form-container">
-            <Form onSubmit={enviar} style={{'margin':'17px'}}>
+            <Form onSubmit={enviar} style={{ margin: "17px" }}>
               <FormularioDocumentos
                 informacion={informacion}
                 setInformacion={setInformacion}
               />
 
-              {!movil && (
-                <FormularioFotoPersona
-                  informacion={informacion}
-                  setInformacion={setInformacion}
-                />
-              )}
+              <FormularioFotoPersona
+                informacion={informacion}
+                setInformacion={setInformacion}
+              />
 
-              {movil && (
-                <FormularioSelfie
-                  informacion={informacion}
-                  setInformacion={setInformacion}
-                />
-              )}
-
-              <Button block color="success">
+              <Button type="submit" color="primary" block>
                 Validar
               </Button>
             </Form>
           </div>
-          <div>
-            {data.coincidencia_documento_rostro && (
-              <div>La persona coincide con el documento</div>
-            )}
-          </div>
+          {mostrarMensaje === true && (
+            <MensajeVerificacion
+              loadingPost={loadingPost}
+              coincidencia={respuesta.coincidencia_documento_rostro}
+              mostrarMensaje={mostrarMensaje}
+              setMostrarMensaje={setMostrar}
+              error={error}
+              setError={setError}
+            />
+          )}
+          {mostrarAlert && (
+            <Alert color="warning">
+              Para realizar la verificacion, primero debes llenar todos los
+              campos
+            </Alert>
+          )}
         </div>
       </main>
     </>

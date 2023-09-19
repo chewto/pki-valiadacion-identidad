@@ -1,7 +1,12 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import "../../styles/styles.css";
-import { InformacionIdentidad } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import "../../styles/formulario-style.component.css";
+import {
+  InformacionIdentidad,
+  PreviewDocumento,
+} from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -12,8 +17,14 @@ export const FormularioDocumentos: React.FC<Props> = ({
   informacion,
   setInformacion,
 }) => {
+  const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
+    anverso: "",
+    reverso: "",
+  });
+
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = evento.target.files?.[0];
+    const lector = new FileReader();
 
     if (archivo) {
       setInformacion({
@@ -21,6 +32,15 @@ export const FormularioDocumentos: React.FC<Props> = ({
         [evento.target.name]: archivo,
       });
     }
+
+    lector.onload = () => {
+      setPreviewDocumento({
+        ...previewDocumento,
+        [evento.target.name]: lector.result,
+      });
+    };
+
+    if (archivo) lector.readAsDataURL(archivo);
   };
 
   return (
@@ -34,6 +54,13 @@ export const FormularioDocumentos: React.FC<Props> = ({
           onChange={cambioArchivo}
         />
       </FormGroup>
+
+      {previewDocumento.anverso.length !== 0 && (
+        <div className="img-container">
+          <img src={previewDocumento.anverso} alt="anverso" />
+        </div>
+      )}
+
       <FormGroup>
         <Label>Reverso del documento</Label>
         <Input
@@ -42,6 +69,12 @@ export const FormularioDocumentos: React.FC<Props> = ({
           accept=".jpg, .jpeg, .png"
           onChange={cambioArchivo}
         />
+
+        {previewDocumento.reverso.length !== 0 && (
+          <div className="img-container">
+            <img src={previewDocumento.reverso} alt="reverso" />
+          </div>
+        )}
       </FormGroup>
     </>
   );

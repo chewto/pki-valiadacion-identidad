@@ -1,6 +1,7 @@
-import { Dispatch, SetStateAction } from "react";
-import { FormGroup, Input, Label } from "reactstrap";
+import { Dispatch, SetStateAction, useState } from "react";
+import { Button, FormGroup, Input, Label } from "reactstrap";
 import { InformacionIdentidad } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import { CapturadorSelfie } from "./selfie-movil";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -11,6 +12,18 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   informacion,
   setInformacion,
 }) => {
+  const esMobile = () => {
+    const regex =
+      /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    return regex.test(navigator.userAgent);
+  };
+
+  const movil = esMobile();
+
+  const [mostrarCamara, setMostrarCamara] = useState<boolean>(false)
+
+  const alternarCamara = () => setMostrarCamara(!mostrarCamara)
+
   const cambioArchivo = (event: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = event.target.files?.[0];
 
@@ -26,7 +39,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
   return (
     <>
-      <div>
+      {movil ?(
+        <Button color="primary" onClick={alternarCamara} style={{margin: '5px 0 23px 0'}}>Tomar foto</Button>
+      ) :(<div>
         <FormGroup>
           <Label>Foto de su persona</Label>
           <Input
@@ -36,7 +51,16 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             onChange={cambioArchivo}
           />
         </FormGroup>
-      </div>
+      </div>)}
+
+
+      {mostrarCamara && (
+        <CapturadorSelfie
+          informacion={informacion}
+          setInformacion={setInformacion}
+          alternarCamara={alternarCamara}
+        />
+      )}
     </>
   );
 };

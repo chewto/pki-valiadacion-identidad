@@ -1,0 +1,48 @@
+@import url('./modal-style.component.css');
+
+.actions-container{
+  display: flex;
+}
+
+@media screen and (max-width: 768px){
+
+  .video{
+    width: 75%;
+  }
+
+  .foto{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .foto > img{
+    width: 65%;
+  }
+
+  .actions-container{
+    gap: 25px;
+  }
+}
+
+@media screen and (max-width: 425px){
+
+  .video{
+    width: 85%;
+  }
+
+  .foto > img{
+    width: 85%;
+  }
+
+  .actions-container{
+    gap: 20px;
+  }
+}
+
+@media screen and (max-width: 320px){
+
+  .actions-container{
+    gap: 8px;
+  }
+}

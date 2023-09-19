@@ -1,10 +1,9 @@
-import { RouterProvider } from 'react-router-dom';
-import {router} from './nucleo/rutas/rutas'
+import { ValidacionIdentidad } from "./paginas/validacion-identidad";
 
-export const App:React.FC = () => {
+export const App: React.FC = () => {
   return (
     <>
-      <RouterProvider router={router}/>
+      <ValidacionIdentidad />
     </>
-  )
-}
+  );
+};

@@ -12,3 +12,8 @@ export interface Respuesta {
   persona_reconocida: string;
   registradoDB_antes: boolean;
 }
+
+export interface PreviewDocumento{
+  anverso: string;
+  reverso: string;
+}

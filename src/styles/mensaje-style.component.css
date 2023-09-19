@@ -1,0 +1,46 @@
+.mensaje-container{
+  width: 100%;
+  height: 190%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #000a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 500;
+}
+
+.mensaje-content{
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 20vw;
+  position: relative;
+  top: 25%;
+  padding: 25px 10px;
+  border-radius: 8px;
+}
+
+.text-align{
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  .mensaje-content{
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 425px) {
+  .mensaje-content{
+    width: 95%;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .mensaje-content{
+    width: 96%;
+  }
+}
