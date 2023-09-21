@@ -1,0 +1,76 @@
+.selfie-container{
+  width: 100%;
+  margin: 25px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.video{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.video > .react-html5-camera-photo > video {
+  width: 60%;
+  display: flex;
+  justify-content: center;
+}
+
+.preview{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.foto{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.foto > img{
+  width: 65%;
+}
+
+.retake-btn{
+  background: #ff0022;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 350ms;
+}
+
+.retake-btn:hover{
+  background: #810011;
+}
+
+@media screen and (max-width: 768px){
+
+  .video > .react-html5-camera-photo > video {
+    width: 90%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .video{
+    width: 75%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+@media screen and (max-width: 425px){
+
+  .video{
+    width: 85%;
+  }
+
+  .foto > img{
+    width: 85%;
+  }
+}

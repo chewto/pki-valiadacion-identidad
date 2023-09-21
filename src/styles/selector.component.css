@@ -1,0 +1,31 @@
+.selector-container{
+  width: 100%;
+  padding:0 20px;
+}
+
+.selector-texto{
+  text-align: center;
+  font-size: 24px;
+}
+
+.selector-btn{
+  text-align: left;
+  margin: 10px 0;
+  display: block;
+  font-size: 20px;
+}
+
+.selector-radio{
+  margin: 0 5px;
+}
+
+@media screen and (max-width: 375px) {
+  .selector-texto{
+    margin: 20px 0;
+    font-size: 18px;
+  }
+
+  .selector-btn{
+    font-size: 15px;
+  }
+}
