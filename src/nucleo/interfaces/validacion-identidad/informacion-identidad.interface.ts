@@ -10,7 +10,7 @@ export interface InformacionIdentidad {
 export interface Respuesta {
   coincidencia_documento_rostro: boolean;
   persona_reconocida: string;
-  registradoDB_antes: boolean;
+  status: string;
 }
 
 export interface PreviewDocumento{

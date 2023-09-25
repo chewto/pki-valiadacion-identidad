@@ -16,6 +16,7 @@ export const Mensaje:React.FC<Props> = ({textoMensaje, colorMensaje}) => {
     if(colorMensaje === 'warning'){
       console.log('no esta verificado')
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

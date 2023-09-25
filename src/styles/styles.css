@@ -8,7 +8,10 @@ header{
 }
 
 header > img{
-  width: 15%;
+  width: 13%;
+}
+header > h2{
+  font-size: 25px;
 }
 
 .main-container{

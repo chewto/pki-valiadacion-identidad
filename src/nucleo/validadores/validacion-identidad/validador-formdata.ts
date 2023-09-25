@@ -21,4 +21,5 @@ export const formdataKeys = {
   anverso_documento: "anverso",
   reverso_documento: "reverso",
   foto_persona: "foto_persona",
+  tipoDocumento: "tipo_documento"
 };

@@ -41,7 +41,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   const mobile: boolean = useMobile();
 
   useEffect(() => {
-
     if (!mostrarPreviewInput) {
       setMostrarPreviewInput(true);
     }
@@ -51,7 +50,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     if (conteo >= 1) setContinuarBoton(true);
     if (conteo === 0) setContinuarBoton(false);
-    if(conteo === 0 && ladoPreview.length >=1) setContinuarBoton(true)
+    if (conteo === 0 && ladoPreview.length >= 1) setContinuarBoton(true);
   }, [conteo, setContinuarBoton, ladoPreview.length]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,52 +80,50 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   return (
-    <>
-      <div>
-        <div>
-          <label className="file-input">
-            <input
-              name={ladoDocumento}
-              type="file"
-              accept=".jpg, .jpeg, .png"
-              onChange={cambioArchivo}
-              style={{ display: "none" }}
-            />
-            Subir foto del {ladoDocumento} de su {tipoDocumento}
-          </label>
-        </div>
+    <div className="documento-container">
+      <h2 className="documento-title">
+        Subir foto del {ladoDocumento} de su {tipoDocumento}
+      </h2>
 
-        {mobile &&
-          (mostrarCamara ? (
-            <CapturadorSelfie
-              informacion={informacion}
-              setInformacion={setInformacion}
-              keyFoto={ladoDocumento}
-              conteo={conteo}
-              setConteo={setConteo}
-              ladoDocumento={ladoDocumento}
-              preview={preview}
-              setPreview={setPreview}
-              setMostrarPreviewCamara={setMostrarPreviewCamara}
-            />
-          ) : (
-            <Button
-            style={{margin: '15px 0'}}
+      <label className="file-input">
+        <input
+          name={ladoDocumento}
+          type="file"
+          accept=".jpg, .jpeg, .png"
+          onChange={cambioArchivo}
+          style={{ display: "none" }}
+        />
+        Subir foto del {ladoDocumento} de su documento
+      </label>
+
+      {mobile &&
+        (mostrarCamara ? (
+          <CapturadorSelfie
+            informacion={informacion}
+            setInformacion={setInformacion}
+            keyFoto={ladoDocumento}
+            conteo={conteo}
+            setConteo={setConteo}
+            ladoDocumento={ladoDocumento}
+            preview={preview}
+            setPreview={setPreview}
+            setMostrarPreviewCamara={setMostrarPreviewCamara}
+          />
+        ) : (
+          <Button
+            style={{ margin: "15px 0" }}
             block
-              color="primary"
-              onClick={()=> {
-                setMostrarCamara(true)
-                setMostrarPreviewCamara(false);
-                setMostrarPreviewInput(false);
-                setContinuarBoton(false);
-              }}
-            >
-              Tomar foto
-            </Button>
-          ))}
-      </div>
-
-      {/* preview archivo */}
+            color="primary"
+            onClick={() => {
+              setMostrarCamara(true);
+              setMostrarPreviewCamara(false);
+              setMostrarPreviewInput(false);
+              setContinuarBoton(false);
+            }}
+          >
+            Tomar foto al {ladoDocumento} de su documento
+          </Button>
+        ))}
       {ladoPreview.length >= 1 && mostrarPreviewInput && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
       )}
@@ -134,6 +131,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       {ladoPreview.length >= 1 && mostrarPreviewCamara && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
       )}
-    </>
+    </div>
   );
 };

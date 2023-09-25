@@ -18,13 +18,14 @@ import {
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useParams } from "react-router-dom";
-import { useGetFetch } from "../nucleo/hooks/useGetFetch";
+// import { useGetFetch } from "../nucleo/hooks/useGetFetch";
 import { SpinnerLoading } from "../componentes/shared/spinner-loading";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
+import { AccesoCamara } from "../componentes/validacion-identidad/acceso-camara";
 
 export const ValidacionIdentidad: React.FC = () => {
   const formulario = new FormData();
@@ -43,7 +44,7 @@ export const ValidacionIdentidad: React.FC = () => {
   const [respuesta, setRespuesta] = useState<Respuesta>({
     coincidencia_documento_rostro: false,
     persona_reconocida: "",
-    registradoDB_antes: false,
+    status: "",
   });
 
   const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
@@ -80,7 +81,9 @@ export const ValidacionIdentidad: React.FC = () => {
     console.log(respuesta);
   }, [loadingPost, respuesta]);
 
-  const enviar = (step:any) => {
+  const enviar = (step:number) => {
+
+    console.log(step)
 
     const documentoNormalizado: string = normalizeDocumento(
       informacion.numero_documento
@@ -131,6 +134,10 @@ export const ValidacionIdentidad: React.FC = () => {
       );
     }
 
+    if(tipoDocumento !== ""){
+      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, tipoDocumento)
+    }
+
     if (
       informacion.foto_persona !== "" &&
       informacion.anverso !== "" &&
@@ -167,7 +174,7 @@ export const ValidacionIdentidad: React.FC = () => {
       <main className="main-container">
         <div className="content-container">
           {!loading && <SpinnerLoading />}
-          <Header/>
+          <Header titulo="Validacion de identidad"/>
           <div style={{ margin: "17px" }}>
               <Stepper
                 allowClickControl={false}
@@ -182,16 +189,22 @@ export const ValidacionIdentidad: React.FC = () => {
                   informacion.foto_persona !== "" &&
                   informacion.anverso !== "" &&
                   informacion.reverso !== "" ? (
-                    <button className="stepper-btn">Enviar verificacion</button>
+                    <button className="stepper-btn">Verificar</button>
                   ) : (
-                    <button className="stepper-btn" disabled>Agregue la informacion para la vereficacion</button>
+                    <button className="stepper-btn" disabled>Verificar</button>
                   )
                 }
                 onSubmit={enviar}
               >
+
+                <AccesoCamara
+                  setContinuarBoton={setContinuarBoton}
+                />
+
                 <SelectorTipoDocumento
                   tipoDocumento={tipoDocumento}
                   setTipoDocumento={setTipoDocumento}
+                  continuarBoton={continuarBoton}
                   setContinuarBoton={setContinuarBoton}
                 />
 
@@ -206,6 +219,7 @@ export const ValidacionIdentidad: React.FC = () => {
                   setContinuarBoton={setContinuarBoton}
                   ladoDocumento="anverso"
                 />
+
 
                 <FormularioDocumento
                   tipoDocumento={tipoDocumento}

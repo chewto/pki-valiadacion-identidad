@@ -1,10 +1,14 @@
 import logoPKI from '../../assets/img/logo-pki.png'
 
-export const Header:React.FC = () => {
+interface Props{
+  titulo: string;
+}
+
+export const Header:React.FC<Props> = ({titulo}) => {
   return(
     <header>
       <img src={logoPKI} alt="pki" />
-      <h2 className="title">Validacion de identidad</h2>
+      <h2 className="title">{titulo}</h2>
     </header>
   )
 }

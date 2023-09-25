@@ -10,13 +10,16 @@
 
 .selector-btn{
   text-align: left;
+  display: flex;
+  align-items: center;
   margin: 10px 0;
-  display: block;
   font-size: 20px;
+  cursor: pointer;
 }
 
 .selector-radio{
-  margin: 0 5px;
+  margin: 4px 5px 0 0;
+  cursor: pointer;
 }
 
 @media screen and (max-width: 375px) {
