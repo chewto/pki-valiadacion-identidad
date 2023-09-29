@@ -21,5 +21,12 @@ export const formdataKeys = {
   anverso_documento: "anverso",
   reverso_documento: "reverso",
   foto_persona: "foto_persona",
-  tipoDocumento: "tipo_documento"
+  tipoDocumento: "tipo_documento",
+  dispositivo: "dispositivo",
+  navegador: "navegador",
+  ip: "ip",
+  latitud: "latitud",
+  longitud: "longitud",
+  hora: "hora",
+  fecha: "fecha"
 };

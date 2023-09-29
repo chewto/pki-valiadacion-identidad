@@ -89,7 +89,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         <input
           name={ladoDocumento}
           type="file"
-          accept=".jpg, .jpeg, .png"
+          accept=".jpg, .jpeg"
           onChange={cambioArchivo}
           style={{ display: "none" }}
         />

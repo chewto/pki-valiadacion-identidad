@@ -34,7 +34,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       <div
         style={{textAlign: 'center', fontSize: '23px', margin: '23px 0 0 0'}}
       >
-        <p>Realice un selfie para la verificacion </p>
+        <p>Realice un selfie para la verificación </p>
       </div>
 
       {mostrarCamara ? (
@@ -52,7 +52,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       ): (
         <button className="stepper-btn" style={{width: '100%', margin: '10px 0 0 0'}} onClick={()=> {
           setMostrarCamara(true)
-        }}>tomar selfie</button>
+        }}>Tomar selfie</button>
       )}
 
       {ladoPreview.length >= 1 && mostrarPreviewCamara && (

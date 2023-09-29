@@ -43,28 +43,28 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
 
       {desplegarCamara == 0 && (
         <>
-          <h3>Permitenos usar la camara</h3>
+          <h3>Permítenos usar su cámara</h3>
           <p>
-            Veras una ventana emergente que te pedira accesso a tu camara. Por
+            Veras una ventana emergente que te pedirá acceso a tu cámara. Por
             favor, asegurate de hacer click en permitir.
           </p>
           <Button color="success" onClick={() => setAccesoCamara(true)}>
-            Permitir acceso a la camara
+            Permitir acceso a la cámara
           </Button>
         </>
       )}
 
       {desplegarCamara == 1 && (
         <>
-          <h3>El acceso a la camara concedido</h3>
-          <p>Puede continuar con la verificacion</p>
+          <h3>El acceso a la cámara concedido</h3>
+          <p>Puede continuar con la verificación</p>
         </>
       )}
 
       {desplegarCamara == 2 &&  (
         <>
-          <h3>El acceso a la camara fue denegado</h3>
-          <p>Por favor recargue la pagina</p>
+          <h3>El acceso a la cámara fue denegado</h3>
+          <p>Por favor recargue la página</p>
         </>
       )}
     </div>

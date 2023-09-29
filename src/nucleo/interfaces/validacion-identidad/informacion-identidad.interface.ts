@@ -1,20 +1,30 @@
 export interface InformacionIdentidad {
-  nombres: string;
-  apellidos: string;
-  numero_documento: string;
   anverso: File | string;
   reverso: File | string;
   foto_persona: File | string;
+  dispositivo: string;
+  navegador: string;
+  latitud: string;
+  longitud: string;
+  hora: string;
+  fecha: string;
 }
 
 export interface Respuesta {
-  coincidencia_documento_rostro: boolean;
-  persona_reconocida: string;
-  status: string;
+  coincidenciaDocumentoRostro: boolean;
+  estadoVerificacion: string;
+  evidencias: string;
+  evidenciasAdicionales: string;
+  tipoDocumento: string;
 }
 
 export interface PreviewDocumento{
   anverso: string;
   reverso: string;
   foto_persona: string;
+}
+
+export interface EvidenciasRes{
+  idEvidencias: number;
+  idEvidenciasAdicionales: number;
 }

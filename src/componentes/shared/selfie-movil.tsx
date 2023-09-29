@@ -8,6 +8,7 @@ import { Button, Input } from "reactstrap";
 import Camera, { FACING_MODES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useMobile } from "../../nucleo/hooks/useMobile";
+import background from "../../assets/img/camara-back.png";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -34,7 +35,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
 }) => {
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [cambioCamara, setCambioCamara] = useState<any>(
-    FACING_MODES.ENVIRONMENT
+    FACING_MODES.USER
   );
 
   const mobile: boolean = useMobile();
@@ -96,16 +97,21 @@ export const CapturadorSelfie: React.FC<Props> = ({
                   tomarFoto(dataURL, keyFoto);
                 }}
               />
+              {keyFoto === 'foto_persona' && (
+                <div className="mascara">
+                  <img className="indicador" src={background}></img>
+                </div>
+              )}
               {mobile && (
                 <Input
                   type="select"
                   onChange={onChangeCamara}
-                  style={{ margin: "20px 0" }}
+                  style={{ margin: "55px 0 0 0" }}
                 >
                   <option value={FACING_MODES.ENVIRONMENT}>
-                    Camara frontal
+                    Cámara frontal
                   </option>
-                  <option value={FACING_MODES.USER}>Camara trasera</option>
+                  <option value={FACING_MODES.USER}>Cámara trasera</option>
                 </Input>
               )}
             </div>
@@ -115,10 +121,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
         {mostrarPreview && (
           <>
             <div className="preview">
-              <Button
-                color="danger"
-                onClick={capturarOtra}
-              >
+              <Button color="danger" onClick={capturarOtra}>
                 Capturar otra vez
               </Button>
             </div>

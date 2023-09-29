@@ -1,12 +1,18 @@
-import { Outlet } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ValidacionIdentidad } from "./paginas/validacion-identidad";
 
 function App() {
 
+
   return (
     <>
-      <Outlet/>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/validacion/:idFirma" element={<ValidacionIdentidad />}/>
+        </Routes>
+      </BrowserRouter>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

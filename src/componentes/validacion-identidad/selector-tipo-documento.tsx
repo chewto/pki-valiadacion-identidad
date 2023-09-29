@@ -36,15 +36,15 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
   const tiposDocumentos = [
     {
       id: 0,
-      valor: "Cedula de ciudadania",
+      valor: "Cédula de ciudadanía",
     },
     {
       id: 1,
-      valor: "Cedula de extranjeria",
+      valor: "Cédula de extranjería",
     },
     {
       id: 2,
-      valor: "Permiso por proteccion temporal",
+      valor: "Permiso por protección temporal",
     },
     {
       id: 3,
@@ -55,10 +55,10 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
   return (
     <div className="selector-container">
       <p className="selector-texto">
-        Seleccione un documento para la verificacion
+        Seleccione un documento para la verificación
       </p>
       {tiposDocumentos.map((opcion) => (
-        <label className="selector-btn">
+        <label className="selector-btn" key={opcion.id}>
           {tipoDocumento.length >= 1 && opcion.valor === tipoDocumento ? (
             <input
               type="radio"
