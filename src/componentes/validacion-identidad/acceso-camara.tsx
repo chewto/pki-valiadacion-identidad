@@ -9,12 +9,11 @@ interface Props {
 export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [desplegarCamara, setDesplegarCamara] = useState<number>(0);
-  const [accesoCamara, setAccesoCamara] = useState<boolean>(false);
 
-  useEffect(() => {
+  const iniciarCamara = () => {
     const video = videoRef.current;
 
-    if (accesoCamara) {
+  
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices
           .getUserMedia({ video: true })
@@ -31,11 +30,15 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
             setDesplegarCamara(2);
             console.log("accesso denegado");
           });
-      }
+      
     }
+  }
+
+  useEffect(() => {
+    setContinuarBoton(false)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accesoCamara]);
+  }, []);
 
   return (
     <div className="acceso-container">
@@ -48,7 +51,7 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
             Veras una ventana emergente que te pedirá acceso a tu cámara. Por
             favor, asegurate de hacer click en permitir.
           </p>
-          <Button color="success" onClick={() => setAccesoCamara(true)}>
+          <Button color="success" onClick={iniciarCamara}>
             Permitir acceso a la cámara
           </Button>
         </>

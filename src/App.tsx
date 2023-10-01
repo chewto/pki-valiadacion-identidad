@@ -3,12 +3,11 @@ import { ValidacionIdentidad } from "./paginas/validacion-identidad";
 
 function App() {
 
-
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/validacion/:idFirma" element={<ValidacionIdentidad />}/>
+          <Route path="/validacion" element={<ValidacionIdentidad />}/>
         </Routes>
       </BrowserRouter>
     </>

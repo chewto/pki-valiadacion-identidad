@@ -123,7 +123,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           >
             Tomar foto al {ladoDocumento} de su documento
           </Button>
-        ))}
+        ))} 
       {ladoPreview.length >= 1 && mostrarPreviewInput && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
       )}

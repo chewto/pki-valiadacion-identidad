@@ -5,6 +5,10 @@
   margin: 20px 0 10px 0;
 }
 
+.acceso-container > h3{
+  text-align: center;
+}
+
 .acceso-container > p{
   text-align: center;
   margin: 10px 0 30px 0;

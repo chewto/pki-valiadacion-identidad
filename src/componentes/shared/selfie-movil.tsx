@@ -4,11 +4,11 @@ import {
   PreviewDocumento,
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
-import { Button, Input } from "reactstrap";
+import { Button } from "reactstrap";
 import Camera, { FACING_MODES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import background from "../../assets/img/camara-back.png";
+import { convertidorFile } from "../../nucleo/services/convertidorFile";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -33,29 +33,14 @@ export const CapturadorSelfie: React.FC<Props> = ({
   setPreview,
   setMostrarPreviewCamara,
 }) => {
-  const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [cambioCamara, setCambioCamara] = useState<any>(
-    FACING_MODES.USER
-  );
-
   const mobile: boolean = useMobile();
 
-  const toFile = async (dataURL: string | undefined, nombreArchivo: string) => {
-    try {
-      if (dataURL) {
-        const response = await fetch(dataURL);
-        const blob = await response.blob();
-        const archivo = new File([blob], nombreArchivo, { type: blob.type });
-        return archivo;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
+  const [cambioCamara, setCambioCamara] = useState<boolean>(true);
 
-  const onChangeCamara = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const camara = event.target.value;
-    setCambioCamara(camara);
+  const cambiarCamara = () => {
+    setCambioCamara((prev) => !prev);
+    console.log(cambioCamara);
   };
 
   const capturarOtra = () => {
@@ -73,7 +58,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
       ...preview,
       [ladoDocumento]: dataURL,
     });
-    toFile(dataURL, "verificacion.jpg").then((res) => {
+    convertidorFile(dataURL, "verificacion.jpg").then((res) => {
       if (res) {
         setInformacion({
           ...informacion,
@@ -92,28 +77,48 @@ export const CapturadorSelfie: React.FC<Props> = ({
           <>
             <div className="video">
               <Camera
-                idealFacingMode={cambioCamara}
+                idealResolution={{
+                  width: mobile ? 500 : 600,
+                  height: mobile ? 400 : 350,
+                }}
+                idealFacingMode={
+                  cambioCamara ? FACING_MODES.USER : FACING_MODES.ENVIRONMENT
+                }
                 onTakePhoto={(dataURL) => {
                   tomarFoto(dataURL, keyFoto);
                 }}
               />
-              {keyFoto === 'foto_persona' && (
-                <div className="mascara">
-                  <img className="indicador" src={background}></img>
-                </div>
-              )}
-              {mobile && (
-                <Input
-                  type="select"
-                  onChange={onChangeCamara}
-                  style={{ margin: "55px 0 0 0" }}
-                >
-                  <option value={FACING_MODES.ENVIRONMENT}>
-                    Cámara frontal
-                  </option>
-                  <option value={FACING_MODES.USER}>Cámara trasera</option>
-                </Input>
-              )}
+
+              <div className="mascara">
+                {keyFoto === "foto_persona" && (
+                  <div className="indicador-persona"></div>
+                )}
+
+                {keyFoto === "reverso" && (
+                  <div className="indicador-documento"></div>
+                )}
+                {keyFoto === "anverso" && (
+                  <div className="indicador-documento"></div>
+                )}
+              </div>
+
+              <Button
+                color="primary"
+                style={{ margin: "60px 0 0 0", display: 'flex', justifyContent: 'center', alignItems: 'center'}}
+                onClick={cambiarCamara}
+              >
+                Cambiar camara
+                <span className="material-symbols-outlined">autorenew</span>
+              </Button>
+
+              {/* <Input
+                type="select"
+                onChange={onChangeCamara}
+                style={{ margin: "55px 0 0 0" }}
+              >
+                <option value={FACING_MODES.ENVIRONMENT}>Cámara frontal</option>
+                <option value={FACING_MODES.USER}>Cámara trasera</option>
+              </Input> */}
             </div>
           </>
         )}

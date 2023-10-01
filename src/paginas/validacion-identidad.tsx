@@ -12,7 +12,7 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
-import { useParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 import Stepper from "awesome-react-stepper";
@@ -23,9 +23,13 @@ import { useBrowser } from "../nucleo/hooks/useBrowser";
 import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
+import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
 
 export const ValidacionIdentidad: React.FC = () => {
-  const { idFirma } = useParams<string>();
+  const [params] = useSearchParams();
+
+  const tipoParam = params.get("tipo");
+  const idParam = params.get("id");
 
   const formulario = new FormData();
 
@@ -38,10 +42,10 @@ export const ValidacionIdentidad: React.FC = () => {
     latitud: "",
     longitud: "",
     hora: useHour(),
-    fecha: useDate()
+    fecha: useDate(),
   });
 
-  const [tipoDocumento, setTipoDocumento] = useState<string>('')
+  const [tipoDocumento, setTipoDocumento] = useState<string>("");
 
   const [, setEvidenciasID] = useState<EvidenciasRes>({
     idEvidencias: 0,
@@ -67,46 +71,53 @@ export const ValidacionIdentidad: React.FC = () => {
   const [errorPost, setErrorPost] = useState<boolean>(false);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
-
+  const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
     document.title = "Validacion identidad";
+    console.log(tipoParam, idParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-
-    geolocation()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    geolocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(()=> {
-    console.log(informacion)
-  },[informacion])
+  useEffect(() => {
+    console.log(pasos);
+  }, [pasos]);
 
+  const avanzarPasos = () => {
+    setPasos((prev) => prev + 1)
+  }
+
+  const volverPasos = () => {
+    setPasos((prev) => prev - 1)
+  }
 
   const geolocation = () => {
-    const mostrarPosicion = (posicion:GeolocationPosition) => {
-      const latitud:number = posicion.coords.latitude;
-      const longitud:number = posicion.coords.longitude;
+    const mostrarPosicion = (posicion: GeolocationPosition) => {
+      const latitud: number = posicion.coords.latitude;
+      const longitud: number = posicion.coords.longitude;
 
       setInformacion({
         ...informacion,
         latitud: `${latitud}`,
-        longitud: `${longitud}`
-      })
-    }
-  
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(mostrarPosicion)
-    }else{
+        longitud: `${longitud}`,
+      });
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(mostrarPosicion);
+    } else {
       setInformacion({
         ...informacion,
-        latitud:'no disponible',
-        longitud:'no disponible'
-      })
+        latitud: "no disponible",
+        longitud: "no disponible",
+      });
     }
-  }
-
+  };
 
   const enviar = async (step: number) => {
     console.log(step);
@@ -135,43 +146,23 @@ export const ValidacionIdentidad: React.FC = () => {
     }
 
     if (tipoDocumento !== "") {
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.tipoDocumento,
-        tipoDocumento
-      );
+      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, tipoDocumento);
     }
 
     ValidadorFormdata(
       formulario,
       formdataKeys.dispositivo,
       informacion.dispositivo
-    )
+    );
     ValidadorFormdata(
       formulario,
       formdataKeys.navegador,
       informacion.navegador
-    )
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.latitud,
-      informacion.latitud
-    )
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.longitud,
-      informacion.longitud
-    )
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.hora,
-      informacion.hora
-    )
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.fecha,
-      informacion.fecha
-    )
+    );
+    ValidadorFormdata(formulario, formdataKeys.latitud, informacion.latitud);
+    ValidadorFormdata(formulario, formdataKeys.longitud, informacion.longitud);
+    ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
+    ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
 
     if (
       informacion.foto_persona !== "" &&
@@ -184,7 +175,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
       await axios({
         method: "post",
-        url: `${URLS.verificacionEvidencias}/${idFirma}`,
+        url: `${URLS.verificacionEvidencias}/${idParam}`,
         data: formulario,
         headers: {
           "Content-Type": "multipart/form-data",
@@ -202,7 +193,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
       await axios({
         method: "get",
-        url: `${URLS.obtenerEvidencias}/${idFirma}`,
+        url: `${URLS.obtenerEvidencias}/${idParam}`,
       })
         .then((res) => {
           console.log(informacion);
@@ -230,17 +221,21 @@ export const ValidacionIdentidad: React.FC = () => {
       <main className="main-container">
         <div className="content-container">
           <Header titulo="Validación de identidad" />
-          <div style={{ margin: "17px" }}>
+          <div style={{ margin: "17px", position: 'relative' }}>
+            <PasosEnumerados
+              tipo={tipoParam}
+              paso={pasos}
+            />
             <Stepper
               allowClickControl={false}
               strokeColor="#0d6efd"
               fillStroke="#0d6efd"
               activeColor="#0d6efd"
               activeProgressBorder="2px solid #0d6efd"
-              backBtn={<button className="stepper-btn">Vólver</button>}
+              backBtn={<button className="stepper-btn" onClick={volverPasos}>Volver</button>}
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn">Siguiente</button>
+                  <button className="stepper-btn" onClick={avanzarPasos}>Siguiente</button>
                 ) : (
                   <button className="stepper-btn" disabled>
                     Siguiente
@@ -303,7 +298,6 @@ export const ValidacionIdentidad: React.FC = () => {
                 selfie="foto_persona"
               />
             </Stepper>
-            <h1 style={{fontSize: '60px'}}>hola</h1>
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion
