@@ -1,4 +1,4 @@
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, Dispatch, SetStateAction, useRef, useCallback } from "react";
 import {
   InformacionIdentidad,
   PreviewDocumento,
@@ -9,6 +9,7 @@ import Camera, { FACING_MODES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useMobile } from "../../nucleo/hooks/useMobile";
 import { convertidorFile } from "../../nucleo/services/convertidorFile";
+import Webcam from "react-webcam";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -36,21 +37,8 @@ export const CapturadorSelfie: React.FC<Props> = ({
   const mobile: boolean = useMobile();
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [cambioCamara, setCambioCamara] = useState<boolean>(true);
 
-  const cambiarCamara = () => {
-    setCambioCamara((prev) => !prev);
-    console.log(cambioCamara);
-  };
-
-  const capturarOtra = () => {
-    setMostrarPreview(false);
-    setPreview({
-      ...preview,
-      [ladoDocumento]: "",
-    });
-    setConteo(0);
-  };
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const tomarFoto = (dataURL: string, keyFotoParam: string) => {
     setMostrarPreview(true);
@@ -70,55 +58,97 @@ export const CapturadorSelfie: React.FC<Props> = ({
     setMostrarPreviewCamara(true);
   };
 
+  const capturarOtra = () => {
+    setMostrarPreview(false);
+    setPreview({
+      ...preview,
+      [ladoDocumento]: "",
+    });
+    setConteo(0);
+  };
+
+  const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    const data = evento.target.files;
+    if (data) {
+      console.log(data[0]);
+
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setPreview({
+          ...preview,
+          [evento.target.name]: reader.result as string,
+        });
+      };
+
+      if (data) {
+        reader.readAsDataURL(data[0]);
+      }
+
+      setMostrarPreview(true);
+      setInformacion({
+        ...informacion,
+        [evento.target.name]: data[0],
+      });
+      setConteo(conteo + 1);
+      setMostrarPreviewCamara(true);
+    }
+  };
+
+
   return (
     <>
       <div className="selfie-container">
         {!mostrarPreview && (
           <>
             <div className="video">
-              <Camera
-                idealResolution={{
-                  width: mobile ? 500 : 600,
-                  height: mobile ? 400 : 350,
-                }}
-                idealFacingMode={
-                  cambioCamara ? FACING_MODES.USER : FACING_MODES.ENVIRONMENT
-                }
-                onTakePhoto={(dataURL) => {
-                  tomarFoto(dataURL, keyFoto);
-                }}
-              />
-
-              <div className="mascara">
-                {keyFoto === "foto_persona" && (
+              {keyFoto === "foto_persona" && (
+                <>
+                  <Camera
+                    idealResolution={{
+                      width: mobile ? 500 : 600,
+                      height: mobile ? 600 : 350,
+                    }}
+                    idealFacingMode={FACING_MODES.USER}
+                    onTakePhoto={(dataURL) => {
+                      tomarFoto(dataURL, keyFoto);
+                    }}
+                  />
+                </>
+              )}
+              {keyFoto === "foto_persona" && (
+                <div className="mascara">
                   <div className="indicador-persona"></div>
-                )}
+                </div>
+              )}
 
-                {keyFoto === "reverso" && (
-                  <div className="indicador-documento"></div>
-                )}
-                {keyFoto === "anverso" && (
-                  <div className="indicador-documento"></div>
-                )}
-              </div>
+              {keyFoto === "anverso" && (
+                <label className="file-input-camara">
+                  <input
+                    name={ladoDocumento}
+                    type="file"
+                    accept="image/jpeg"
+                    onChange={cambioArchivo}
+                    style={{ display: "none", zIndex: "8000", background: '#5ecc7f' }}
+                    capture="environment"
+                  />
+                  Usar camara trasera
+                </label>
+              )}
 
-              <Button
-                color="primary"
-                style={{ margin: "60px 0 0 0", display: 'flex', justifyContent: 'center', alignItems: 'center'}}
-                onClick={cambiarCamara}
-              >
-                Cambiar camara
-                <span className="material-symbols-outlined">autorenew</span>
-              </Button>
-
-              {/* <Input
-                type="select"
-                onChange={onChangeCamara}
-                style={{ margin: "55px 0 0 0" }}
-              >
-                <option value={FACING_MODES.ENVIRONMENT}>Cámara frontal</option>
-                <option value={FACING_MODES.USER}>Cámara trasera</option>
-              </Input> */}
+              {keyFoto === "reverso" && (
+                <label className="file-input-camara">
+                  <input
+                    name={ladoDocumento}
+                    type="file"
+                    accept="image/jpeg"
+                    onChange={cambioArchivo}
+                    style={{ display: "none", zIndex: "8000", background: '#5ecc7f' }}
+                    capture="environment"
+                  />
+                  Usar camara trasera
+                </label>
+              )}
             </div>
           </>
         )}

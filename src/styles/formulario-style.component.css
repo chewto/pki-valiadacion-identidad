@@ -46,6 +46,25 @@
   background: #0948a5;
 }
 
+.file-input-camara{
+  text-align: center;
+  background: #08a41f;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: 350ms;
+  margin: 15px 0 0 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.file-input-camara:hover{
+  background: #167a21;
+}
+
 @media screen and (max-width: 768px) {
   .img-container{
     left: 20%;

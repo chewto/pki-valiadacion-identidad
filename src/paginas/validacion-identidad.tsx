@@ -31,6 +31,7 @@ export const ValidacionIdentidad: React.FC = () => {
   const tipoParam = params.get("tipo");
   const idParam = params.get("id");
 
+
   const formulario = new FormData();
 
   const [informacion, setInformacion] = useState<InformacionIdentidad>({
@@ -75,9 +76,9 @@ export const ValidacionIdentidad: React.FC = () => {
 
   useEffect(() => {
     document.title = "Validacion identidad";
-    console.log(tipoParam, idParam);
+    console.log(informacion);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [informacion]);
 
   useEffect(() => {
     geolocation();

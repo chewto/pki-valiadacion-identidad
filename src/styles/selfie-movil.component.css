@@ -24,11 +24,11 @@
 }
 
 .indicador-persona{
-  width: 40%;
-  height: 75%;
+  width: 45%;
+  height: 96%;
   position: absolute;
-  left: 29%;
-  top: 8%;
+  left: 28%;
+  top: 19%;
   border: 3px solid #fff;
   z-index: 1200;
 }
@@ -125,10 +125,10 @@
 @media screen and (max-width: 768px){
 
   .indicador-persona{
-    width: 55%;
-    height: 80%;
-    left: 20%;
-    top: 0%;
+    width: 65%;
+    height: 93%;
+    left: 16.5%;
+    top: 11%;
   }
 
   .indicador-documento{
@@ -181,10 +181,10 @@
 @media screen and (max-width: 375px){
 
   .indicador-persona{
-    width: 60%;
-    height: 75%;
-    left: 18%;
-    top: -5%;
+    width: 70%;
+    height: 93%;
+    left: 15.3%;
+    top: 3%;
   }
 
   .indicador-documento{
@@ -204,10 +204,10 @@
 @media screen and (max-width: 320px){
 
   .indicador-persona{
-    width: 60%;
-    height: 66%;
-    left: 19%;
-    top: -3%;
+    width: 73%;
+    height: 90%;
+    left: 13.7%;
+    top: 5%;
   }
   
   .indicador-documento{
