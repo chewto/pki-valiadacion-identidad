@@ -10,12 +10,22 @@ export interface InformacionIdentidad {
   fecha: string;
 }
 
+export interface InformacionFirmador {
+  nombre: string;
+  apellido: string;
+  correo: string;
+  documento: string;
+  tipoDocumento?: string;
+  enlaceTemporal?: string;
+  ordenFirma?: number;
+  firmaElectronicaId?: number;
+}
+
 export interface Respuesta {
+  idValidacion?: number;
+  idUsuario?: number;
   coincidenciaDocumentoRostro: boolean;
   estadoVerificacion: string;
-  evidencias: string;
-  evidenciasAdicionales: string;
-  tipoDocumento: string;
 }
 
 export interface PreviewDocumento{

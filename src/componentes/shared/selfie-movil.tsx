@@ -1,15 +1,14 @@
-import { useState, Dispatch, SetStateAction, useRef, useCallback } from "react";
+import { useState, Dispatch, SetStateAction } from "react";
 import {
   InformacionIdentidad,
   PreviewDocumento,
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
-import Camera, { FACING_MODES } from "react-html5-camera-photo";
+import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useMobile } from "../../nucleo/hooks/useMobile";
 import { convertidorFile } from "../../nucleo/services/convertidorFile";
-import Webcam from "react-webcam";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -37,8 +36,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
   const mobile: boolean = useMobile();
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const tomarFoto = (dataURL: string, keyFotoParam: string) => {
     setMostrarPreview(true);
@@ -109,6 +106,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
                       width: mobile ? 500 : 600,
                       height: mobile ? 600 : 350,
                     }}
+                    imageType={IMAGE_TYPES.JPG}
                     idealFacingMode={FACING_MODES.USER}
                     onTakePhoto={(dataURL) => {
                       tomarFoto(dataURL, keyFoto);

@@ -18,6 +18,7 @@ export const formdataKeys = {
   nombres: "nombres",
   apellidos: "apellidos",
   numero_documento: "numero_documento",
+  email: "email",
   anverso_documento: "anverso",
   reverso_documento: "reverso",
   foto_persona: "foto_persona",

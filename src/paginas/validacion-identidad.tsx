@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import {
   EvidenciasRes,
   InformacionIdentidad,
+  InformacionFirmador,
   PreviewDocumento,
   Respuesta,
 } from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
@@ -14,7 +15,7 @@ import { FormularioFotoPersona } from "../componentes/validacion-identidad/formu
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
-import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
+import { URLSdesarollo } from "../nucleo/api-urls/validacion-identidad-urls";
 import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
@@ -28,11 +29,24 @@ import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enume
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
 
-  const tipoParam = params.get("tipo");
   const idParam = params.get("id");
+  const idUsuarioParam = params.get("idUsuario")
+  const tipoParam = params.get("tipo");
 
+  const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
+
+  const url = tipoParam === '3' ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}` : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`
+
+  const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idParam}`;
 
   const formulario = new FormData();
+
+  const [informacionFirmador, setInformacionFirmador] = useState<InformacionFirmador>({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    documento: ''
+  })
 
   const [informacion, setInformacion] = useState<InformacionIdentidad>({
     anverso: "",
@@ -54,11 +68,10 @@ export const ValidacionIdentidad: React.FC = () => {
   });
 
   const [respuesta, setRespuesta] = useState<Respuesta>({
+    idValidacion: 0,
+    idUsuario: 0,
     coincidenciaDocumentoRostro: false,
-    estadoVerificacion: "",
-    evidencias: "",
-    evidenciasAdicionales: "",
-    tipoDocumento: "",
+    estadoVerificacion: ""
   });
 
   const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
@@ -76,18 +89,21 @@ export const ValidacionIdentidad: React.FC = () => {
 
   useEffect(() => {
     document.title = "Validacion identidad";
-    console.log(informacion);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [informacion]);
 
-  useEffect(() => {
+    if(tipoParam === '3'){
+      axios({
+        method: 'get',
+        url: urlFirmador
+      })
+      .then(res => {
+        setInformacionFirmador(res.data)
+        console.log(res)
+      }).catch(err => console.log(err))
+    }
+
     geolocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    console.log(pasos);
-  }, [pasos]);
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1)
@@ -160,23 +176,36 @@ export const ValidacionIdentidad: React.FC = () => {
       formdataKeys.navegador,
       informacion.navegador
     );
+
     ValidadorFormdata(formulario, formdataKeys.latitud, informacion.latitud);
     ValidadorFormdata(formulario, formdataKeys.longitud, informacion.longitud);
     ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
     ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
+
+    if(tipoParam === '3'){
+      ValidadorFormdata(formulario, formdataKeys.nombres, informacionFirmador.nombre)
+      ValidadorFormdata(formulario, formdataKeys.apellidos, informacionFirmador.apellido)
+      ValidadorFormdata(formulario, formdataKeys.email, informacionFirmador.correo)
+      ValidadorFormdata(formulario, formdataKeys.numero_documento, informacionFirmador.documento)
+    }
 
     if (
       informacion.foto_persona !== "" &&
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-      console.log(formulario);
+      console.log(informacion, informacionFirmador);
       setMostrar(true);
       setLoadingPost(true);
 
+      console.log(url)
+
+      let idValidacion = 0
+      let idUsuario = 0
+
       await axios({
         method: "post",
-        url: `${URLS.verificacionEvidencias}/${idParam}`,
+        url: url,
         data: formulario,
         headers: {
           "Content-Type": "multipart/form-data",
@@ -185,6 +214,10 @@ export const ValidacionIdentidad: React.FC = () => {
         .then((res) => {
           console.log(res);
           setRespuesta(res.data);
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
+
+          console.log(idValidacion, idUsuario)
         })
         .catch((err) => {
           console.error(err);
@@ -194,7 +227,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
       await axios({
         method: "get",
-        url: `${URLS.obtenerEvidencias}/${idParam}`,
+        url: tipoParam === '3' ? `${URLSdesarollo.obtenerEvidencias}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`  : `${URLSdesarollo.obtenerEvidencias}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
       })
         .then((res) => {
           console.log(informacion);
@@ -207,7 +240,7 @@ export const ValidacionIdentidad: React.FC = () => {
             idEvidenciasAdicionales: evidenciasIdAdicionales,
           });
 
-          window.location.href = `${URLS.resultados}?id-evidencias=${evidenciasId}&id-evidencias-adicionales=${evidenciasIdAdicionales}`;
+          window.location.href = `${URLSdesarollo.resultados}?id-evidencias=${evidenciasId}&id-evidencias-adicionales=${evidenciasIdAdicionales}&tipo=${tipoParam}`;
         })
         .catch((err) => {
           console.error(err);
