@@ -2,7 +2,7 @@ import axios from "axios";
 import { useRef, useEffect, useState } from "react";
 
 export const PruebaVitalidad: React.FC = () => {
-  const [photos, setPhotos] = useState<string[]>([]);
+  const photos:string[] = []
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -20,7 +20,8 @@ export const PruebaVitalidad: React.FC = () => {
 
           const photoUrl = canvas.toDataURL();
 
-          setPhotos(prevPhotos => [...prevPhotos, photoUrl]);
+          photos.push(photoUrl);
+          console.log(photos)
 
           count++;
 
@@ -31,7 +32,7 @@ export const PruebaVitalidad: React.FC = () => {
             }
             axios({
               method:'post',
-              url:'http://127.0.0.1:5000/validacion-vida',
+              url:'http://127.0.0.1:4000/validacion-vida',
               data: data,
               headers: {
                 "Content-Type": 'application/json'
@@ -72,12 +73,6 @@ export const PruebaVitalidad: React.FC = () => {
     <div>
       <h1>Photo Capture Component</h1>
       <video ref={videoRef}  width="640" height="480" />
-      <div>
-        {photos.map((photo, index) => (
-          <img key={index} src={photo} alt={`Photo ${index + 1}`} />
-        ))}
-        {photos.length}
-      </div>
     </div>
   );
 };

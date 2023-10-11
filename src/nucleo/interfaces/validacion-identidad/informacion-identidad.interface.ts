@@ -10,15 +10,22 @@ export interface InformacionIdentidad {
   fecha: string;
 }
 
-export interface InformacionFirmador {
-  nombre: string;
-  apellido: string;
-  correo: string;
-  documento: string;
-  tipoDocumento?: string;
-  enlaceTemporal?: string;
-  ordenFirma?: number;
-  firmaElectronicaId?: number;
+export interface Root {
+  dato: Dato
+}
+
+export interface Dato {
+  id?: number
+  firmaElectronicaId?: number
+  nombre: string
+  apellido: string
+  correo: string
+  tipoDocumento?: string
+  documento: string
+  evidenciasCargadas?: boolean
+  enlaceTemporal?: string
+  ordenFirma?: number
+  fechaCreacion?: string
 }
 
 export interface Respuesta {

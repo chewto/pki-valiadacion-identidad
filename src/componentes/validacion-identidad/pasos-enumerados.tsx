@@ -36,7 +36,7 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
         </>
       )}
 
-      {tipo === "2" && (
+      {tipo === "3" && (
         <>
           {pasosTipo2.map((index) => (
             <>

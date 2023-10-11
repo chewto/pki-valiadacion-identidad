@@ -1,11 +1,10 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import {
-  EvidenciasRes,
   InformacionIdentidad,
-  InformacionFirmador,
   PreviewDocumento,
   Respuesta,
+  Dato,
 } from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import {
   ValidadorFormdata,
@@ -25,6 +24,7 @@ import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
 import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
+import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -37,11 +37,11 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const url = tipoParam === '3' ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}` : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`
 
-  const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idParam}`;
+  const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idUsuarioParam}`;
 
   const formulario = new FormData();
 
-  const [informacionFirmador, setInformacionFirmador] = useState<InformacionFirmador>({
+  const [informacionFirmador, setInformacionFirmador] = useState<Dato>({
     nombre: '',
     apellido: '',
     correo: '',
@@ -61,11 +61,6 @@ export const ValidacionIdentidad: React.FC = () => {
   });
 
   const [tipoDocumento, setTipoDocumento] = useState<string>("");
-
-  const [, setEvidenciasID] = useState<EvidenciasRes>({
-    idEvidencias: 0,
-    idEvidenciasAdicionales: 0,
-  });
 
   const [respuesta, setRespuesta] = useState<Respuesta>({
     idValidacion: 0,
@@ -96,14 +91,18 @@ export const ValidacionIdentidad: React.FC = () => {
         url: urlFirmador
       })
       .then(res => {
-        setInformacionFirmador(res.data)
-        console.log(res)
+        setInformacionFirmador(res.data.dato)
+        console.log(res.data.dato)
       }).catch(err => console.log(err))
     }
 
     geolocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(()=> {
+    console.log(informacionFirmador)
+  }, [informacionFirmador])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1)
@@ -223,30 +222,16 @@ export const ValidacionIdentidad: React.FC = () => {
           console.error(err);
           setLoadingPost(false);
           setErrorPost(true);
-        });
-
-      await axios({
-        method: "get",
-        url: tipoParam === '3' ? `${URLSdesarollo.obtenerEvidencias}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`  : `${URLSdesarollo.obtenerEvidencias}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
-      })
-        .then((res) => {
-          console.log(informacion);
-          console.log(res.data);
-          const evidenciasId = res.data.idEvidencias;
-          const evidenciasIdAdicionales = res.data.idEvidenciasAdicionales;
-
-          setEvidenciasID({
-            idEvidencias: evidenciasId,
-            idEvidenciasAdicionales: evidenciasIdAdicionales,
-          });
-
-          window.location.href = `${URLSdesarollo.resultados}?id-evidencias=${evidenciasId}&id-evidencias-adicionales=${evidenciasIdAdicionales}&tipo=${tipoParam}`;
         })
-        .catch((err) => {
-          console.error(err);
-          setLoadingPost(false);
-          setErrorPost(true);
-        });
+        .finally(() => {
+          if(tipoParam === '1'){
+            window.location.href = `${URLSdesarollo.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
+          }
+
+          if(tipoParam === '3'){
+            window.location.href = `${URLSdesarollo.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`
+          }
+        })
     }
   };
 
@@ -332,6 +317,12 @@ export const ValidacionIdentidad: React.FC = () => {
                 selfie="foto_persona"
               />
             </Stepper>
+
+            <div>
+              {pasos >= 1 && (
+                <PruebaVitalidad/>
+              )}
+            </div>
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion
