@@ -8,7 +8,6 @@ import { Button } from "reactstrap";
 import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import { convertidorFile } from "../../nucleo/services/convertidorFile";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -43,13 +42,9 @@ export const CapturadorSelfie: React.FC<Props> = ({
       ...preview,
       [ladoDocumento]: dataURL,
     });
-    convertidorFile(dataURL, "verificacion.jpg").then((res) => {
-      if (res) {
-        setInformacion({
-          ...informacion,
-          [keyFotoParam]: res,
-        });
-      }
+    setInformacion({
+      ...informacion,
+      [keyFotoParam]: dataURL,
     });
     setConteo(conteo + 1);
     setMostrarPreviewCamara(true);
@@ -64,39 +59,11 @@ export const CapturadorSelfie: React.FC<Props> = ({
     setConteo(0);
   };
 
-  const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    const data = evento.target.files;
-    if (data) {
-      console.log(data[0]);
-
-      const reader = new FileReader();
-
-      reader.onloadend = () => {
-        setPreview({
-          ...preview,
-          [evento.target.name]: reader.result as string,
-        });
-      };
-
-      if (data) {
-        reader.readAsDataURL(data[0]);
-      }
-
-      setMostrarPreview(true);
-      setInformacion({
-        ...informacion,
-        [evento.target.name]: data[0],
-      });
-      setConteo(conteo + 1);
-      setMostrarPreviewCamara(true);
-    }
-  };
-
 
   return (
     <>
       <div className="selfie-container">
-        {!mostrarPreview && (
+        {!mostrarPreview && keyFoto === "foto_persona" && (
           <>
             <div className="video">
               {keyFoto === "foto_persona" && (
@@ -119,37 +86,10 @@ export const CapturadorSelfie: React.FC<Props> = ({
                   <div className="indicador-persona"></div>
                 </div>
               )}
-
-              {keyFoto === "anverso" && (
-                <label className="file-input-camara">
-                  <input
-                    name={ladoDocumento}
-                    type="file"
-                    accept="image/jpeg"
-                    onChange={cambioArchivo}
-                    style={{ display: "none", zIndex: "8000", background: '#5ecc7f' }}
-                    capture="environment"
-                  />
-                  Usar camara trasera
-                </label>
-              )}
-
-              {keyFoto === "reverso" && (
-                <label className="file-input-camara">
-                  <input
-                    name={ladoDocumento}
-                    type="file"
-                    accept="image/jpeg"
-                    onChange={cambioArchivo}
-                    style={{ display: "none", zIndex: "8000", background: '#5ecc7f' }}
-                    capture="environment"
-                  />
-                  Usar camara trasera
-                </label>
-              )}
             </div>
           </>
         )}
+
 
         {mostrarPreview && (
           <>

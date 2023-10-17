@@ -4,9 +4,10 @@ import "../../styles/acceso-camara.component.css";
 
 interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  setCapturarImagenes: Dispatch<SetStateAction<boolean>>;
 }
 
-export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
+export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton, setCapturarImagenes }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [desplegarCamara, setDesplegarCamara] = useState<number>(0);
 
@@ -24,6 +25,7 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
               console.log("accesso permitido");
               setDesplegarCamara(1);
               setContinuarBoton(true);
+              setCapturarImagenes(true)
             }
           })
           .catch(() => {

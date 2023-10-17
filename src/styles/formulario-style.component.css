@@ -1,5 +1,7 @@
 .documento-container{
   margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
 }
 
 .documento-title{

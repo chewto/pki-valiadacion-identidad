@@ -1,7 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, Dispatch, SetStateAction } from "react";
 
-export const PruebaVitalidad: React.FC = () => {
+interface Props{
+  porcentaje: number | undefined;
+  setPorcentaje: Dispatch<SetStateAction<number | undefined>>
+}
+
+export const PruebaVitalidad: React.FC<Props> = ({ setPorcentaje}) => {
   const photos:string[] = []
   const videoRef = useRef<HTMLVideoElement>(null)
 
@@ -25,7 +31,7 @@ export const PruebaVitalidad: React.FC = () => {
 
           count++;
 
-          if (count === 5) {
+          if (count === 9) {
             clearInterval(interval);
             const data = {
               imagenes: photos
@@ -38,7 +44,11 @@ export const PruebaVitalidad: React.FC = () => {
                 "Content-Type": 'application/json'
               }
             })
-            .then(res => console.log(res))
+            .then(res => {
+              console.log(res)
+              setPorcentaje(res.data)
+            })
+            .catch(error => console.log(error))
         }
         }
       }
@@ -55,7 +65,7 @@ export const PruebaVitalidad: React.FC = () => {
             video.play();
           }
 
-          interval = setInterval(capturePhoto, 2000);
+          interval = setInterval(capturePhoto, 1250);
         })
         .catch(error => {
           console.error('Error accessing webcam:', error);
@@ -67,12 +77,12 @@ export const PruebaVitalidad: React.FC = () => {
     return () => {
       clearInterval(interval);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div>
-      <h1>Photo Capture Component</h1>
-      <video ref={videoRef}  width="640" height="480" />
+      <video ref={videoRef}  width="0" height="0" />
     </div>
   );
 };

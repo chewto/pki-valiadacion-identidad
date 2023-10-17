@@ -5,10 +5,11 @@ import {
   InformacionIdentidad,
   PreviewDocumento,
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
-import { CapturadorSelfie } from "../shared/selfie-movil";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import { Button } from "reactstrap";
+import { Alert, Button } from "reactstrap";
+import axios from "axios";
+import { URLSdesarollo } from "../../nucleo/api-urls/validacion-identidad-urls";
 
 interface Props {
   tipoDocumento: string;
@@ -32,51 +33,87 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
 }) => {
-  const [mostrarCamara, setMostrarCamara] = useState<boolean>(false);
-  const [mostrarPreviewCamara, setMostrarPreviewCamara] =
-    useState<boolean>(false);
-  const [mostrarPreviewInput, setMostrarPreviewInput] =
-    useState<boolean>(false);
+  const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
+  const [validacion, setValidacion] = useState<number>(0);
+  const [validacionMensaje, setValidacionMensaje] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
+  const URL = `${URLSdesarollo.validarDocumento}?tipoDocumento=${tipoDocumento}&ladoDocumento=${ladoDocumento}`;
+
   useEffect(() => {
-    if (!mostrarPreviewInput) {
-      setMostrarPreviewInput(true);
+    if (!mostrarPreview) {
+      setMostrarPreview(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(()=> {
+    console.log(informacion, preview)
+  },[informacion,preview])
+
   useEffect(() => {
-    if (conteo >= 1) setContinuarBoton(true);
     if (conteo === 0) setContinuarBoton(false);
-    if (conteo === 0 && ladoPreview.length >= 1) setContinuarBoton(true);
-  }, [conteo, setContinuarBoton, ladoPreview.length]);
+    if (conteo >= 2 && ladoPreview.length >= 1) setContinuarBoton(true);
+    if (conteo >= 1 && ladoPreview.length >= 1 && tipoDocumento !== 'Cédula de ciudadanía') setContinuarBoton(true)
+  }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    setMostrarPreviewInput(true);
-    setMostrarPreviewCamara(false);
-    setMostrarCamara(false);
+
+    setPreview({
+      ...preview,
+      [evento.target.name]: '',
+    });
+
+    setInformacion({
+      ...informacion,
+      [evento.target.name]: '',
+    });
+
+    setValidacionMensaje(false);
+    setConteo(1);
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
-
-    if (archivo) {
-      setInformacion({
-        ...informacion,
-        [evento.target.name]: archivo,
-      });
-    }
 
     lector.onload = () => {
       setPreview({
         ...preview,
         [evento.target.name]: lector.result,
       });
+
+      setInformacion({
+        ...informacion,
+        [evento.target.name]: lector.result,
+      });
     };
 
     if (archivo) lector.readAsDataURL(archivo);
+    console.log(lector.result)
+  };
 
-    if (evento.target.name.length !== 0) setContinuarBoton(true);
+  const validarDocumento = (evento: React.MouseEvent<HTMLButtonElement>) => {
+    evento.preventDefault();
+
+    const data = {
+      imagen: preview,
+    };
+
+    axios({
+      method: "post",
+      url: URL,
+      data: data,
+    })
+      .then((res) => {
+        setValidacion(res.data.validacion);
+        console.log(res.data.validacion);
+        if (res.data.validacion >= 55) {
+          setConteo(2);
+        }
+      })
+      .catch((error) => console.log(error))
+      .finally(() => {
+        setValidacionMensaje(true);
+      });
   };
 
   return (
@@ -89,48 +126,44 @@ export const FormularioDocumento: React.FC<Props> = ({
         <input
           name={ladoDocumento}
           type="file"
-          accept=".jpg, .jpeg"
+          accept="image/jpeg"
           onChange={cambioArchivo}
           style={{ display: "none" }}
         />
-        Subir foto del {ladoDocumento} de su documento
+        Subir foto del {ladoDocumento} de su {tipoDocumento}
       </label>
 
-      {mobile &&
-        (mostrarCamara ? (
-          <CapturadorSelfie
-            informacion={informacion}
-            setInformacion={setInformacion}
-            keyFoto={ladoDocumento}
-            conteo={conteo}
-            setConteo={setConteo}
-            ladoDocumento={ladoDocumento}
-            preview={preview}
-            setPreview={setPreview}
-            setMostrarPreviewCamara={setMostrarPreviewCamara}
-          />
-        ) : (
-          <Button
-            style={{ margin: "15px 0" }}
-            block
-            color="primary"
-            onClick={() => {
-              setMostrarCamara(true);
-              setMostrarPreviewCamara(false);
-              setMostrarPreviewInput(false);
-              setContinuarBoton(false);
+      {mobile &&(
+          <label className="file-input">
+          <input
+            name={ladoDocumento}
+            type="file"
+            accept="image/jpeg"
+            onChange={cambioArchivo}
+            style={{
+              display: "none",
+              zIndex: "8000",
+              background: "#5ecc7f",
             }}
-          >
-            Tomar foto al {ladoDocumento} de su documento
-          </Button>
-        ))} 
-      {ladoPreview.length >= 1 && mostrarPreviewInput && (
+            capture="environment"
+          />
+          Tomar foto al {ladoDocumento} de su documento
+        </label>)}
+
+
+      {ladoPreview.length >= 1 && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
       )}
 
-      {ladoPreview.length >= 1 && mostrarPreviewCamara && (
-        <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
+      {ladoPreview.length >= 1 && tipoDocumento === "Cédula de ciudadanía" && (
+        <Button onClick={validarDocumento}>Validar documento</Button>
       )}
+
+      {validacionMensaje && validacion >= 55 && (
+        <Alert style={{margin: '20px 0 0 0'}}>Documento validado exitosamente</Alert>
+      )}
+
+      {validacionMensaje && validacion <= 55 && <Alert color="warning" style={{margin: '20px 0 0 0'}}>Documento invalido</Alert>}
     </div>
   );
 };

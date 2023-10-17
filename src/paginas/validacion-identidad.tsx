@@ -30,23 +30,26 @@ export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
-  const idUsuarioParam = params.get("idUsuario")
+  const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
 
-  const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
+  const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
-  const url = tipoParam === '3' ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}` : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`
+  const url =
+    tipoParam === "3"
+      ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}`
+      : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idUsuarioParam}`;
 
   const formulario = new FormData();
 
   const [informacionFirmador, setInformacionFirmador] = useState<Dato>({
-    nombre: '',
-    apellido: '',
-    correo: '',
-    documento: ''
-  })
+    nombre: "",
+    apellido: "",
+    correo: "",
+    documento: "",
+  });
 
   const [informacion, setInformacion] = useState<InformacionIdentidad>({
     anverso: "",
@@ -66,7 +69,7 @@ export const ValidacionIdentidad: React.FC = () => {
     idValidacion: 0,
     idUsuario: 0,
     coincidenciaDocumentoRostro: false,
-    estadoVerificacion: ""
+    estadoVerificacion: "",
   });
 
   const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
@@ -82,35 +85,39 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
+  const [capturarImagenes, setCapturarImagenes] = useState<boolean>(false);
+  const [porcentaje, setPorcentaje] = useState<number | undefined>();
+
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    if(tipoParam === '3'){
+    if (tipoParam === "3") {
       axios({
-        method: 'get',
-        url: urlFirmador
+        method: "get",
+        url: urlFirmador,
       })
-      .then(res => {
-        setInformacionFirmador(res.data.dato)
-        console.log(res.data.dato)
-      }).catch(err => console.log(err))
+        .then((res) => {
+          setInformacionFirmador(res.data.dato);
+          console.log(res.data.dato);
+        })
+        .catch((err) => console.log(err));
     }
 
     geolocation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(()=> {
-    console.log(informacionFirmador)
-  }, [informacionFirmador])
+  useEffect(() => {
+    console.log(informacionFirmador);
+  }, [informacionFirmador]);
 
   const avanzarPasos = () => {
-    setPasos((prev) => prev + 1)
-  }
+    setPasos((prev) => prev + 1);
+  };
 
   const volverPasos = () => {
-    setPasos((prev) => prev - 1)
-  }
+    setPasos((prev) => prev - 1);
+  };
 
   const geolocation = () => {
     const mostrarPosicion = (posicion: GeolocationPosition) => {
@@ -135,7 +142,7 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = async (step: number) => {
+  const enviar = (step: number) => {
     console.log(step);
     if (informacion.anverso !== "") {
       ValidadorFormdata(
@@ -181,11 +188,27 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
     ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
 
-    if(tipoParam === '3'){
-      ValidadorFormdata(formulario, formdataKeys.nombres, informacionFirmador.nombre)
-      ValidadorFormdata(formulario, formdataKeys.apellidos, informacionFirmador.apellido)
-      ValidadorFormdata(formulario, formdataKeys.email, informacionFirmador.correo)
-      ValidadorFormdata(formulario, formdataKeys.numero_documento, informacionFirmador.documento)
+    if (tipoParam === "3") {
+      ValidadorFormdata(
+        formulario,
+        formdataKeys.nombres,
+        informacionFirmador.nombre
+      );
+      ValidadorFormdata(
+        formulario,
+        formdataKeys.apellidos,
+        informacionFirmador.apellido
+      );
+      ValidadorFormdata(
+        formulario,
+        formdataKeys.email,
+        informacionFirmador.correo
+      );
+      ValidadorFormdata(
+        formulario,
+        formdataKeys.numero_documento,
+        informacionFirmador.documento
+      );
     }
 
     if (
@@ -197,12 +220,12 @@ export const ValidacionIdentidad: React.FC = () => {
       setMostrar(true);
       setLoadingPost(true);
 
-      console.log(url)
+      console.log(url);
 
-      let idValidacion = 0
-      let idUsuario = 0
+      let idValidacion = 0;
+      let idUsuario = 0;
 
-      await axios({
+      axios({
         method: "post",
         url: url,
         data: formulario,
@@ -216,7 +239,7 @@ export const ValidacionIdentidad: React.FC = () => {
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
 
-          console.log(idValidacion, idUsuario)
+          console.log(idValidacion, idUsuario);
         })
         .catch((err) => {
           console.error(err);
@@ -224,14 +247,14 @@ export const ValidacionIdentidad: React.FC = () => {
           setErrorPost(true);
         })
         .finally(() => {
-          if(tipoParam === '1'){
-            window.location.href = `${URLSdesarollo.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
+          if (tipoParam === "1") {
+            window.location.href = `${URLSdesarollo.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
           }
 
-          if(tipoParam === '3'){
-            window.location.href = `${URLSdesarollo.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`
+          if (tipoParam === "3") {
+            window.location.href = `${URLSdesarollo.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
           }
-        })
+        });
     }
   };
 
@@ -240,21 +263,24 @@ export const ValidacionIdentidad: React.FC = () => {
       <main className="main-container">
         <div className="content-container">
           <Header titulo="Validación de identidad" />
-          <div style={{ margin: "17px", position: 'relative' }}>
-            <PasosEnumerados
-              tipo={tipoParam}
-              paso={pasos}
-            />
+          <div style={{ margin: "17px", position: "relative" }}>
+            <PasosEnumerados tipo={tipoParam} paso={pasos} />
             <Stepper
               allowClickControl={false}
               strokeColor="#0d6efd"
               fillStroke="#0d6efd"
               activeColor="#0d6efd"
               activeProgressBorder="2px solid #0d6efd"
-              backBtn={<button className="stepper-btn" onClick={volverPasos}>Volver</button>}
+              backBtn={
+                <button className="stepper-btn" onClick={volverPasos}>
+                  Volver
+                </button>
+              }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos}>Siguiente</button>
+                  <button className="stepper-btn" onClick={avanzarPasos}>
+                    Siguiente
+                  </button>
                 ) : (
                   <button className="stepper-btn" disabled>
                     Siguiente
@@ -282,7 +308,10 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
               />
 
-              <AccesoCamara setContinuarBoton={setContinuarBoton} />
+              <AccesoCamara
+                setContinuarBoton={setContinuarBoton}
+                setCapturarImagenes={setCapturarImagenes}
+              />
 
               <FormularioDocumento
                 tipoDocumento={tipoDocumento}
@@ -315,12 +344,16 @@ export const ValidacionIdentidad: React.FC = () => {
                 setPreview={setPreviewDocumento}
                 ladoPreview={previewDocumento.foto_persona}
                 selfie="foto_persona"
+                porcentaje={porcentaje}
               />
             </Stepper>
 
             <div>
-              {pasos >= 1 && (
-                <PruebaVitalidad/>
+              {capturarImagenes && (
+                <PruebaVitalidad
+                  porcentaje={porcentaje}
+                  setPorcentaje={setPorcentaje}
+                />
               )}
             </div>
           </div>
