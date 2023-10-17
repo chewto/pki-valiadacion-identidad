@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -20,6 +21,21 @@ function App() {
         </a>
       </header>
     </div>
+=======
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { ValidacionIdentidad } from "./paginas/validacion-identidad";
+
+function App() {
+
+  return (
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/validacion" element={<ValidacionIdentidad />}/>
+        </Routes>
+      </BrowserRouter>
+    </>
+>>>>>>> camara-nueva
   );
 }
 
