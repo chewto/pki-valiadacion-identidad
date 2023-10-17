@@ -33,6 +33,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
 }) => {
+  const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
   const [validacion, setValidacion] = useState<number>(0);
@@ -130,7 +131,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   return (
     <div className="documento-container">
       <h2 className="documento-title">
-        Subir foto del {ladoDocumento} de su {tipoDocumento}
+        Subir foto del {placeholder} de su {tipoDocumento}
       </h2>
 
       <label className="file-input">
@@ -141,7 +142,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           onChange={cambioArchivo}
           style={{ display: "none" }}
         />
-        Subir foto del {ladoDocumento} de su {tipoDocumento}
+        Subir foto del {placeholder} de su {tipoDocumento}
       </label>
 
       {mobile &&(
@@ -158,7 +159,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          Tomar foto al {ladoDocumento} de su documento
+          Tomar foto al {placeholder} de su documento
         </label>)}
 
 
