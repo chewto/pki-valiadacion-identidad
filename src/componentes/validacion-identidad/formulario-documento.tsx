@@ -37,6 +37,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [conteo, setConteo] = useState<number>(0);
   const [validacion, setValidacion] = useState<number>(0);
   const [validacionMensaje, setValidacionMensaje] = useState<boolean>(false);
+  const [validacionError, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
   const URL = `${URLSdesarollo.validarDocumento}?tipoDocumento=${tipoDocumento}&ladoDocumento=${ladoDocumento}`;
@@ -54,7 +55,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   useEffect(() => {
     if (conteo === 0) setContinuarBoton(false);
-    if (conteo >= 2 && ladoPreview.length >= 1) setContinuarBoton(true);
+    if (conteo >= 2 && ladoPreview.length >= 1 && tipoDocumento === 'Cédula de ciudadanía') setContinuarBoton(true);
     if (conteo >= 1 && ladoPreview.length >= 1 && tipoDocumento !== 'Cédula de ciudadanía') setContinuarBoton(true)
   }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
 
@@ -71,7 +72,14 @@ export const FormularioDocumento: React.FC<Props> = ({
     });
 
     setValidacionMensaje(false);
-    setConteo(1);
+    if(tipoDocumento === 'Cédula de ciudadanía'){
+      setConteo(0);
+    }
+
+    if(tipoDocumento !== 'Cédula de ciudadanía'){
+      setConteo(2);
+    }
+
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
 
@@ -110,7 +118,10 @@ export const FormularioDocumento: React.FC<Props> = ({
           setConteo(2);
         }
       })
-      .catch((error) => console.log(error))
+      .catch((error) => {
+        console.log(error)
+        setValidacionError(true)
+      })
       .finally(() => {
         setValidacionMensaje(true);
       });
@@ -163,7 +174,9 @@ export const FormularioDocumento: React.FC<Props> = ({
         <Alert style={{margin: '20px 0 0 0'}}>Documento validado exitosamente</Alert>
       )}
 
-      {validacionMensaje && validacion <= 55 && <Alert color="warning" style={{margin: '20px 0 0 0'}}>Documento invalido</Alert>}
+      {validacionMensaje && validacion <= 55 && !validacionError && <Alert color="warning" style={{margin: '20px 0 0 0'}}>Documento invalido</Alert>}
+
+      {validacionMensaje && validacion <= 55 && validacionError && <Alert color="danger" style={{margin: '20px 0 0 0'}}>Ha ocurredo un error con el servidor</Alert>}
     </div>
   );
 };
