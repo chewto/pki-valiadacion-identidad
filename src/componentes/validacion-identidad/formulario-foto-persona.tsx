@@ -6,6 +6,7 @@ import {
 import { CapturadorSelfie } from "../shared/selfie-movil";
 import { Previsualizacion } from "../shared/previsualizacion";
 import "../../styles/styles.css";
+import { useNumeroAleatorio } from "../../nucleo/hooks/useNumeroAleatorio";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -29,18 +30,29 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 }) => {
 
 
-  // const dedos = ['pulgar','indice', 'medio', 'anular', 'meñique']
+  const dedos = [
+    'pulgar',
+    'indice',
+    'medio',
+    'anular',
+    'meñique'
+  ]
   const [conteo, setConteo] = useState<number>(0);
   const [mostrarPreviewCamara, setMostrarPreviewCamara] =
     useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(false);
 
-  function getRandomNumber(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+  const instruccion:string[] = ['pulgar']
 
-  getRandomNumber(1, 5);
+  const numeros = useNumeroAleatorio(5,1,4)
 
+  numeros.forEach((element) => {
+    const dedo = dedos[element]
+    instruccion.push(dedo)
+  })
+
+  console.log(numeros)
+  console.log(instruccion)
 
   return (
     <>
