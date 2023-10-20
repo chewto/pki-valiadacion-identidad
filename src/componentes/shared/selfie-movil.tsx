@@ -60,8 +60,11 @@ export const CapturadorSelfie: React.FC<Props> = ({
       const context = canvas.getContext("2d");
 
       // Set canvas dimensions to match video stream
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const videoAspectRatio = video.videoWidth / video.videoHeight;
+      const canvasWidth = video.clientWidth;
+      const canvasHeight = canvasWidth / videoAspectRatio;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
 
       // Draw the current frame from the video stream onto the canvas
       context?.drawImage(video, 0, 0, canvas.width, canvas.height);
