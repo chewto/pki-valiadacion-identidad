@@ -4,6 +4,7 @@ export interface InformacionIdentidad {
   foto_persona: File | string;
   dispositivo: string;
   navegador: string;
+  ip: string;
   latitud: string;
   longitud: string;
   hora: string;
@@ -39,9 +40,4 @@ export interface PreviewDocumento{
   anverso: string;
   reverso: string;
   foto_persona: string;
-}
-
-export interface EvidenciasRes{
-  idEvidencias: number;
-  idEvidenciasAdicionales: number;
 }

@@ -7,7 +7,7 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/validacion" element={<ValidacionIdentidad />}/>
+          <Route path="/" element={<ValidacionIdentidad />}/>
         </Routes>
       </BrowserRouter>
     </>

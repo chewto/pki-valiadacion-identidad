@@ -25,7 +25,7 @@ export const formdataKeys = {
   tipoDocumento: "tipo_documento",
   dispositivo: "dispositivo",
   navegador: "navegador",
-  ip: "ip",
+  ip: "ip_publica",
   latitud: "latitud",
   longitud: "longitud",
   hora: "hora",

@@ -9,7 +9,7 @@ import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
 import { Alert, Button } from "reactstrap";
 import axios from "axios";
-import { URLSdesarollo } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 
 interface Props {
   tipoDocumento: string;
@@ -41,8 +41,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [validacionError, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
-  const URL = `${URLSdesarollo.validarDocumento}?tipoDocumento=${tipoDocumento}&ladoDocumento=${ladoDocumento}`;
-
   useEffect(() => {
     if (!mostrarPreview) {
       setMostrarPreview(true);
@@ -56,12 +54,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   useEffect(() => {
     if (conteo === 0) setContinuarBoton(false);
-    if (conteo >= 2 && ladoPreview.length >= 1 && tipoDocumento === 'Cédula de ciudadanía') setContinuarBoton(true);
-    if (conteo >= 1 && ladoPreview.length >= 1 && tipoDocumento !== 'Cédula de ciudadanía') setContinuarBoton(true)
+    if (conteo >= 1 && ladoPreview.length >= 1) setContinuarBoton(true);
   }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-
     setPreview({
       ...preview,
       [evento.target.name]: '',
@@ -72,14 +68,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       [evento.target.name]: '',
     });
 
-    setValidacionMensaje(false);
-    if(tipoDocumento === 'Cédula de ciudadanía'){
-      setConteo(0);
-    }
-
-    if(tipoDocumento !== 'Cédula de ciudadanía'){
-      setConteo(2);
-    }
+    setConteo(1)
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -94,30 +83,32 @@ export const FormularioDocumento: React.FC<Props> = ({
         ...informacion,
         [evento.target.name]: lector.result,
       });
+
+      validarDocumento(lector.result)
     };
 
     if (archivo) lector.readAsDataURL(archivo);
-    console.log(lector.result)
   };
 
-  const validarDocumento = (evento: React.MouseEvent<HTMLButtonElement>) => {
-    evento.preventDefault();
+  const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
 
     const data = {
-      imagen: preview,
+      imagen: dataImagen,
+      tipoDocumento: tipoDocumento,
+      ladoDocumento: ladoDocumento
     };
 
     axios({
       method: "post",
-      url: URL,
+      url: URLS.validarDocumento,
       data: data,
     })
       .then((res) => {
         setValidacion(res.data.validacion);
-        console.log(res.data.validacion);
-        if (res.data.validacion >= 55) {
-          setConteo(2);
-        }
+        console.log(res);
+        // if (res.data.validacion >= 55) {
+        //   setConteo(2);
+        // }
       })
       .catch((error) => {
         console.log(error)
@@ -166,18 +157,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       {ladoPreview.length >= 1 && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
       )}
-
-      {ladoPreview.length >= 1 && tipoDocumento === "Cédula de ciudadanía" && (
-        <Button onClick={validarDocumento}>Validar documento</Button>
-      )}
-
-      {validacionMensaje && validacion >= 55 && (
-        <Alert style={{margin: '20px 0 0 0'}}>Documento validado exitosamente</Alert>
-      )}
-
-      {validacionMensaje && validacion <= 55 && !validacionError && <Alert color="warning" style={{margin: '20px 0 0 0'}}>Documento invalido</Alert>}
-
-      {validacionMensaje && validacion <= 55 && validacionError && <Alert color="danger" style={{margin: '20px 0 0 0'}}>Ha ocurredo un error con el servidor</Alert>}
     </div>
   );
 };

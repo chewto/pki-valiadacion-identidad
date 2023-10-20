@@ -14,7 +14,7 @@ import { FormularioFotoPersona } from "../componentes/validacion-identidad/formu
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
-import { URLSdesarollo } from "../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
@@ -37,10 +37,10 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const url =
     tipoParam === "3"
-      ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}`
-      : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`;
+      ? `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
+      : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
-  const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idUsuarioParam}`;
+  const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
 
   const formulario = new FormData();
 
@@ -57,6 +57,7 @@ export const ValidacionIdentidad: React.FC = () => {
     foto_persona: "",
     dispositivo: useDevice(),
     navegador: useBrowser(),
+    ip: "",
     latitud: "",
     longitud: "",
     hora: useHour(),
@@ -91,6 +92,8 @@ export const ValidacionIdentidad: React.FC = () => {
   useEffect(() => {
     document.title = "Validacion identidad";
 
+    console.log(url, urlFirmador)
+
     if (tipoParam === "3") {
       axios({
         method: "get",
@@ -98,18 +101,18 @@ export const ValidacionIdentidad: React.FC = () => {
       })
         .then((res) => {
           setInformacionFirmador(res.data.dato);
-          console.log(res.data.dato);
         })
         .catch((err) => console.log(err));
     }
 
     geolocation();
+    obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    console.log(informacionFirmador);
-  }, [informacionFirmador]);
+    console.log(informacionFirmador, informacion);
+  }, [informacionFirmador, informacion]);
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -118,6 +121,27 @@ export const ValidacionIdentidad: React.FC = () => {
   const volverPasos = () => {
     setPasos((prev) => prev - 1);
   };
+
+  const obtenerIp = () => {
+    axios({
+      method:'get',
+      url: URLS.obtenerIp
+    })
+    .then(res => {
+      setInformacion({
+        ...informacion,
+        ip: res.data.ip
+      })
+      console.log(res.data)
+    })
+    .catch(error => {
+      setInformacion({
+        ...informacion,
+        ip: 'no se encontro la ip'
+      })
+      console.log(error)
+    })
+  }
 
   const geolocation = () => {
     const mostrarPosicion = (posicion: GeolocationPosition) => {
@@ -187,6 +211,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.longitud, informacion.longitud);
     ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
     ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
+    ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
 
     if (tipoParam === "3") {
       ValidadorFormdata(
@@ -216,11 +241,10 @@ export const ValidacionIdentidad: React.FC = () => {
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-      console.log(informacion, informacionFirmador);
+
+      console.log(formulario)
       setMostrar(true);
       setLoadingPost(true);
-
-      console.log(url);
 
       let idValidacion = 0;
       let idUsuario = 0;
@@ -248,11 +272,11 @@ export const ValidacionIdentidad: React.FC = () => {
         })
         .finally(() => {
           if (tipoParam === "1") {
-            window.location.href = `${URLSdesarollo.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+            window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
           }
 
           if (tipoParam === "3") {
-            window.location.href = `${URLSdesarollo.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
           }
         });
     }
