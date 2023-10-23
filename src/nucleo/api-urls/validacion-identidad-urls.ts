@@ -5,6 +5,6 @@ export const URLSdesarollo = {
   ValidacionIdentidadTipo3: `${urlBase}/validacion-identidad-tipo-3`,
   validarDocumento: `${urlBase}/ocr`,
   obtenerEvidencias: `${urlBase}/obtener-evidencias`,
-  obtenerFirmador: `${urlBase}/obtener-firmador`,
+  obtenerFirmador: `https://libertador.pkiservices.co/fe-back/api/Firmador`,
   resultados: 'http://localhost/efirma/efirma.php/'
 }
