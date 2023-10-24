@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   InformacionIdentidad,
   PreviewDocumento,
@@ -30,15 +30,17 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
 
   // const dedos = ['pulgar','indice', 'medio', 'anular', 'meñique']
-  const contedoDedos = Math.random()
   const [conteo, setConteo] = useState<number>(0);
   const [mostrarPreviewCamara, setMostrarPreviewCamara] =
     useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(false);
 
-  useEffect(()=>{
-    console.log(contedoDedos)
-  })
+  function getRandomNumber(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  getRandomNumber(1, 5);
+
 
   return (
     <>
