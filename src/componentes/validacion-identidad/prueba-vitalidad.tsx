@@ -50,6 +50,11 @@ export const PruebaVitalidad: React.FC<Props> = ({ setPorcentaje}) => {
               setPorcentaje(res.data)
             })
             .catch(error => console.log(error))
+
+            const stream = video.srcObject as MediaStream;
+            stream.getTracks().forEach((track) => {
+              track.stop();
+            });
         }
         }
       }

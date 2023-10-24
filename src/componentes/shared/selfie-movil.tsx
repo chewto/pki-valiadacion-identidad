@@ -1,13 +1,13 @@
-import { useState, Dispatch, SetStateAction } from "react";
+import { useState, Dispatch, SetStateAction, useRef, useEffect } from "react";
 import {
   InformacionIdentidad,
   PreviewDocumento,
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
-import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
+//import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
-import { useMobile } from "../../nucleo/hooks/useMobile";
+//import { useMobile } from "../../nucleo/hooks/useMobile";
 
 interface Props {
   informacion: InformacionIdentidad;
@@ -32,23 +32,79 @@ export const CapturadorSelfie: React.FC<Props> = ({
   setPreview,
   setMostrarPreviewCamara,
 }) => {
-  const mobile: boolean = useMobile();
+
+
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // const mobile: boolean = useMobile();
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
 
-  const tomarFoto = (dataURL: string, keyFotoParam: string) => {
-    setMostrarPreview(true);
-    setPreview({
-      ...preview,
-      [ladoDocumento]: dataURL,
-    });
-    setInformacion({
-      ...informacion,
-      [keyFotoParam]: dataURL,
-    });
-    setConteo(conteo + 1);
-    setMostrarPreviewCamara(true);
-  };
+  // const tomarFoto = (dataURL: string, keyFotoParam: string) => {
+  //   setMostrarPreview(true);
+  //   setPreview({
+  //     ...preview,
+  //     [ladoDocumento]: dataURL,
+  //   });
+  //   setInformacion({
+  //     ...informacion,
+  //     [keyFotoParam]: dataURL,
+  //   });
+  //   setConteo(conteo + 1);
+  //   setMostrarPreviewCamara(true);
+  // };
+
+  const tomarFoto = (keyFotoParam:string) =>{
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+
+      // Set canvas dimensions to match video stream
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      // Draw the current frame from the video stream onto the canvas
+      context?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Get the image data from the canvas as a data URL
+      const dataUrl = canvas.toDataURL('image/jpeg');
+
+      // Do something with the captured selfie (e.g., save it, display it, etc.)
+      setMostrarPreview(true);
+        setPreview({
+          ...preview,
+          [ladoDocumento]: dataUrl,
+        });
+        setInformacion({
+          ...informacion,
+          [keyFotoParam]: dataUrl,
+        });
+        setConteo(conteo + 1);
+        setMostrarPreviewCamara(true);
+    }
+  }
+
+  useEffect(()=>{
+    if (!('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices)) {
+      console.log("getUserMedia is not supported in this browser");
+    }
+
+    // Request camera access
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then((stream) => {
+        // Camera access granted, stream contains the video stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      })
+      .catch((error) => {
+        // Camera access denied or error occurred
+        console.log("Error accessing camera:", error);
+      });
+  })
 
   const capturarOtra = () => {
     setMostrarPreview(false);
@@ -68,7 +124,11 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {keyFoto === "foto_persona" && (
                 <>
-                  <Camera
+                  <video ref={videoRef} className="video-captura"></video>
+                  <canvas ref={canvasRef} style={{display: 'none'}}></canvas>
+
+                  <Button color="success" onClick={() => tomarFoto(keyFoto)}>Tomar selfie</Button>
+                  {/* <Camera
                     idealResolution={{
                       width: mobile ? 500 : 600,
                       height: mobile ? 600 : 350,
@@ -78,14 +138,16 @@ export const CapturadorSelfie: React.FC<Props> = ({
                     onTakePhoto={(dataURL) => {
                       tomarFoto(dataURL, keyFoto);
                     }}
-                  />
+                  /> */}
+
+
                 </>
               )}
-              {keyFoto === "foto_persona" && (
+              {/* {keyFoto === "foto_persona" && (
                 <div className="mascara">
                   <div className="indicador-persona"></div>
                 </div>
-              )}
+              )} */}
             </div>
           </>
         )}

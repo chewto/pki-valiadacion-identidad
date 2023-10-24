@@ -2,7 +2,7 @@
 // ruta desarrollo
 // const urlBase ='http://127.0.0.1:4000'
 
-// ruta produccion
+// // ruta produccion
 const urlBase = 'https://libertador.pkiservices.co/validacion-back'
 
 // ruta desarrollo
@@ -19,5 +19,5 @@ export const URLS = {
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerFirmador: firmadorUrlBase,
-  resultados: 'http://localhost/efirma/efirma.php/'
+  resultados: 'https://efirma.pkiservices.co/efirma.php/'
 }

@@ -7,7 +7,6 @@ import {
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import { Alert, Button } from "reactstrap";
 import axios from "axios";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 
@@ -36,9 +35,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
-  const [validacion, setValidacion] = useState<number>(0);
-  const [validacionMensaje, setValidacionMensaje] = useState<boolean>(false);
-  const [validacionError, setValidacionError] = useState<boolean>(false);
+  const [, setValidacion] = useState<number>(0);
+  const [, setValidacionMensaje] = useState<boolean>(false);
+  const [, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
   useEffect(() => {

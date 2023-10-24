@@ -24,7 +24,7 @@ import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
 import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
-import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
+// import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -86,8 +86,10 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
-  const [capturarImagenes, setCapturarImagenes] = useState<boolean>(false);
-  const [porcentaje, setPorcentaje] = useState<number | undefined>();
+  // const [capturarImagenes, setCapturarImagenes] = useState<boolean>(false);
+  // const [porcentaje, setPorcentaje] = useState<number | undefined>();
+
+  const [mano, setMano] = useState<string[]>([])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -334,7 +336,6 @@ export const ValidacionIdentidad: React.FC = () => {
 
               <AccesoCamara
                 setContinuarBoton={setContinuarBoton}
-                setCapturarImagenes={setCapturarImagenes}
               />
 
               <FormularioDocumento
@@ -368,18 +369,19 @@ export const ValidacionIdentidad: React.FC = () => {
                 setPreview={setPreviewDocumento}
                 ladoPreview={previewDocumento.foto_persona}
                 selfie="foto_persona"
-                porcentaje={porcentaje}
+                mano={mano}
+                setMano={setMano}
               />
             </Stepper>
 
-            <div>
+            {/* <div>
               {capturarImagenes && (
                 <PruebaVitalidad
                   porcentaje={porcentaje}
                   setPorcentaje={setPorcentaje}
                 />
               )}
-            </div>
+            </div> */}
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion
