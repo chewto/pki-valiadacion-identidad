@@ -57,16 +57,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    setPreview({
-      ...preview,
-      [evento.target.name]: '',
-    });
-
-    setInformacion({
-      ...informacion,
-      [evento.target.name]: '',
-    });
-
     setConteo(1)
 
     const archivo = evento.target.files?.[0];
