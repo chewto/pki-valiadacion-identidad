@@ -52,8 +52,13 @@ export const CapturadorSelfie: React.FC<Props> = ({
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
+      context?.scale(-1, 1);
+      context?.translate(-canvasWidth, 0);
+
       // Draw the current frame from the video stream onto the canvas
       context?.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      context?.setTransform(1, 0, 0, 1, 0, 0);
 
       // Get the image data from the canvas as a data URL
       const dataUrl = canvas.toDataURL("image/jpeg");
@@ -116,7 +121,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {keyFoto === "foto_persona" && (
                 <>
-                  <video ref={videoRef} className="video-captura"></video>
+                  <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
                   <Button color="success" onClick={() => tomarFoto(keyFoto)}>

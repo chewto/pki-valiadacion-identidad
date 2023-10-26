@@ -334,10 +334,6 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
               />
 
-              <AccesoCamara
-                setContinuarBoton={setContinuarBoton}
-              />
-
               <FormularioDocumento
                 tipoDocumento={tipoDocumento}
                 informacion={informacion}
@@ -360,6 +356,10 @@ export const ValidacionIdentidad: React.FC = () => {
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento="reverso"
+              />
+
+              <AccesoCamara
+                setContinuarBoton={setContinuarBoton}
               />
 
               <FormularioFotoPersona
