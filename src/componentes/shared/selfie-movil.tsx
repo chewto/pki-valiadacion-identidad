@@ -39,20 +39,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
 
-  // const tomarFoto = (dataURL: string, keyFotoParam: string) => {
-  //   setMostrarPreview(true);
-  //   setPreview({
-  //     ...preview,
-  //     [ladoDocumento]: dataURL,
-  //   });
-  //   setInformacion({
-  //     ...informacion,
-  //     [keyFotoParam]: dataURL,
-  //   });
-  //   setConteo(conteo + 1);
-  //   setMostrarPreviewCamara(true);
-  // };
-
   const tomarFoto = (keyFotoParam: string) => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
