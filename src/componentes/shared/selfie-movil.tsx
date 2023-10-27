@@ -5,8 +5,7 @@ import {
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
-//import Camera, { FACING_MODES, IMAGE_TYPES } from "react-html5-camera-photo";
-import "react-html5-camera-photo/build/css/index.css";
+import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { useMobile } from "../../nucleo/hooks/useMobile";
 
 interface Props {
@@ -38,6 +37,19 @@ export const CapturadorSelfie: React.FC<Props> = ({
   // const mobile: boolean = useMobile();
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
+
+  const getResolutionFromDataURL = (dataURL: any):string => {
+    const img = new Image();
+  
+    img.onload = () => {
+      const { width, height } = img;
+      console.log(`Image resolution: ${width} x ${height}`);
+    };
+  
+    img.src = dataURL;
+  
+    return `width: ${img.width}, height: ${img.height} `;
+  };
 
   const tomarFoto = (keyFotoParam: string) => {
     if (videoRef.current && canvasRef.current) {

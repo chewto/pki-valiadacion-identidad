@@ -9,6 +9,8 @@ import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
 import axios from "axios";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
+//import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
 interface Props {
   tipoDocumento: string;
@@ -63,20 +65,101 @@ export const FormularioDocumento: React.FC<Props> = ({
     const lector = new FileReader();
 
     lector.onload = () => {
+
+      const dataURL = lector.result
+
+      if(archivo && archivo.size && 1.5 * 1024 * 1024){
+        
+        console.log('comprimir')
+        const img = new Image()
+        if(typeof dataURL === 'string'){
+          img.src = dataURL
+
+          img.onload = () => {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+
+
+            const maxWidthHeight = 800;
+
+            let nuevoWidth = img.width
+            let nuevoHeight = img.height
+
+            if(nuevoWidth > maxWidthHeight || nuevoHeight > maxWidthHeight){
+              if(nuevoWidth > nuevoHeight){
+                nuevoHeight = Math.round((nuevoHeight * maxWidthHeight) / nuevoWidth)
+                nuevoWidth = maxWidthHeight
+              } else{
+                nuevoWidth = Math.round((nuevoWidth * maxWidthHeight) / nuevoHeight)
+                nuevoHeight = maxWidthHeight
+              }
+            }
+
+            canvas.width = nuevoWidth
+            canvas.height = nuevoHeight
+
+            ctx?.drawImage(img, 0,0, nuevoWidth, nuevoHeight)
+
+            const imagenComprimida = canvas.toDataURL()
+
+            setPreview({
+              ...preview,
+              [evento.target.name]: dataURL
+            })
+
+            setInformacion({
+              ...informacion,
+              [evento.target.name]: imagenComprimida
+            })
+
+            getResolutionFromDataURL(dataURL)
+
+            const mb = getImageSizeFromDataURL(imagenComprimida)
+
+            console.log(mb)
+
+            validarDocumento(imagenComprimida)
+          }
+        }
+
+
+      } else {
+        console.log('sin necesidad de comprimir')
+
       setPreview({
         ...preview,
-        [evento.target.name]: lector.result,
+        [evento.target.name]: dataURL,
       });
 
       setInformacion({
         ...informacion,
-        [evento.target.name]: lector.result,
+        [evento.target.name]: dataURL,
       });
 
+      getResolutionFromDataURL(dataURL)
+
+      const mb = getImageSizeFromDataURL(dataURL)
+
+      console.log(mb)
+
       validarDocumento(lector.result)
+    }
     };
 
     if (archivo) lector.readAsDataURL(archivo);
+  };
+
+  const getResolutionFromDataURL = (dataURL: any): string => {
+    const img = new Image();
+  
+    img.onload = () => {
+      const { width, height } = img;
+      console.log(`Image resolution: ${width} x ${height}`)
+    };
+  
+    img.src = dataURL;
+  
+    return `width: ${img.width}, height: ${img.height} `;
   };
 
   const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
@@ -141,6 +224,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           />
           Tomar foto al {placeholder} de su documento
         </label>)}
+
 
 
       {ladoPreview.length >= 1 && (
