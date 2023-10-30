@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "../../styles/styles.css";
 import "../../styles/formulario-style.component.css";
@@ -7,8 +9,8 @@ import {
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import axios from "axios";
-import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+//import axios from "axios";
+//import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
@@ -37,9 +39,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
-  const [, setValidacion] = useState<number>(0);
-  const [, setValidacionMensaje] = useState<boolean>(false);
-  const [, setValidacionError] = useState<boolean>(false);
+  // const [, setValidacion] = useState<number>(0);
+  // const [, setValidacionMensaje] = useState<boolean>(false);
+  // const [, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             const ctx = canvas.getContext('2d')
 
 
-            const maxWidthHeight = 800;
+            const maxWidthHeight = 500;
 
             let nuevoWidth = img.width
             let nuevoHeight = img.height
@@ -100,7 +102,8 @@ export const FormularioDocumento: React.FC<Props> = ({
 
             ctx?.drawImage(img, 0,0, nuevoWidth, nuevoHeight)
 
-            const imagenComprimida = canvas.toDataURL()
+            const imagenComprimida = canvas.toDataURL("image/jpeg", 0.7)
+            console.log(imagenComprimida)
 
             setPreview({
               ...preview,
@@ -118,7 +121,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
             console.log(mb)
 
-            validarDocumento(imagenComprimida)
+            //validarDocumento(dataURL)
           }
         }
 
@@ -142,7 +145,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
       console.log(mb)
 
-      validarDocumento(lector.result)
+      //validarDocumento(lector.result)
     }
     };
 
@@ -162,34 +165,37 @@ export const FormularioDocumento: React.FC<Props> = ({
     return `width: ${img.width}, height: ${img.height} `;
   };
 
-  const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
+  // const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
 
-    const data = {
-      imagen: dataImagen,
-      tipoDocumento: tipoDocumento,
-      ladoDocumento: ladoDocumento
-    };
+  //   const data = {
+  //     imagen: dataImagen,
+  //     tipoDocumento: tipoDocumento,
+  //     ladoDocumento: ladoDocumento
+  //   };
 
-    axios({
-      method: "post",
-      url: URLS.validarDocumento,
-      data: data,
-    })
-      .then((res) => {
-        setValidacion(res.data.validacion);
-        console.log(res);
-        // if (res.data.validacion >= 55) {
-        //   setConteo(2);
-        // }
-      })
-      .catch((error) => {
-        console.log(error)
-        setValidacionError(true)
-      })
-      .finally(() => {
-        setValidacionMensaje(true);
-      });
-  };
+  //   axios({
+  //     method: "post",
+  //     url: URLS.validarDocumento,
+  //     data: data,
+  //   })
+  //     .then((res) => {
+  //       setValidacion(res.data.validacion);
+  //       console.log(res);
+  //       // if (res.data.validacion >= 55) {
+  //       //   setConteo(2);
+  //       // }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //       setValidacionError(true)
+  //     })
+  //     .finally(() => {
+  //       setValidacionMensaje(true);
+  //     });
+  // };
+
+
+  
 
   return (
     <div className="documento-container">
@@ -224,8 +230,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           />
           Tomar foto al {placeholder} de su documento
         </label>)}
-
-
 
       {ladoPreview.length >= 1 && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />

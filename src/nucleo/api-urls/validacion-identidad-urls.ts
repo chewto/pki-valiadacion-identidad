@@ -8,7 +8,7 @@ const urlBase ='http://127.0.0.1:4000'
 //const urlBase = 'https://libertador.pkiservices.co/validacion-back'
 
 // ruta desarrollo
- const firmadorUrlBase = 'http://127.0.0.1:4000/obtener-firmador'
+const firmadorUrlBase = 'http://127.0.0.1:4000/obtener-firmador'
 
 // ruta produccion
 //const firmadorUrlBase = 'https://libertador.pkiservices.co/fe-back/api/Firmador'

@@ -5,7 +5,6 @@ import {
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
-import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { useMobile } from "../../nucleo/hooks/useMobile";
 
 interface Props {
@@ -38,19 +37,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
 
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
 
-  const getResolutionFromDataURL = (dataURL: any):string => {
-    const img = new Image();
-  
-    img.onload = () => {
-      const { width, height } = img;
-      console.log(`Image resolution: ${width} x ${height}`);
-    };
-  
-    img.src = dataURL;
-  
-    return `width: ${img.width}, height: ${img.height} `;
-  };
-
   const tomarFoto = (keyFotoParam: string) => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -73,7 +59,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
       context?.setTransform(1, 0, 0, 1, 0, 0);
 
       // Get the image data from the canvas as a data URL
-      const dataUrl = canvas.toDataURL("image/jpeg");
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
 
       // Do something with the captured selfie (e.g., save it, display it, etc.)
       setMostrarPreview(true);
