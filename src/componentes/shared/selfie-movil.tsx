@@ -33,8 +33,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // const mobile: boolean = useMobile();
-
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
 
   const tomarFoto = (keyFotoParam: string) => {
@@ -59,7 +57,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
       context?.setTransform(1, 0, 0, 1, 0, 0);
 
       // Get the image data from the canvas as a data URL
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      const dataUrl = canvas.toDataURL("image/jpeg");
 
       // Do something with the captured selfie (e.g., save it, display it, etc.)
       setMostrarPreview(true);
@@ -119,6 +117,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {keyFoto === "foto_persona" && (
                 <>
+                    <span style={{fontSize: '16px', margin: '0 0 10px 0', textAlign: 'center'}}>Por favor, quítese la gafas o gorra para realizar la verificación.</span>
                   <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
@@ -138,11 +137,11 @@ export const CapturadorSelfie: React.FC<Props> = ({
                   /> */}
                 </>
               )}
-              {/* {keyFoto === "foto_persona" && (
+              {keyFoto === "foto_persona" && (
                 <div className="mascara">
                   <div className="indicador-persona"></div>
                 </div>
-              )} */}
+              )}
             </div>
           </>
         )}

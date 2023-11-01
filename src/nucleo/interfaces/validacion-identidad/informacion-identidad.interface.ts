@@ -1,7 +1,7 @@
 export interface InformacionIdentidad {
-  anverso: File | string;
-  reverso: File | string;
-  foto_persona: File | string;
+  anverso: string;
+  reverso: string;
+  foto_persona: string;
   dispositivo: string;
   navegador: string;
   ip: string;

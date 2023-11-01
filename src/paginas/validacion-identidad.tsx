@@ -24,6 +24,9 @@ import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
 import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
+import {useDispatch, useSelector} from 'react-redux'
+import { RootState } from "../nucleo/redux/store";
+import { setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador } from "../nucleo/redux/slices/informacionSlice";
 // import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
 
 export const ValidacionIdentidad: React.FC = () => {
@@ -32,6 +35,9 @@ export const ValidacionIdentidad: React.FC = () => {
   const idParam = params.get("id");
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
+
+  const informacion = useSelector((state:RootState) => state.informacion)
+  const dispatch = useDispatch()
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
@@ -51,18 +57,13 @@ export const ValidacionIdentidad: React.FC = () => {
     documento: "",
   });
 
-  const [informacion, setInformacion] = useState<InformacionIdentidad>({
-    anverso: "",
-    reverso: "",
-    foto_persona: "",
-    dispositivo: useDevice(),
-    navegador: useBrowser(),
-    ip: "",
-    latitud: "",
-    longitud: "",
-    hora: useHour(),
-    fecha: useDate(),
-  });
+  const hora = useHour()
+  const fecha = useDate()
+  dispatch(setHoraFecha({hora: hora, fecha: fecha}))
+
+  const dispositivo = useDevice()
+  const navegador = useBrowser()
+  dispatch(setDispostivoNavegador({dispositivo: dispositivo, navegador: navegador}))
 
   const [tipoDocumento, setTipoDocumento] = useState<string>("");
 
@@ -86,15 +87,14 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
-  // const [capturarImagenes, setCapturarImagenes] = useState<boolean>(false);
-  // const [porcentaje, setPorcentaje] = useState<number | undefined>();
-
-  const [mano, setMano] = useState<string[]>([])
+  const labelFoto = {
+    anverso:'anverso',
+    reverso:'reverso',
+    foto_persona: 'foto_persona'
+  }
 
   useEffect(() => {
     document.title = "Validacion identidad";
-
-    console.log(url, urlFirmador)
 
     if (tipoParam === "3") {
       axios({
@@ -113,8 +113,8 @@ export const ValidacionIdentidad: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    console.log(informacionFirmador, informacion);
-  }, [informacionFirmador, informacion]);
+    console.log(informacion)
+  }, [informacion])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -130,17 +130,10 @@ export const ValidacionIdentidad: React.FC = () => {
       url: URLS.obtenerIp
     })
     .then(res => {
-      setInformacion({
-        ...informacion,
-        ip: res.data.ip
-      })
-      console.log(res.data)
+      dispatch(setIp(res.data))
     })
     .catch(error => {
-      setInformacion({
-        ...informacion,
-        ip: 'no se encontro la ip'
-      })
+      dispatch(setIp({ip: 'ip inaccesible'}))
       console.log(error)
     })
   }
@@ -150,21 +143,13 @@ export const ValidacionIdentidad: React.FC = () => {
       const latitud: number = posicion.coords.latitude;
       const longitud: number = posicion.coords.longitude;
 
-      setInformacion({
-        ...informacion,
-        latitud: `${latitud}`,
-        longitud: `${longitud}`,
-      });
+      dispatch(setCoordenadas({latitud: `${latitud}`, longitud: `${longitud}`}))
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(mostrarPosicion);
     } else {
-      setInformacion({
-        ...informacion,
-        latitud: "no disponible",
-        longitud: "no disponible",
-      });
+      dispatch(setCoordenadas({latitud: 'no disponible', longitud: 'no disponible'}))
     }
   };
 
@@ -297,18 +282,19 @@ export const ValidacionIdentidad: React.FC = () => {
               fillStroke="#0d6efd"
               activeColor="#0d6efd"
               activeProgressBorder="2px solid #0d6efd"
+              contentBoxClassName="contenido"
               backBtn={
-                <button className="stepper-btn" onClick={volverPasos}>
+                <button className="stepper-btn" onClick={volverPasos} style={{position: 'absolute', left: '10%', top: '10%'}}>
                   Volver
                 </button>
               }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos}>
+                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '73%', top: '10%'}}>
                     Siguiente
                   </button>
                 ) : (
-                  <button className="stepper-btn" disabled>
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '73%', top: '10%'}}>
                     Siguiente
                   </button>
                 )
@@ -318,10 +304,10 @@ export const ValidacionIdentidad: React.FC = () => {
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
                 informacion.reverso !== "" ? (
-                  <button className="stepper-btn">Verificar</button>
+                  <button className="stepper-btn" style={{position: 'absolute', left: '73%', top: '10%'}}>Finalizar</button>
                 ) : (
-                  <button className="stepper-btn" disabled>
-                    Verificar
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '73%', top: '10%'}}>
+                    Finalizar
                   </button>
                 )
               }
@@ -336,26 +322,18 @@ export const ValidacionIdentidad: React.FC = () => {
 
               <FormularioDocumento
                 tipoDocumento={tipoDocumento}
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.anverso}
+                preview={informacion.anverso}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
-                ladoDocumento="anverso"
+                ladoDocumento={labelFoto.anverso}
               />
 
               <FormularioDocumento
                 tipoDocumento={tipoDocumento}
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.reverso}
+                preview={informacion.reverso}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
-                ladoDocumento="reverso"
+                ladoDocumento={labelFoto.reverso}
               />
 
               <AccesoCamara
@@ -363,25 +341,11 @@ export const ValidacionIdentidad: React.FC = () => {
               />
 
               <FormularioFotoPersona
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.foto_persona}
-                selfie="foto_persona"
-                mano={mano}
-                setMano={setMano}
+                preview={informacion.foto_persona}
+                selfie={labelFoto.foto_persona}
               />
             </Stepper>
-
-            {/* <div>
-              {capturarImagenes && (
-                <PruebaVitalidad
-                  porcentaje={porcentaje}
-                  setPorcentaje={setPorcentaje}
-                />
-              )}
-            </div> */}
+            
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion

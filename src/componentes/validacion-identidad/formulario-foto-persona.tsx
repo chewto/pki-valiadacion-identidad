@@ -1,30 +1,16 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import {
-  InformacionIdentidad,
-  PreviewDocumento,
-} from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import { useState } from "react";
 import { CapturadorSelfie } from "../shared/selfie-movil";
 import { Previsualizacion } from "../shared/previsualizacion";
 import "../../styles/styles.css";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
-  informacion: InformacionIdentidad;
-  setInformacion: Dispatch<SetStateAction<InformacionIdentidad>>;
-  preview: PreviewDocumento;
-  setPreview: Dispatch<SetStateAction<PreviewDocumento>>;
-  ladoPreview: string;
+  preview: string;
   selfie: string;
-  mano: string[];
-  setMano: Dispatch<SetStateAction<string[]>>
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
-  informacion,
-  setInformacion,
   preview,
-  setPreview,
-  ladoPreview,
   selfie
 }) => {
 
@@ -46,7 +32,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             style={{
               textAlign: "center",
               fontSize: "22px",
-              margin: "23px 0 0 0",
             }}
           >
             <p>Realice un selfie para la verificación </p>
@@ -80,7 +65,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             <Previsualizacion preview={ladoPreview} nombrePreview={selfie} />
           )}
         </>
-      {/* )} */}
     </>
   );
 };
