@@ -84,40 +84,33 @@ export const FormularioDocumento: React.FC<Props> = ({
 
             const maxWidthHeight = 500;
 
-            let nuevoWidth = img.width
-            let nuevoHeight = img.height
+            const nuevoWidth = Math.floor(img.width / 2)
+            const nuevoHeight = Math.floor(img.height / 2)
 
-            if(nuevoWidth > maxWidthHeight || nuevoHeight > maxWidthHeight){
-              if(nuevoWidth > nuevoHeight){
-                nuevoHeight = Math.round((nuevoHeight * maxWidthHeight) / nuevoWidth)
-                nuevoWidth = maxWidthHeight
-              } else{
-                nuevoWidth = Math.round((nuevoWidth * maxWidthHeight) / nuevoHeight)
-                nuevoHeight = maxWidthHeight
-              }
-            }
+            
 
             canvas.width = nuevoWidth
             canvas.height = nuevoHeight
 
             ctx?.drawImage(img, 0,0, nuevoWidth, nuevoHeight)
 
-            const imagenComprimida = canvas.toDataURL("image/jpeg", 0.7)
-            console.log(imagenComprimida)
+            const imagenResized = canvas.toDataURL("image/jpeg")
+            console.log(imagenResized)
 
             setPreview({
               ...preview,
-              [evento.target.name]: dataURL
+              [evento.target.name]: imagenResized
             })
 
             setInformacion({
               ...informacion,
-              [evento.target.name]: imagenComprimida
+              [evento.target.name]: imagenResized
             })
 
             getResolutionFromDataURL(dataURL)
+            getResolutionFromDataURL(imagenResized)
 
-            const mb = getImageSizeFromDataURL(imagenComprimida)
+            const mb = getImageSizeFromDataURL(imagenResized)
 
             console.log(mb)
 

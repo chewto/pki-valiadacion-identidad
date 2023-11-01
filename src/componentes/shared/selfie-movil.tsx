@@ -59,7 +59,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
       context?.setTransform(1, 0, 0, 1, 0, 0);
 
       // Get the image data from the canvas as a data URL
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+      const dataUrl = canvas.toDataURL("image/jpeg");
 
       // Do something with the captured selfie (e.g., save it, display it, etc.)
       setMostrarPreview(true);
