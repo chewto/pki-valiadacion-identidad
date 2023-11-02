@@ -1,19 +1,21 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import "../../styles/selector.component.css";
+import { useDispatch } from "react-redux";
+import { setTipoDocumento } from "../../nucleo/redux/slices/informacionSlice";
 
 interface Props {
   tipoDocumento: string;
-  setTipoDocumento: Dispatch<SetStateAction<string>>;
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
 }
 
 export const SelectorTipoDocumento: React.FC<Props> = ({
   tipoDocumento,
-  setTipoDocumento,
   continuarBoton,
   setContinuarBoton,
 }) => {
+
+  const dispatch = useDispatch()
 
   useEffect(()=> {
     if(continuarBoton === true){
@@ -30,7 +32,7 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
 
   const onChange = (evento: React.ChangeEvent<HTMLInputElement>) => {
     const valor = evento.target.value;
-    setTipoDocumento(valor);
+    dispatch(setTipoDocumento({tipoDocumento: valor}))
   };
 
   const tiposDocumentos = [

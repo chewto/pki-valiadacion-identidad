@@ -1,17 +1,15 @@
 export interface InformacionIdentidad {
-  anverso: File | string;
-  reverso: File | string;
-  foto_persona: File | string;
+  anverso: string;
+  reverso: string;
+  tipoDocumento: string;
+  foto_persona: string;
   dispositivo: string;
   navegador: string;
+  ip: string;
   latitud: string;
   longitud: string;
   hora: string;
   fecha: string;
-}
-
-export interface Root {
-  dato: Dato
 }
 
 export interface Dato {
@@ -28,20 +26,3 @@ export interface Dato {
   fechaCreacion?: string
 }
 
-export interface Respuesta {
-  idValidacion?: number;
-  idUsuario?: number;
-  coincidenciaDocumentoRostro: boolean;
-  estadoVerificacion: string;
-}
-
-export interface PreviewDocumento{
-  anverso: string;
-  reverso: string;
-  foto_persona: string;
-}
-
-export interface EvidenciasRes{
-  idEvidencias: number;
-  idEvidenciasAdicionales: number;
-}

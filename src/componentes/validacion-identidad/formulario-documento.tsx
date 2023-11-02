@@ -1,23 +1,20 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "../../styles/styles.css";
 import "../../styles/formulario-style.component.css";
-import {
-  InformacionIdentidad,
-  PreviewDocumento,
-} from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import { Alert, Button } from "reactstrap";
-import axios from "axios";
-import { URLSdesarollo } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { useDispatch } from "react-redux";
+import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
+
+//import axios from "axios";
+//import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+//import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
+//import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
 interface Props {
   tipoDocumento: string;
-  informacion: InformacionIdentidad;
-  setInformacion: Dispatch<SetStateAction<InformacionIdentidad>>;
-  preview: PreviewDocumento;
-  setPreview: Dispatch<SetStateAction<PreviewDocumento>>;
-  ladoPreview: string;
+  preview: string;
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
@@ -25,23 +22,19 @@ interface Props {
 
 export const FormularioDocumento: React.FC<Props> = ({
   tipoDocumento,
-  informacion,
-  setInformacion,
   preview,
-  setPreview,
-  ladoPreview,
   setContinuarBoton,
   ladoDocumento,
 }) => {
-  const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
+  const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
-  const [validacion, setValidacion] = useState<number>(0);
-  const [validacionMensaje, setValidacionMensaje] = useState<boolean>(false);
-  const [validacionError, setValidacionError] = useState<boolean>(false);
+  // const [, setValidacion] = useState<number>(0);
+  // const [, setValidacionMensaje] = useState<boolean>(false);
+  // const [, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
-  const URL = `${URLSdesarollo.validarDocumento}?tipoDocumento=${tipoDocumento}&ladoDocumento=${ladoDocumento}`;
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!mostrarPreview) {
@@ -50,83 +43,90 @@ export const FormularioDocumento: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(()=> {
-    console.log(informacion, preview)
-  },[informacion,preview])
-
   useEffect(() => {
     if (conteo === 0) setContinuarBoton(false);
-    if (conteo >= 2 && ladoPreview.length >= 1 && tipoDocumento === 'Cédula de ciudadanía') setContinuarBoton(true);
-    if (conteo >= 1 && ladoPreview.length >= 1 && tipoDocumento !== 'Cédula de ciudadanía') setContinuarBoton(true)
-  }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
+    if (conteo >= 1 && preview.length >= 1) setContinuarBoton(true);
+  }, [conteo, setContinuarBoton, preview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-
-    setPreview({
-      ...preview,
-      [evento.target.name]: '',
-    });
-
-    setInformacion({
-      ...informacion,
-      [evento.target.name]: '',
-    });
-
-    setValidacionMensaje(false);
-    if(tipoDocumento === 'Cédula de ciudadanía'){
-      setConteo(0);
-    }
-
-    if(tipoDocumento !== 'Cédula de ciudadanía'){
-      setConteo(2);
-    }
+    setConteo(1);
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
 
-    lector.onload = () => {
-      setPreview({
-        ...preview,
-        [evento.target.name]: lector.result,
-      });
-
-      setInformacion({
-        ...informacion,
-        [evento.target.name]: lector.result,
-      });
-    };
-
     if (archivo) lector.readAsDataURL(archivo);
-    console.log(lector.result)
-  };
 
-  const validarDocumento = (evento: React.MouseEvent<HTMLButtonElement>) => {
-    evento.preventDefault();
+    lector.onload = () => {
+      const dataURL = lector.result;
+      const img = new Image();
+      if (typeof dataURL === "string") {
+        img.src = dataURL;
 
-    const data = {
-      imagen: preview,
+        const imagen = new Image();
+
+        imagen.src = typeof dataURL === "string" ? dataURL : "";
+
+        imagen.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          const nuevoWidth = Math.floor(imagen.width / 2);
+          const nuevoHeigth = Math.floor(imagen.height / 2);
+
+          canvas.width = nuevoWidth;
+          canvas.height = nuevoHeigth;
+
+          ctx?.drawImage(imagen, 0, 0, nuevoWidth, nuevoHeigth);
+
+          const imagenResized = canvas.toDataURL("image/jpeg");
+
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
+        };
+      }
     };
-
-    axios({
-      method: "post",
-      url: URL,
-      data: data,
-    })
-      .then((res) => {
-        setValidacion(res.data.validacion);
-        console.log(res.data.validacion);
-        if (res.data.validacion >= 55) {
-          setConteo(2);
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-        setValidacionError(true)
-      })
-      .finally(() => {
-        setValidacionMensaje(true);
-      });
   };
+
+  // const getResolutionFromDataURL = (dataURL: any): string => {
+  //   const img = new Image();
+
+  //   img.onload = () => {
+  //     const { width, height } = img;
+  //     console.log(`Image resolution: ${width} x ${height}`)
+  //   };
+
+  //   img.src = dataURL;
+
+  //   return `width: ${img.width}, height: ${img.height} `;
+  // };
+
+  // const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
+
+  //   const data = {
+  //     imagen: dataImagen,
+  //     tipoDocumento: tipoDocumento,
+  //     ladoDocumento: ladoDocumento
+  //   };
+
+  //   axios({
+  //     method: "post",
+  //     url: URLS.validarDocumento,
+  //     data: data,
+  //   })
+  //     .then((res) => {
+  //       setValidacion(res.data.validacion);
+  //       console.log(res);
+  //       // if (res.data.validacion >= 55) {
+  //       //   setConteo(2);
+  //       // }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //       setValidacionError(true)
+  //     })
+  //     .finally(() => {
+  //       setValidacionMensaje(true);
+  //     });
+  // };
 
   return (
     <div className="documento-container">
@@ -134,19 +134,13 @@ export const FormularioDocumento: React.FC<Props> = ({
         Subir foto del {placeholder} de su {tipoDocumento}
       </h2>
 
-      <label className="file-input">
-        <input
-          name={ladoDocumento}
-          type="file"
-          accept="image/jpeg"
-          onChange={cambioArchivo}
-          style={{ display: "none" }}
-        />
-        Subir foto del {placeholder} de su {tipoDocumento}
-      </label>
-
-      {mobile &&(
-          <label className="file-input">
+      {mobile ? (
+        <label
+          className="file-input"
+          style={{
+            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
           <input
             name={ladoDocumento}
             type="file"
@@ -159,25 +153,33 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          Tomar foto al {placeholder} de su documento
-        </label>)}
-
-
-      {ladoPreview.length >= 1 && (
-        <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
+          {preview.length >= 1
+            ? "Volver a tomar foto si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
+      ) : (
+        <label
+          className="file-input"
+          style={{
+            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
+          <input
+            name={ladoDocumento}
+            type="file"
+            accept="image/jpeg"
+            onChange={cambioArchivo}
+            style={{ display: "none" }}
+          />
+          {preview.length >= 1
+            ? "Volver a subir el documento si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
       )}
 
-      {ladoPreview.length >= 1 && tipoDocumento === "Cédula de ciudadanía" && (
-        <Button onClick={validarDocumento}>Validar documento</Button>
+      {preview.length >= 1 && (
+        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
       )}
-
-      {validacionMensaje && validacion >= 55 && (
-        <Alert style={{margin: '20px 0 0 0'}}>Documento validado exitosamente</Alert>
-      )}
-
-      {validacionMensaje && validacion <= 55 && !validacionError && <Alert color="warning" style={{margin: '20px 0 0 0'}}>Documento invalido</Alert>}
-
-      {validacionMensaje && validacion <= 55 && validacionError && <Alert color="danger" style={{margin: '20px 0 0 0'}}>Ha ocurredo un error con el servidor</Alert>}
     </div>
   );
 };

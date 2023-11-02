@@ -1,20 +1,11 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import {
-  InformacionIdentidad,
-  PreviewDocumento,
-  Respuesta,
-  Dato,
-} from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
-import {
-  ValidadorFormdata,
-  formdataKeys,
-} from "../nucleo/validadores/validacion-identidad/validador-formdata";
+import {ValidadorFormdata,formdataKeys} from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
-import { URLSdesarollo } from "../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
@@ -24,7 +15,10 @@ import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
 import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
-import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
+import {useDispatch, useSelector} from 'react-redux'
+import { RootState } from "../nucleo/redux/store";
+import { setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador } from "../nucleo/redux/slices/informacionSlice";
+import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -33,50 +27,35 @@ export const ValidacionIdentidad: React.FC = () => {
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
 
+  const informacion = useSelector((state:RootState) => state.informacion)
+  const informacionFirmador = useSelector((state:RootState) => state.firmador)
+  
+  const dispatch = useDispatch()
+
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
   const url =
     tipoParam === "3"
-      ? `${URLSdesarollo.ValidacionIdentidadTipo3}?${urlParams}`
-      : `${URLSdesarollo.ValidacionIdentidadTipo1}?${urlParams}`;
+      ? `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
+      : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
-  const urlFirmador = `${URLSdesarollo.obtenerFirmador}/${idUsuarioParam}`;
+  const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
 
   const formulario = new FormData();
 
-  const [informacionFirmador, setInformacionFirmador] = useState<Dato>({
-    nombre: "",
-    apellido: "",
-    correo: "",
-    documento: "",
-  });
+  const labelFoto = {
+    anverso:'anverso',
+    reverso:'reverso',
+    foto_persona: 'foto_persona'
+  }
 
-  const [informacion, setInformacion] = useState<InformacionIdentidad>({
-    anverso: "",
-    reverso: "",
-    foto_persona: "",
-    dispositivo: useDevice(),
-    navegador: useBrowser(),
-    latitud: "",
-    longitud: "",
-    hora: useHour(),
-    fecha: useDate(),
-  });
+  const hora = useHour()
+  const fecha = useDate()
+  dispatch(setHoraFecha({hora: hora, fecha: fecha}))
 
-  const [tipoDocumento, setTipoDocumento] = useState<string>("");
-
-  const [respuesta, setRespuesta] = useState<Respuesta>({
-    idValidacion: 0,
-    idUsuario: 0,
-    coincidenciaDocumentoRostro: false,
-    estadoVerificacion: "",
-  });
-
-  const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
-    anverso: "",
-    reverso: "",
-    foto_persona: "",
-  });
+  const dispositivo = useDevice()
+  const navegador = useBrowser()
+  dispatch(setDispostivoNavegador({dispositivo: dispositivo, navegador: navegador}))
 
   const [loadingPost, setLoadingPost] = useState<boolean>(false);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -85,8 +64,9 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
-  const [capturarImagenes, setCapturarImagenes] = useState<boolean>(false);
-  const [porcentaje, setPorcentaje] = useState<number | undefined>();
+  useEffect(()=> {
+    console.log(informacion, informacionFirmador)
+  }, [informacion, informacionFirmador])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -97,19 +77,16 @@ export const ValidacionIdentidad: React.FC = () => {
         url: urlFirmador,
       })
         .then((res) => {
-          setInformacionFirmador(res.data.dato);
-          console.log(res.data.dato);
+
+          dispatch(setFirmador(res.data.dato))
         })
         .catch((err) => console.log(err));
     }
 
     geolocation();
+    obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    console.log(informacionFirmador);
-  }, [informacionFirmador]);
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -119,26 +96,32 @@ export const ValidacionIdentidad: React.FC = () => {
     setPasos((prev) => prev - 1);
   };
 
+  const obtenerIp = () => {
+    axios({
+      method:'get',
+      url: URLS.obtenerIp
+    })
+    .then(res => {
+      dispatch(setIp(res.data))
+    })
+    .catch(error => {
+      dispatch(setIp({ip: 'ip inaccesible'}))
+      console.log(error)
+    })
+  }
+
   const geolocation = () => {
     const mostrarPosicion = (posicion: GeolocationPosition) => {
       const latitud: number = posicion.coords.latitude;
       const longitud: number = posicion.coords.longitude;
 
-      setInformacion({
-        ...informacion,
-        latitud: `${latitud}`,
-        longitud: `${longitud}`,
-      });
+      dispatch(setCoordenadas({latitud: `${latitud}`, longitud: `${longitud}`}))
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(mostrarPosicion);
     } else {
-      setInformacion({
-        ...informacion,
-        latitud: "no disponible",
-        longitud: "no disponible",
-      });
+      dispatch(setCoordenadas({latitud: 'no disponible', longitud: 'no disponible'}))
     }
   };
 
@@ -168,8 +151,8 @@ export const ValidacionIdentidad: React.FC = () => {
       );
     }
 
-    if (tipoDocumento !== "") {
-      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, tipoDocumento);
+    if (informacion.tipoDocumento !== "") {
+      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, informacion.tipoDocumento);
     }
 
     ValidadorFormdata(
@@ -187,6 +170,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.longitud, informacion.longitud);
     ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
     ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
+    ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
 
     if (tipoParam === "3") {
       ValidadorFormdata(
@@ -216,11 +200,10 @@ export const ValidacionIdentidad: React.FC = () => {
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-      console.log(informacion, informacionFirmador);
+
+      console.log(formulario)
       setMostrar(true);
       setLoadingPost(true);
-
-      console.log(url);
 
       let idValidacion = 0;
       let idUsuario = 0;
@@ -234,8 +217,6 @@ export const ValidacionIdentidad: React.FC = () => {
         },
       })
         .then((res) => {
-          console.log(res);
-          setRespuesta(res.data);
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
 
@@ -248,11 +229,11 @@ export const ValidacionIdentidad: React.FC = () => {
         })
         .finally(() => {
           if (tipoParam === "1") {
-            window.location.href = `${URLSdesarollo.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+            window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
           }
 
           if (tipoParam === "3") {
-            window.location.href = `${URLSdesarollo.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
           }
         });
     }
@@ -271,96 +252,72 @@ export const ValidacionIdentidad: React.FC = () => {
               fillStroke="#0d6efd"
               activeColor="#0d6efd"
               activeProgressBorder="2px solid #0d6efd"
+              contentBoxClassName="contenido"
               backBtn={
-                <button className="stepper-btn" onClick={volverPasos}>
+                <button className="stepper-btn" onClick={volverPasos} style={{position: 'absolute', left: '10%', top: '10%'}}>
                   Volver
                 </button>
               }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos}>
+                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 ) : (
-                  <button className="stepper-btn" disabled>
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 )
               }
-              // onContinue={()=> console.log('presion')}
               submitBtn={
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
                 informacion.reverso !== "" ? (
-                  <button className="stepper-btn">Verificar</button>
+                  <button className="stepper-btn" style={{position: 'absolute', left: '71%', top: '10%'}}>Finalizar</button>
                 ) : (
-                  <button className="stepper-btn" disabled>
-                    Verificar
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
+                    Finalizar
                   </button>
                 )
               }
               onSubmit={enviar}
             >
               <SelectorTipoDocumento
-                tipoDocumento={tipoDocumento}
-                setTipoDocumento={setTipoDocumento}
+                tipoDocumento={informacion.tipoDocumento}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
+              />
+
+              <FormularioDocumento
+                tipoDocumento={informacion.tipoDocumento}
+                preview={informacion.anverso}
+                continuarBoton={continuarBoton}
+                setContinuarBoton={setContinuarBoton}
+                ladoDocumento={labelFoto.anverso}
+              />
+
+              <FormularioDocumento
+                tipoDocumento={informacion.tipoDocumento}
+                preview={informacion.reverso}
+                continuarBoton={continuarBoton}
+                setContinuarBoton={setContinuarBoton}
+                ladoDocumento={labelFoto.reverso}
               />
 
               <AccesoCamara
                 setContinuarBoton={setContinuarBoton}
-                setCapturarImagenes={setCapturarImagenes}
-              />
-
-              <FormularioDocumento
-                tipoDocumento={tipoDocumento}
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.anverso}
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-                ladoDocumento="anverso"
-              />
-
-              <FormularioDocumento
-                tipoDocumento={tipoDocumento}
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.reverso}
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-                ladoDocumento="reverso"
               />
 
               <FormularioFotoPersona
-                informacion={informacion}
-                setInformacion={setInformacion}
-                preview={previewDocumento}
-                setPreview={setPreviewDocumento}
-                ladoPreview={previewDocumento.foto_persona}
-                selfie="foto_persona"
-                porcentaje={porcentaje}
+                preview={informacion.foto_persona}
+                selfie={labelFoto.foto_persona}
               />
             </Stepper>
-
-            <div>
-              {capturarImagenes && (
-                <PruebaVitalidad
-                  porcentaje={porcentaje}
-                  setPorcentaje={setPorcentaje}
-                />
-              )}
-            </div>
+            
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion
               loadingPost={loadingPost}
-              coincidencia={respuesta.coincidenciaDocumentoRostro}
               mostrarMensaje={mostrarMensaje}
               setMostrarMensaje={setMostrar}
               error={errorPost}

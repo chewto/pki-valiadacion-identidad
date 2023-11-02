@@ -5,7 +5,6 @@ import { Mensaje } from "./mensaje";
 
 interface Props {
   loadingPost: boolean;
-  coincidencia: boolean;
   mostrarMensaje: boolean;
   setMostrarMensaje: Dispatch<SetStateAction<boolean>>;
   error: boolean;
@@ -26,26 +25,7 @@ export const MensajeVerificacion: React.FC<Props> = ({
             <Spinner color="primary" />
           </>
         )}
-{/* 
-        {(coincidencia && !loadingPost) && (
-          <>
-            <Mensaje
-              textoMensaje="El usuario fue reconocido en el documento"
-              colorMensaje="success"
-            />
-          </>
-        )}
-        {(!coincidencia && !loadingPost && !error) && (
-          <>
-            <Mensaje
-              textoMensaje="EL usuario no pudo ser reconocido en el documento"
-              colorMensaje="warning"
-            />
-            <Button color="warning" onClick={cerrarMensaje}>
-              Volver a intentar
-            </Button>
-          </>
-        )}*/}
+
         {(error && !loadingPost) && (
           <>
             <Mensaje

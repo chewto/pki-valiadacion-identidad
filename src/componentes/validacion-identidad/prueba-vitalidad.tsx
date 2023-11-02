@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { useRef, useEffect, Dispatch, SetStateAction } from "react";
+import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 
 interface Props{
   porcentaje: number | undefined;
@@ -38,7 +39,7 @@ export const PruebaVitalidad: React.FC<Props> = ({ setPorcentaje}) => {
             }
             axios({
               method:'post',
-              url:'http://127.0.0.1:4000/validacion-vida',
+              url:URLS.validacionVida,
               data: data,
               headers: {
                 "Content-Type": 'application/json'
@@ -49,6 +50,11 @@ export const PruebaVitalidad: React.FC<Props> = ({ setPorcentaje}) => {
               setPorcentaje(res.data)
             })
             .catch(error => console.log(error))
+
+            const stream = video.srcObject as MediaStream;
+            stream.getTracks().forEach((track) => {
+              track.stop();
+            });
         }
         }
       }
