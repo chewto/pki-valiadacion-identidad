@@ -256,11 +256,11 @@ export const ValidacionIdentidad: React.FC = () => {
               }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '73%', top: '10%'}}>
+                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 ) : (
-                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '73%', top: '10%'}}>
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 )
@@ -269,9 +269,9 @@ export const ValidacionIdentidad: React.FC = () => {
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
                 informacion.reverso !== "" ? (
-                  <button className="stepper-btn" style={{position: 'absolute', left: '73%', top: '10%'}}>Finalizar</button>
+                  <button className="stepper-btn" style={{position: 'absolute', left: '71%', top: '10%'}}>Finalizar</button>
                 ) : (
-                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '73%', top: '10%'}}>
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Finalizar
                   </button>
                 )

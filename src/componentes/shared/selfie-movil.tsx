@@ -121,7 +121,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
           <>
             <div className="preview">
               <Button color="danger" onClick={capturarOtra}>
-                Capturar otra vez
+                Capturar otra vez, si la imagen no se ve correctamente
               </Button>
             </div>
           </>

@@ -4,7 +4,7 @@ import "../../styles/styles.css";
 import "../../styles/formulario-style.component.css";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import {useDispatch} from 'react-redux'
+import { useDispatch } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 
 //import axios from "axios";
@@ -26,7 +26,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
 }) => {
-  const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
+  const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
   // const [, setValidacion] = useState<number>(0);
@@ -34,7 +34,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   // const [, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!mostrarPreview) {
@@ -49,50 +49,55 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [conteo, setContinuarBoton, preview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    setConteo(1)
+    setConteo(1);
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
 
     lector.onload = () => {
+      const dataURL = lector.result;
 
-      const dataURL = lector.result
+      console.log("comprimir");
+      const img = new Image();
+      if (typeof dataURL === "string") {
+        img.src = dataURL;
 
-      const imagen = new Image()
+        const imagen = new Image();
 
-      imagen.src = typeof dataURL === 'string' ? dataURL : ''
+        imagen.src = typeof dataURL === "string" ? dataURL : "";
 
-      imagen.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')
+        imagen.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
 
-        const nuevoWidth = Math.floor(imagen.width / 2)
-        const nuevoHeigth = Math.floor(imagen.height / 2)
+          const nuevoWidth = Math.floor(imagen.width / 2);
+          const nuevoHeigth = Math.floor(imagen.height / 2);
 
-        canvas.width = nuevoWidth
-        canvas.height = nuevoHeigth
+          canvas.width = nuevoWidth;
+          canvas.height = nuevoHeigth;
 
-        ctx?.drawImage(imagen, 0, 0, nuevoWidth, nuevoHeigth)
+          ctx?.drawImage(imagen, 0, 0, nuevoWidth, nuevoHeigth);
 
-        const imagenResized = canvas.toDataURL('image/jpeg')
-  
-        dispatch(setFotos({labelFoto: ladoDocumento, data: imagenResized}))
+          const imagenResized = canvas.toDataURL("image/jpeg");
+
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
+        };
       }
-    };
 
-    if (archivo) lector.readAsDataURL(archivo);
+      if (archivo) lector.readAsDataURL(archivo);
+    };
   };
 
   // const getResolutionFromDataURL = (dataURL: any): string => {
   //   const img = new Image();
-  
+
   //   img.onload = () => {
   //     const { width, height } = img;
   //     console.log(`Image resolution: ${width} x ${height}`)
   //   };
-  
+
   //   img.src = dataURL;
-  
+
   //   return `width: ${img.width}, height: ${img.height} `;
   // };
 
@@ -125,28 +130,19 @@ export const FormularioDocumento: React.FC<Props> = ({
   //     });
   // };
 
-
-  
-
   return (
     <div className="documento-container">
       <h2 className="documento-title">
         Subir foto del {placeholder} de su {tipoDocumento}
       </h2>
 
-      <label className="file-input">
-        <input
-          name={ladoDocumento}
-          type="file"
-          accept="image/jpeg"
-          onChange={cambioArchivo}
-          style={{ display: "none" }}
-        />
-        Subir foto del {placeholder} de su {tipoDocumento}
-      </label>
-
-      {mobile &&(
-          <label className="file-input">
+      {mobile ? (
+        <label
+          className="file-input"
+          style={{
+            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
           <input
             name={ladoDocumento}
             type="file"
@@ -159,8 +155,29 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          Tomar foto al {placeholder} de su documento
-        </label>)}
+          {preview.length >= 1
+            ? "Volver a tomar foto si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
+      ) : (
+        <label
+          className="file-input"
+          style={{
+            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
+          <input
+            name={ladoDocumento}
+            type="file"
+            accept="image/jpeg"
+            onChange={cambioArchivo}
+            style={{ display: "none" }}
+          />
+          {preview.length >= 1
+            ? "Volver a subir el documento si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
+      )}
 
       {preview.length >= 1 && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
