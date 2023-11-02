@@ -39,14 +39,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
           {mostrarCamara ? (
             <CapturadorSelfie
-              informacion={informacion}
-              setInformacion={setInformacion}
-              keyFoto={selfie}
+              labelFoto={selfie}
               conteo={conteo}
               setConteo={setConteo}
-              preview={preview}
-              setPreview={setPreview}
-              ladoDocumento={selfie}
               setMostrarPreviewCamara={setMostrarPreviewCamara}
             />
           ) : (
@@ -61,8 +56,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             </button>
           )}
 
-          {ladoPreview.length >= 1 && mostrarPreviewCamara && (
-            <Previsualizacion preview={ladoPreview} nombrePreview={selfie} />
+          {preview.length >= 1 && mostrarPreviewCamara && (
+            <Previsualizacion preview={preview} nombrePreview={selfie} />
           )}
         </>
     </>

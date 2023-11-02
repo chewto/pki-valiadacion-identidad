@@ -1,41 +1,30 @@
 import { useState, Dispatch, SetStateAction, useRef, useEffect } from "react";
-import {
-  InformacionIdentidad,
-  PreviewDocumento,
-} from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
-//import { useMobile } from "../../nucleo/hooks/useMobile";
+import { useDispatch } from "react-redux";
+import { setFotos, setVaciarFoto } from "../../nucleo/redux/slices/informacionSlice";
 
 interface Props {
-  informacion: InformacionIdentidad;
-  setInformacion: Dispatch<SetStateAction<InformacionIdentidad>>;
-  keyFoto: string;
+  labelFoto: string;
   conteo: number;
   setConteo: Dispatch<SetStateAction<number>>;
-  ladoDocumento: string;
-  preview: PreviewDocumento;
-  setPreview: Dispatch<SetStateAction<PreviewDocumento>>;
   setMostrarPreviewCamara: Dispatch<SetStateAction<boolean>>;
 }
 
 export const CapturadorSelfie: React.FC<Props> = ({
-  informacion,
-  setInformacion,
-  keyFoto,
+  labelFoto,
   conteo,
   setConteo,
-  ladoDocumento,
-  preview,
-  setPreview,
   setMostrarPreviewCamara,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
+  const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
 
-  const tomarFoto = (keyFotoParam: string) => {
+  const dispatch = useDispatch()
+
+  const tomarFoto = (labelFotoParam: string) => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -59,16 +48,12 @@ export const CapturadorSelfie: React.FC<Props> = ({
       // Get the image data from the canvas as a data URL
       const dataUrl = canvas.toDataURL("image/jpeg");
 
+      dispatch(setFotos({labelFoto: labelFotoParam, data: dataUrl}))
+
       // Do something with the captured selfie (e.g., save it, display it, etc.)
-      setMostrarPreview(true);
-      setPreview({
-        ...preview,
-        [ladoDocumento]: dataUrl,
-      });
-      setInformacion({
-        ...informacion,
-        [keyFotoParam]: dataUrl,
-      });
+      setCapturarOtravez(true);
+
+
       setConteo(conteo + 1);
       setMostrarPreviewCamara(true);
     }
@@ -101,43 +86,29 @@ export const CapturadorSelfie: React.FC<Props> = ({
   });
 
   const capturarOtra = () => {
-    setMostrarPreview(false);
-    setPreview({
-      ...preview,
-      [ladoDocumento]: "",
-    });
+    dispatch(setVaciarFoto())
+    setCapturarOtravez(false);
     setConteo(0);
   };
 
   return (
     <>
       <div className="selfie-container">
-        {!mostrarPreview && keyFoto === "foto_persona" && (
+        {!capturarOtraVez && labelFoto === "foto_persona" && (
           <>
             <div className="video">
-              {keyFoto === "foto_persona" && (
+              {labelFoto === "foto_persona" && (
                 <>
                     <span style={{fontSize: '16px', margin: '0 0 10px 0', textAlign: 'center'}}>Por favor, quítese la gafas o gorra para realizar la verificación.</span>
                   <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
-                  <Button color="success" onClick={() => tomarFoto(keyFoto)}>
+                  <Button color="success" onClick={() => tomarFoto(labelFoto)}>
                     Tomar selfie
                   </Button>
-                  {/* <Camera
-                    idealResolution={{
-                      width: mobile ? 500 : 600,
-                      height: mobile ? 600 : 350,
-                    }}
-                    imageType={IMAGE_TYPES.JPG}
-                    idealFacingMode={FACING_MODES.USER}
-                    onTakePhoto={(dataURL) => {
-                      tomarFoto(dataURL, keyFoto);
-                    }}
-                  /> */}
                 </>
               )}
-              {keyFoto === "foto_persona" && (
+              {labelFoto === "foto_persona" && (
                 <div className="mascara">
                   <div className="indicador-persona"></div>
                 </div>
@@ -146,7 +117,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
           </>
         )}
 
-        {mostrarPreview && (
+        {capturarOtraVez && (
           <>
             <div className="preview">
               <Button color="danger" onClick={capturarOtra}>

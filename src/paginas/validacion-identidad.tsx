@@ -1,10 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import {
-  InformacionIdentidad,
-  PreviewDocumento,
   Respuesta,
-  Dato,
 } from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import {
   ValidadorFormdata,
@@ -27,7 +24,7 @@ import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enume
 import {useDispatch, useSelector} from 'react-redux'
 import { RootState } from "../nucleo/redux/store";
 import { setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador } from "../nucleo/redux/slices/informacionSlice";
-// import { PruebaVitalidad } from "../componentes/validacion-identidad/prueba-vitalidad";
+import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -37,6 +34,8 @@ export const ValidacionIdentidad: React.FC = () => {
   const tipoParam = params.get("tipo");
 
   const informacion = useSelector((state:RootState) => state.informacion)
+  const informacionFirmador = useSelector((state:RootState) => state.firmador)
+  
   const dispatch = useDispatch()
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
@@ -49,13 +48,6 @@ export const ValidacionIdentidad: React.FC = () => {
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
 
   const formulario = new FormData();
-
-  const [informacionFirmador, setInformacionFirmador] = useState<Dato>({
-    nombre: "",
-    apellido: "",
-    correo: "",
-    documento: "",
-  });
 
   const hora = useHour()
   const fecha = useDate()
@@ -72,12 +64,6 @@ export const ValidacionIdentidad: React.FC = () => {
     idUsuario: 0,
     coincidenciaDocumentoRostro: false,
     estadoVerificacion: "",
-  });
-
-  const [previewDocumento, setPreviewDocumento] = useState<PreviewDocumento>({
-    anverso: "",
-    reverso: "",
-    foto_persona: "",
   });
 
   const [loadingPost, setLoadingPost] = useState<boolean>(false);
@@ -102,7 +88,9 @@ export const ValidacionIdentidad: React.FC = () => {
         url: urlFirmador,
       })
         .then((res) => {
-          setInformacionFirmador(res.data.dato);
+
+          dispatch(setFirmador(res.data.dato))
+          // setInformacionFirmador(res.data.dato);
         })
         .catch((err) => console.log(err));
     }
@@ -111,10 +99,6 @@ export const ValidacionIdentidad: React.FC = () => {
     obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    console.log(informacion)
-  }, [informacion])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);

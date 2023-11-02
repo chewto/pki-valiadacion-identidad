@@ -37,13 +37,16 @@ export const informacionSlice = createSlice({
       state.dispositivo = dispositivo
       state.navegador = navegador
     },
-    setFotos: (state, action: PayloadAction<{ladoDocumento: string, data: string}>) => {
-      const {ladoDocumento, data} = action.payload
-      state[ladoDocumento as keyof InformacionIdentidad] = data
+    setFotos: (state, action: PayloadAction<{labelFoto: string, data: string}>) => {
+      const {labelFoto, data} = action.payload
+      state[labelFoto as keyof InformacionIdentidad] = data
+    },
+    setVaciarFoto: (state) => {
+      state.foto_persona = ''
     }
   }
 })
 
-export const {setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador, setFotos} = informacionSlice.actions;
+export const {setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador, setFotos, setVaciarFoto} = informacionSlice.actions;
 
 export default informacionSlice.reducer

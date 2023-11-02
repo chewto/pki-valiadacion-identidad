@@ -76,7 +76,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
         const imagenResized = canvas.toDataURL('image/jpeg')
   
-        dispatch(setFotos({ladoDocumento: ladoDocumento, data: imagenResized}))
+        dispatch(setFotos({labelFoto: ladoDocumento, data: imagenResized}))
       }
     };
 
