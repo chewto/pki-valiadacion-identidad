@@ -54,10 +54,10 @@ export const FormularioDocumento: React.FC<Props> = ({
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
 
+    if (archivo) lector.readAsDataURL(archivo);
+
     lector.onload = () => {
       const dataURL = lector.result;
-
-      console.log("comprimir");
       const img = new Image();
       if (typeof dataURL === "string") {
         img.src = dataURL;
@@ -83,8 +83,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
         };
       }
-
-      if (archivo) lector.readAsDataURL(archivo);
     };
   };
 

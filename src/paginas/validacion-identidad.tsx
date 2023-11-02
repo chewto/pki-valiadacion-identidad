@@ -64,6 +64,10 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
+  useEffect(()=> {
+    console.log(informacion, informacionFirmador)
+  }, [informacion, informacionFirmador])
+
   useEffect(() => {
     document.title = "Validacion identidad";
 
