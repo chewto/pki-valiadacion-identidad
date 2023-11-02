@@ -1,6 +1,7 @@
 export interface InformacionIdentidad {
   anverso: string;
   reverso: string;
+  tipoDocumento: string;
   foto_persona: string;
   dispositivo: string;
   navegador: string;

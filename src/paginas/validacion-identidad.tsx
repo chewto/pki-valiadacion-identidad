@@ -57,8 +57,6 @@ export const ValidacionIdentidad: React.FC = () => {
   const navegador = useBrowser()
   dispatch(setDispostivoNavegador({dispositivo: dispositivo, navegador: navegador}))
 
-  const [tipoDocumento, setTipoDocumento] = useState<string>("");
-
   const [loadingPost, setLoadingPost] = useState<boolean>(false);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [errorPost, setErrorPost] = useState<boolean>(false);
@@ -149,8 +147,8 @@ export const ValidacionIdentidad: React.FC = () => {
       );
     }
 
-    if (tipoDocumento !== "") {
-      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, tipoDocumento);
+    if (informacion.tipoDocumento !== "") {
+      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, informacion.tipoDocumento);
     }
 
     ValidadorFormdata(
@@ -281,14 +279,13 @@ export const ValidacionIdentidad: React.FC = () => {
               onSubmit={enviar}
             >
               <SelectorTipoDocumento
-                tipoDocumento={tipoDocumento}
-                setTipoDocumento={setTipoDocumento}
+                tipoDocumento={informacion.tipoDocumento}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
               />
 
               <FormularioDocumento
-                tipoDocumento={tipoDocumento}
+                tipoDocumento={informacion.tipoDocumento}
                 preview={informacion.anverso}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
@@ -296,7 +293,7 @@ export const ValidacionIdentidad: React.FC = () => {
               />
 
               <FormularioDocumento
-                tipoDocumento={tipoDocumento}
+                tipoDocumento={informacion.tipoDocumento}
                 preview={informacion.reverso}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
