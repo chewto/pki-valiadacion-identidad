@@ -36,7 +36,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
 }) => {
-  const placeholder = ladoDocumento === 'anverso' ? 'frontal' : 'reverso'
+  const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
   // const [, setValidacion] = useState<number>(0);
@@ -51,9 +51,9 @@ export const FormularioDocumento: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(()=> {
-    console.log(informacion, preview)
-  },[informacion,preview])
+  useEffect(() => {
+    console.log(informacion, preview);
+  }, [informacion, preview]);
 
   useEffect(() => {
     if (conteo === 0) setContinuarBoton(false);
@@ -61,82 +61,54 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [conteo, setContinuarBoton, ladoPreview.length, tipoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    setConteo(1)
+    setConteo(1);
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
 
     lector.onload = () => {
+      const dataURL = lector.result;
 
-      const dataURL = lector.result
+      console.log("comprimir");
+      const img = new Image();
+      if (typeof dataURL === "string") {
+        img.src = dataURL;
 
-      if(archivo && archivo.size && 1.5 * 1024 * 1024){
-        
-        console.log('comprimir')
-        const img = new Image()
-        if(typeof dataURL === 'string'){
-          img.src = dataURL
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
 
-          img.onload = () => {
-            const canvas = document.createElement('canvas')
-            const ctx = canvas.getContext('2d')
+          const nuevoWidth = Math.floor(img.width / 2);
+          const nuevoHeight = Math.floor(img.height / 2);
 
-            const nuevoWidth = Math.floor(img.width / 2)
-            const nuevoHeight = Math.floor(img.height / 2)
+          canvas.width = nuevoWidth;
+          canvas.height = nuevoHeight;
 
-            
+          ctx?.drawImage(img, 0, 0, nuevoWidth, nuevoHeight);
 
-            canvas.width = nuevoWidth
-            canvas.height = nuevoHeight
+          const imagenResized = canvas.toDataURL("image/jpeg");
+          console.log(imagenResized);
 
-            ctx?.drawImage(img, 0,0, nuevoWidth, nuevoHeight)
+          setPreview({
+            ...preview,
+            [evento.target.name]: imagenResized,
+          });
 
-            const imagenResized = canvas.toDataURL("image/jpeg")
-            console.log(imagenResized)
+          setInformacion({
+            ...informacion,
+            [evento.target.name]: imagenResized,
+          });
 
-            setPreview({
-              ...preview,
-              [evento.target.name]: imagenResized
-            })
+          getResolutionFromDataURL(dataURL);
+          getResolutionFromDataURL(imagenResized);
 
-            setInformacion({
-              ...informacion,
-              [evento.target.name]: imagenResized
-            })
+          const mb = getImageSizeFromDataURL(imagenResized);
 
-            getResolutionFromDataURL(dataURL)
-            getResolutionFromDataURL(imagenResized)
+          console.log(mb);
 
-            const mb = getImageSizeFromDataURL(imagenResized)
-
-            console.log(mb)
-
-            //validarDocumento(dataURL)
-          }
-        }
-
-
-      } else {
-        console.log('sin necesidad de comprimir')
-
-      setPreview({
-        ...preview,
-        [evento.target.name]: dataURL,
-      });
-
-      setInformacion({
-        ...informacion,
-        [evento.target.name]: dataURL,
-      });
-
-      getResolutionFromDataURL(dataURL)
-
-      const mb = getImageSizeFromDataURL(dataURL)
-
-      console.log(mb)
-
-      //validarDocumento(lector.result)
-    }
+          //validarDocumento(dataURL)
+        };
+      }
     };
 
     if (archivo) lector.readAsDataURL(archivo);
@@ -144,14 +116,14 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const getResolutionFromDataURL = (dataURL: any): string => {
     const img = new Image();
-  
+
     img.onload = () => {
       const { width, height } = img;
-      console.log(`Image resolution: ${width} x ${height}`)
+      console.log(`Image resolution: ${width} x ${height}`);
     };
-  
+
     img.src = dataURL;
-  
+
     return `width: ${img.width}, height: ${img.height} `;
   };
 
@@ -184,28 +156,19 @@ export const FormularioDocumento: React.FC<Props> = ({
   //     });
   // };
 
-
-  
-
   return (
     <div className="documento-container">
       <h2 className="documento-title">
         Subir foto del {placeholder} de su {tipoDocumento}
       </h2>
 
-      <label className="file-input">
-        <input
-          name={ladoDocumento}
-          type="file"
-          accept="image/jpeg"
-          onChange={cambioArchivo}
-          style={{ display: "none" }}
-        />
-        Subir foto del {placeholder} de su {tipoDocumento}
-      </label>
-
-      {mobile &&(
-          <label className="file-input">
+      {mobile ? (
+        <label
+          className="file-input"
+          style={{
+            background: ladoPreview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
           <input
             name={ladoDocumento}
             type="file"
@@ -218,8 +181,29 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          Tomar foto al {placeholder} de su documento
-        </label>)}
+          {ladoPreview.length >= 1
+            ? "Volver a tomar foto si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
+      ) : (
+        <label
+          className="file-input"
+          style={{
+            background: ladoPreview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+          }}
+        >
+          <input
+            name={ladoDocumento}
+            type="file"
+            accept="image/jpeg"
+            onChange={cambioArchivo}
+            style={{ display: "none" }}
+          />
+          {ladoPreview.length >= 1
+            ? "Volver a subir el documento si no se ve correctamente"
+            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+        </label>
+      )}
 
       {ladoPreview.length >= 1 && (
         <Previsualizacion preview={ladoPreview} nombrePreview={ladoDocumento} />
