@@ -11,10 +11,6 @@ export interface InformacionIdentidad {
   fecha: string;
 }
 
-export interface Root {
-  dato: Dato
-}
-
 export interface Dato {
   id?: number
   firmaElectronicaId?: number
@@ -29,15 +25,3 @@ export interface Dato {
   fechaCreacion?: string
 }
 
-export interface Respuesta {
-  idValidacion?: number;
-  idUsuario?: number;
-  coincidenciaDocumentoRostro: boolean;
-  estadoVerificacion: string;
-}
-
-export interface PreviewDocumento{
-  anverso: string;
-  reverso: string;
-  foto_persona: string;
-}

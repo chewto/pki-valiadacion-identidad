@@ -1,12 +1,6 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import {
-  Respuesta,
-} from "../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
-import {
-  ValidadorFormdata,
-  formdataKeys,
-} from "../nucleo/validadores/validacion-identidad/validador-formdata";
+import {ValidadorFormdata,formdataKeys} from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useSearchParams } from "react-router-dom";
@@ -49,6 +43,12 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const formulario = new FormData();
 
+  const labelFoto = {
+    anverso:'anverso',
+    reverso:'reverso',
+    foto_persona: 'foto_persona'
+  }
+
   const hora = useHour()
   const fecha = useDate()
   dispatch(setHoraFecha({hora: hora, fecha: fecha}))
@@ -59,25 +59,12 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [tipoDocumento, setTipoDocumento] = useState<string>("");
 
-  const [respuesta, setRespuesta] = useState<Respuesta>({
-    idValidacion: 0,
-    idUsuario: 0,
-    coincidenciaDocumentoRostro: false,
-    estadoVerificacion: "",
-  });
-
   const [loadingPost, setLoadingPost] = useState<boolean>(false);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [errorPost, setErrorPost] = useState<boolean>(false);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
-
-  const labelFoto = {
-    anverso:'anverso',
-    reverso:'reverso',
-    foto_persona: 'foto_persona'
-  }
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -90,7 +77,6 @@ export const ValidacionIdentidad: React.FC = () => {
         .then((res) => {
 
           dispatch(setFirmador(res.data.dato))
-          // setInformacionFirmador(res.data.dato);
         })
         .catch((err) => console.log(err));
     }
@@ -229,8 +215,6 @@ export const ValidacionIdentidad: React.FC = () => {
         },
       })
         .then((res) => {
-          console.log(res);
-          setRespuesta(res.data);
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
 
@@ -283,7 +267,6 @@ export const ValidacionIdentidad: React.FC = () => {
                   </button>
                 )
               }
-              // onContinue={()=> console.log('presion')}
               submitBtn={
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
@@ -334,7 +317,6 @@ export const ValidacionIdentidad: React.FC = () => {
           {mostrarMensaje === true && (
             <MensajeVerificacion
               loadingPost={loadingPost}
-              coincidencia={respuesta.coincidenciaDocumentoRostro}
               mostrarMensaje={mostrarMensaje}
               setMostrarMensaje={setMostrar}
               error={errorPost}
