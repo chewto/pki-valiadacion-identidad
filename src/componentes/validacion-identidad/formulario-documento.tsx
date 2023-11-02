@@ -81,9 +81,6 @@ export const FormularioDocumento: React.FC<Props> = ({
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d')
 
-
-            const maxWidthHeight = 500;
-
             const nuevoWidth = Math.floor(img.width / 2)
             const nuevoHeight = Math.floor(img.height / 2)
 

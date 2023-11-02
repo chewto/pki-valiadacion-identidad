@@ -297,18 +297,19 @@ export const ValidacionIdentidad: React.FC = () => {
               fillStroke="#0d6efd"
               activeColor="#0d6efd"
               activeProgressBorder="2px solid #0d6efd"
+              contentBoxClassName="contenido"
               backBtn={
-                <button className="stepper-btn" onClick={volverPasos}>
+                <button className="stepper-btn" onClick={volverPasos} style={{position: 'absolute', left: '10%', top: '10%'}}>
                   Volver
                 </button>
               }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos}>
+                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 ) : (
-                  <button className="stepper-btn" disabled>
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
                     Siguiente
                   </button>
                 )
@@ -318,10 +319,10 @@ export const ValidacionIdentidad: React.FC = () => {
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
                 informacion.reverso !== "" ? (
-                  <button className="stepper-btn">Verificar</button>
+                  <button className="stepper-btn" style={{position: 'absolute', left: '71%', top: '10%'}}>Finalizar</button>
                 ) : (
-                  <button className="stepper-btn" disabled>
-                    Verificar
+                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
+                    Finalizar
                   </button>
                 )
               }

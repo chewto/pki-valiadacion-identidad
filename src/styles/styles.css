@@ -66,6 +66,10 @@ header > h2{
 .stepper-btn:disabled{
   background: #629cf3;
 }
+
+.contenido{
+  margin-top: 80px;
+}
 @media screen and (max-width: 768px){
 
   .step-number-container{

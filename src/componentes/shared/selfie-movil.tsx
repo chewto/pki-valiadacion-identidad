@@ -119,6 +119,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {keyFoto === "foto_persona" && (
                 <>
+                  <span style={{fontSize: '13px', textAlign: "center"}}>Por favor, quítese la gafas o gorra para realizar la verificación.</span>
                   <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
@@ -138,11 +139,11 @@ export const CapturadorSelfie: React.FC<Props> = ({
                   /> */}
                 </>
               )}
-              {/* {keyFoto === "foto_persona" && (
+              {keyFoto === "foto_persona" && (
                 <div className="mascara">
                   <div className="indicador-persona"></div>
                 </div>
-              )} */}
+              )}
             </div>
           </>
         )}
