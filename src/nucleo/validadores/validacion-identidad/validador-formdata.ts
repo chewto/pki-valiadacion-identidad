@@ -1,7 +1,7 @@
 export const ValidadorFormdata = (
   form: FormData,
   key: string,
-  value: File | string
+  value: File | string 
 ) => {
   if (form.has(key)) {
     form.set(key, value);
@@ -29,5 +29,8 @@ export const formdataKeys = {
   latitud: "latitud",
   longitud: "longitud",
   hora: "hora",
-  fecha: "fecha"
+  fecha: "fecha",
+  ocrNombre: "ocr_nombre",
+  ocrApellido: "ocr_apellido",
+  ocrDocumento: "ocr_documento"
 };

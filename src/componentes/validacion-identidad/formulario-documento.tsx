@@ -4,11 +4,12 @@ import "../../styles/styles.css";
 import "../../styles/formulario-style.component.css";
 import { Previsualizacion } from "../shared/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
-
-//import axios from "axios";
-//import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import {RootState} from '../../nucleo/redux/store'
+import axios from "axios";
+import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
 //import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
@@ -26,6 +27,10 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
 }) => {
+
+  const informacionFirmador = useSelector((state:RootState) => state.firmador)
+  const dispatch = useDispatch();
+
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
@@ -33,8 +38,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   // const [, setValidacionMensaje] = useState<boolean>(false);
   // const [, setValidacionError] = useState<boolean>(false);
   const mobile: boolean = useMobile();
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!mostrarPreview) {
@@ -81,6 +84,10 @@ export const FormularioDocumento: React.FC<Props> = ({
           const imagenResized = canvas.toDataURL("image/jpeg");
 
           dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
+
+          if(ladoDocumento === 'anverso'){
+            validarDocumento(imagenResized, informacionFirmador.nombre, informacionFirmador.apellido, informacionFirmador.documento)
+          }
         };
       }
     };
@@ -99,34 +106,28 @@ export const FormularioDocumento: React.FC<Props> = ({
   //   return `width: ${img.width}, height: ${img.height} `;
   // };
 
-  // const validarDocumento = (dataImagen:string | ArrayBuffer | null) => {
+  const validarDocumento = (dataImagen:string | ArrayBuffer | null, nombre:string, apellido:string, documento:string) => {
 
-  //   const data = {
-  //     imagen: dataImagen,
-  //     tipoDocumento: tipoDocumento,
-  //     ladoDocumento: ladoDocumento
-  //   };
+    const data = {
+      imagen: dataImagen,
+      nombre: nombre,
+      apellido: apellido,
+      documento: documento
+    };
 
-  //   axios({
-  //     method: "post",
-  //     url: URLS.validarDocumento,
-  //     data: data,
-  //   })
-  //     .then((res) => {
-  //       setValidacion(res.data.validacion);
-  //       console.log(res);
-  //       // if (res.data.validacion >= 55) {
-  //       //   setConteo(2);
-  //       // }
-  //     })
-  //     .catch((error) => {
-  //       console.log(error)
-  //       setValidacionError(true)
-  //     })
-  //     .finally(() => {
-  //       setValidacionMensaje(true);
-  //     });
-  // };
+    axios({
+      method: "post",
+      url: URLS.validarDocumento,
+      data: data,
+    })
+      .then((res) => {
+        dispatch(setValidacionOCR(res.data))
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  };
 
   return (
     <div className="documento-container">

@@ -99,7 +99,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {labelFoto === "foto_persona" && (
                 <>
-                    <span style={{fontSize: '16px', margin: '0 0 10px 0', textAlign: 'center'}}>Por favor, quítese la gafas o gorra para realizar la verificación.</span>
                   <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 

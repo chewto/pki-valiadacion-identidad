@@ -26,3 +26,10 @@ export interface Dato {
   fechaCreacion?: string
 }
 
+export interface ValidacionOCR{
+  ocrNombre: string;
+  ocrApellido: string;
+  ocrDocumento: string;
+}
+
+

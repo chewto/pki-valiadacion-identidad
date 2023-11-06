@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import {ValidadorFormdata,formdataKeys} from "../nucleo/validadores/validacion-identidad/validador-formdata";
+import {
+  ValidadorFormdata,
+  formdataKeys,
+} from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
 import { useSearchParams } from "react-router-dom";
@@ -15,9 +18,14 @@ import { useDevice } from "../nucleo/hooks/useDevice";
 import { useHour } from "../nucleo/hooks/useHour";
 import { useDate } from "../nucleo/hooks/useDate";
 import { PasosEnumerados } from "../componentes/validacion-identidad/pasos-enumerados";
-import {useDispatch, useSelector} from 'react-redux'
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../nucleo/redux/store";
-import { setIp, setCoordenadas, setHoraFecha, setDispostivoNavegador } from "../nucleo/redux/slices/informacionSlice";
+import {
+  setIp,
+  setCoordenadas,
+  setHoraFecha,
+  setDispostivoNavegador,
+} from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
 
 export const ValidacionIdentidad: React.FC = () => {
@@ -27,10 +35,11 @@ export const ValidacionIdentidad: React.FC = () => {
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
 
-  const informacion = useSelector((state:RootState) => state.informacion)
-  const informacionFirmador = useSelector((state:RootState) => state.firmador)
-  
-  const dispatch = useDispatch()
+  const informacion = useSelector((state: RootState) => state.informacion);
+  const informacionFirmador = useSelector((state: RootState) => state.firmador);
+  const validacionOCR = useSelector((state: RootState) => state.ocr);
+
+  const dispatch = useDispatch();
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
@@ -40,22 +49,25 @@ export const ValidacionIdentidad: React.FC = () => {
       : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
+  const urlUsuario = `http://127.0.0.1:4000/obtener-usuario?id=${idParam}`;
 
   const formulario = new FormData();
 
   const labelFoto = {
-    anverso:'anverso',
-    reverso:'reverso',
-    foto_persona: 'foto_persona'
-  }
+    anverso: "anverso",
+    reverso: "reverso",
+    foto_persona: "foto_persona",
+  };
 
-  const hora = useHour()
-  const fecha = useDate()
-  dispatch(setHoraFecha({hora: hora, fecha: fecha}))
+  const hora = useHour();
+  const fecha = useDate();
+  dispatch(setHoraFecha({ hora: hora, fecha: fecha }));
 
-  const dispositivo = useDevice()
-  const navegador = useBrowser()
-  dispatch(setDispostivoNavegador({dispositivo: dispositivo, navegador: navegador}))
+  const dispositivo = useDevice();
+  const navegador = useBrowser();
+  dispatch(
+    setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
+  );
 
   const [loadingPost, setLoadingPost] = useState<boolean>(false);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -64,24 +76,21 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
-  useEffect(()=> {
-    console.log(informacion, informacionFirmador)
-  }, [informacion, informacionFirmador])
+  useEffect(() => {
+    console.log(informacion, informacionFirmador, validacionOCR);
+  }, [informacion, informacionFirmador, validacionOCR]);
 
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    if (tipoParam === "3") {
-      axios({
-        method: "get",
-        url: urlFirmador,
+    axios({
+      method: "get",
+      url: tipoParam === "3" ? urlFirmador : urlUsuario,
+    })
+      .then((res) => {
+        dispatch(setFirmador(res.data.dato));
       })
-        .then((res) => {
-
-          dispatch(setFirmador(res.data.dato))
-        })
-        .catch((err) => console.log(err));
-    }
+      .catch((err) => console.log(err));
 
     geolocation();
     obtenerIp();
@@ -98,30 +107,34 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const obtenerIp = () => {
     axios({
-      method:'get',
-      url: URLS.obtenerIp
+      method: "get",
+      url: URLS.obtenerIp,
     })
-    .then(res => {
-      dispatch(setIp(res.data))
-    })
-    .catch(error => {
-      dispatch(setIp({ip: 'ip inaccesible'}))
-      console.log(error)
-    })
-  }
+      .then((res) => {
+        dispatch(setIp(res.data));
+      })
+      .catch((error) => {
+        dispatch(setIp({ ip: "ip inaccesible" }));
+        console.log(error);
+      });
+  };
 
   const geolocation = () => {
     const mostrarPosicion = (posicion: GeolocationPosition) => {
       const latitud: number = posicion.coords.latitude;
       const longitud: number = posicion.coords.longitude;
 
-      dispatch(setCoordenadas({latitud: `${latitud}`, longitud: `${longitud}`}))
+      dispatch(
+        setCoordenadas({ latitud: `${latitud}`, longitud: `${longitud}` })
+      );
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(mostrarPosicion);
     } else {
-      dispatch(setCoordenadas({latitud: 'no disponible', longitud: 'no disponible'}))
+      dispatch(
+        setCoordenadas({ latitud: "no disponible", longitud: "no disponible" })
+      );
     }
   };
 
@@ -152,7 +165,11 @@ export const ValidacionIdentidad: React.FC = () => {
     }
 
     if (informacion.tipoDocumento !== "") {
-      ValidadorFormdata(formulario, formdataKeys.tipoDocumento, informacion.tipoDocumento);
+      ValidadorFormdata(
+        formulario,
+        formdataKeys.tipoDocumento,
+        informacion.tipoDocumento
+      );
     }
 
     ValidadorFormdata(
@@ -171,6 +188,21 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
     ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
     ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.ocrNombre,
+      validacionOCR.ocrNombre
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.ocrApellido,
+      validacionOCR.ocrApellido
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.ocrDocumento,
+      validacionOCR.ocrDocumento
+    );
 
     if (tipoParam === "3") {
       ValidadorFormdata(
@@ -200,8 +232,7 @@ export const ValidacionIdentidad: React.FC = () => {
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-
-      console.log(formulario)
+      console.log(formulario);
       setMostrar(true);
       setLoadingPost(true);
 
@@ -254,17 +285,29 @@ export const ValidacionIdentidad: React.FC = () => {
               activeProgressBorder="2px solid #0d6efd"
               contentBoxClassName="contenido"
               backBtn={
-                <button className="stepper-btn" onClick={volverPasos} style={{position: 'absolute', left: '10%', top: '10%'}}>
+                <button
+                  className="stepper-btn"
+                  onClick={volverPasos}
+                  style={{ position: "absolute", left: "10%", top: "10%" }}
+                >
                   Volver
                 </button>
               }
               continueBtn={
                 continuarBoton ? (
-                  <button className="stepper-btn" onClick={avanzarPasos} style={{position: 'absolute', left: '71%', top: '10%'}}>
+                  <button
+                    className="stepper-btn"
+                    onClick={avanzarPasos}
+                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                  >
                     Siguiente
                   </button>
                 ) : (
-                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
+                  <button
+                    className="stepper-btn"
+                    disabled
+                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                  >
                     Siguiente
                   </button>
                 )
@@ -273,9 +316,18 @@ export const ValidacionIdentidad: React.FC = () => {
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
                 informacion.reverso !== "" ? (
-                  <button className="stepper-btn" style={{position: 'absolute', left: '71%', top: '10%'}}>Finalizar</button>
+                  <button
+                    className="stepper-btn"
+                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                  >
+                    Finalizar
+                  </button>
                 ) : (
-                  <button className="stepper-btn" disabled style={{position: 'absolute', left: '71%', top: '10%'}}>
+                  <button
+                    className="stepper-btn"
+                    disabled
+                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                  >
                     Finalizar
                   </button>
                 )
@@ -304,16 +356,13 @@ export const ValidacionIdentidad: React.FC = () => {
                 ladoDocumento={labelFoto.reverso}
               />
 
-              <AccesoCamara
-                setContinuarBoton={setContinuarBoton}
-              />
+              <AccesoCamara setContinuarBoton={setContinuarBoton} />
 
               <FormularioFotoPersona
                 preview={informacion.foto_persona}
                 selfie={labelFoto.foto_persona}
               />
             </Stepper>
-            
           </div>
           {mostrarMensaje === true && (
             <MensajeVerificacion
