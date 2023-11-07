@@ -27,6 +27,8 @@ import {
   setDispostivoNavegador,
 } from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
+import { useMobile } from "../nucleo/hooks/useMobile";
+import { CodigoQR } from "../componentes/shared/codigo-qr";
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -59,6 +61,8 @@ export const ValidacionIdentidad: React.FC = () => {
     foto_persona: "foto_persona",
   };
 
+  const esMobile = useMobile()
+
   const hora = useHour();
   const fecha = useDate();
   dispatch(setHoraFecha({ hora: hora, fecha: fecha }));
@@ -77,10 +81,11 @@ export const ValidacionIdentidad: React.FC = () => {
   const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
-    console.log(informacion, informacionFirmador, validacionOCR);
+    console.log(informacion, informacionFirmador, validacionOCR, esMobile);
   }, [informacion, informacionFirmador, validacionOCR]);
 
   useEffect(() => {
+
     document.title = "Validacion identidad";
 
     axios({
@@ -94,6 +99,34 @@ export const ValidacionIdentidad: React.FC = () => {
 
     geolocation();
     obtenerIp();
+    
+    const socket = new WebSocket("ws://localhost:8080");
+
+    socket.addEventListener("open", () => {
+      const enviarMensaje = () => {
+        socket.send('proceso iniciado')
+      }
+
+      enviarMensaje()
+    });
+
+    socket.addEventListener("error", (error) => {
+      console.log("error: ", error);
+    });
+
+    socket.addEventListener("close", () => {
+      console.log("connexion lost");
+    });
+
+    socket.addEventListener('message', (event) => {
+      const mensaje = event.data
+
+      mensaje.text().then((text:any) => console.log(text))
+    })
+
+    return () => {
+      socket.close();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -239,6 +272,15 @@ export const ValidacionIdentidad: React.FC = () => {
       let idValidacion = 0;
       let idUsuario = 0;
 
+      const socket =  new WebSocket('ws://localhost:8080')
+
+      socket.addEventListener('open', ()=>{
+        const enviarMensaje = () => {
+          socket.send('proceso finalizado')
+        }
+        enviarMensaje()
+      })
+
       axios({
         method: "post",
         url: url,
@@ -374,6 +416,9 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
+        <>
+          {esMobile ? ( <>hola</>) : (<CodigoQR/>)}
+        </>
       </main>
     </>
   );
