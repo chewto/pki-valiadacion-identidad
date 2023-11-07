@@ -10,8 +10,6 @@ export const ValidadorFormdata = (
   if (!form.has(key)) {
     form.append(key, value);
   }
-
-  console.log(form.get(key));
 };
 
 export const formdataKeys = {

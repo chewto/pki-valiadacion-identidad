@@ -31,6 +31,9 @@ import { useMobile } from "../nucleo/hooks/useMobile";
 import { CodigoQR } from "../componentes/shared/codigo-qr";
 
 export const ValidacionIdentidad: React.FC = () => {
+  
+  const socket = new WebSocket("ws://localhost:8080");
+
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
@@ -61,7 +64,7 @@ export const ValidacionIdentidad: React.FC = () => {
     foto_persona: "foto_persona",
   };
 
-  const esMobile = useMobile()
+  const esMobile = useMobile();
 
   const hora = useHour();
   const fecha = useDate();
@@ -81,11 +84,6 @@ export const ValidacionIdentidad: React.FC = () => {
   const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
-    console.log(informacion, informacionFirmador, validacionOCR, esMobile);
-  }, [informacion, informacionFirmador, validacionOCR]);
-
-  useEffect(() => {
-
     document.title = "Validacion identidad";
 
     axios({
@@ -99,15 +97,16 @@ export const ValidacionIdentidad: React.FC = () => {
 
     geolocation();
     obtenerIp();
-    
-    const socket = new WebSocket("ws://localhost:8080");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  useEffect(() => {
     socket.addEventListener("open", () => {
       const enviarMensaje = () => {
-        socket.send('proceso iniciado')
-      }
+        socket.send(pasos === 4 ? `id: ${idParam} terminado` :`id: ${idParam} iniciado`);
+      };
 
-      enviarMensaje()
+      enviarMensaje();
     });
 
     socket.addEventListener("error", (error) => {
@@ -118,17 +117,25 @@ export const ValidacionIdentidad: React.FC = () => {
       console.log("connexion lost");
     });
 
-    socket.addEventListener('message', (event) => {
-      const mensaje = event.data
+    socket.addEventListener("message", (event) => {
+      const mensaje = event.data;
 
-      mensaje.text().then((text:any) => console.log(text))
-    })
+      mensaje.text().then((ms: string) => {
+        const arrMensaje = ms.split(' ')
+        const id = arrMensaje.find((idFind:string) => idFind === idParam)
+        const estado = arrMensaje[2]
+        console.log(id, estado)
+
+        if(id === idParam && estado === 'terminado'){
+          window.location.href = 'google.com'
+        }
+      });
+    });
 
     return () => {
       socket.close();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pasos])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -272,43 +279,34 @@ export const ValidacionIdentidad: React.FC = () => {
       let idValidacion = 0;
       let idUsuario = 0;
 
-      const socket =  new WebSocket('ws://localhost:8080')
+    //   axios({
+    //     method: "post",
+    //     url: url,
+    //     data: formulario,
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //     .then((res) => {
+    //       idValidacion = res.data.idValidacion;
+    //       idUsuario = res.data.idUsuario;
 
-      socket.addEventListener('open', ()=>{
-        const enviarMensaje = () => {
-          socket.send('proceso finalizado')
-        }
-        enviarMensaje()
-      })
+    //       console.log(idValidacion, idUsuario);
+    //     })
+    //     .catch((err) => {
+    //       console.error(err);
+    //       setLoadingPost(false);
+    //       setErrorPost(true);
+    //     })
+    //     .finally(() => {
+    //       if (tipoParam === "1") {
+    //         window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+    //       }
 
-      axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-
-          console.log(idValidacion, idUsuario);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoadingPost(false);
-          setErrorPost(true);
-        })
-        .finally(() => {
-          if (tipoParam === "1") {
-            window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
-          }
-
-          if (tipoParam === "3") {
-            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-          }
-        });
+    //       if (tipoParam === "3") {
+    //         window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+    //       }
+    //     });
     }
   };
 
@@ -416,9 +414,7 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
-        <>
-          {esMobile ? ( <>hola</>) : (<CodigoQR/>)}
-        </>
+        <>{esMobile ? <>hola</> : <CodigoQR />}</>
       </main>
     </>
   );
