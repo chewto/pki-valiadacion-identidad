@@ -49,7 +49,7 @@ export const ValidacionIdentidad: React.FC = () => {
       : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
-  const urlUsuario = `http://127.0.0.1:4000/obtener-usuario?id=${idParam}`;
+  const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
   const formulario = new FormData();
 
@@ -140,37 +140,30 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const enviar = (step: number) => {
     console.log(step);
-    if (informacion.anverso !== "") {
+
       ValidadorFormdata(
         formulario,
         formdataKeys.anverso_documento,
         informacion.anverso
       );
-    }
 
-    if (informacion.reverso !== "") {
       ValidadorFormdata(
         formulario,
         formdataKeys.reverso_documento,
         informacion.reverso
       );
-    }
 
-    if (informacion.foto_persona !== "") {
       ValidadorFormdata(
         formulario,
         formdataKeys.foto_persona,
         informacion.foto_persona
       );
-    }
 
-    if (informacion.tipoDocumento !== "") {
       ValidadorFormdata(
         formulario,
         formdataKeys.tipoDocumento,
         informacion.tipoDocumento
       );
-    }
 
     ValidadorFormdata(
       formulario,

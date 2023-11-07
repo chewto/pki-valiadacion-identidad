@@ -20,6 +20,7 @@ export const URLS = {
   validacionVida: `${urlBase}/validacion-vida`,
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
+  obtenerData: `${urlBase}/obtener-usuario`,
   obtenerFirmador: firmadorUrlBase,
   resultados: 'https://efirma.pkiservices.co/efirma.php/'
 }
