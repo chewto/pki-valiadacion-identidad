@@ -66,7 +66,6 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
               type="radio"
               name="tipo_documento"
               value={opcion.valor}
-              key={opcion.id}
               onChange={onChange}
               className="selector-radio"
               checked
@@ -76,7 +75,6 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
               type="radio"
               name="tipo_documento"
               value={opcion.valor}
-              key={opcion.id}
               onChange={onChange}
               className="selector-radio"
             />

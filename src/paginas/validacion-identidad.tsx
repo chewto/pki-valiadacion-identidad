@@ -31,8 +31,6 @@ import { useMobile } from "../nucleo/hooks/useMobile";
 import { CodigoQR } from "../componentes/shared/codigo-qr";
 
 export const ValidacionIdentidad: React.FC = () => {
-  
-  const socket = new WebSocket("ws://localhost:8080");
 
   const [params] = useSearchParams();
 
@@ -54,7 +52,7 @@ export const ValidacionIdentidad: React.FC = () => {
       : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
-  const urlUsuario = `http://127.0.0.1:4000/obtener-usuario?id=${idParam}`;
+  const urlUsuario = `${URLS.obtenerUsuario}?id=${idParam}`;
 
   const formulario = new FormData();
 
@@ -86,6 +84,9 @@ export const ValidacionIdentidad: React.FC = () => {
   useEffect(() => {
     document.title = "Validacion identidad";
 
+    axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
+    .then(res => console.log(res.data))
+
     axios({
       method: "get",
       url: tipoParam === "3" ? urlFirmador : urlUsuario,
@@ -101,41 +102,17 @@ export const ValidacionIdentidad: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    socket.addEventListener("open", () => {
-      const enviarMensaje = () => {
-        socket.send(pasos === 4 ? `id: ${idParam} terminado` :`id: ${idParam} iniciado`);
-      };
 
-      enviarMensaje();
-    });
-
-    socket.addEventListener("error", (error) => {
-      console.log("error: ", error);
-    });
-
-    socket.addEventListener("close", () => {
-      console.log("connexion lost");
-    });
-
-    socket.addEventListener("message", (event) => {
-      const mensaje = event.data;
-
-      mensaje.text().then((ms: string) => {
-        const arrMensaje = ms.split(' ')
-        const id = arrMensaje.find((idFind:string) => idFind === idParam)
-        const estado = arrMensaje[2]
-        console.log(id, estado)
-
-        if(id === idParam && estado === 'terminado'){
-          window.location.href = 'google.com'
+    setInterval(() => {
+      axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
+      .then(res => {
+        console.log(res.data.proceso.estado)
+        if (res.data.proceso.estado === 'finalizado') {
+          window.location.href = URLS.resultados
         }
-      });
-    });
-
-    return () => {
-      socket.close();
-    };
-  }, [pasos])
+      })
+    }, 4000)
+  }, [])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -279,34 +256,34 @@ export const ValidacionIdentidad: React.FC = () => {
       let idValidacion = 0;
       let idUsuario = 0;
 
-    //   axios({
-    //     method: "post",
-    //     url: url,
-    //     data: formulario,
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   })
-    //     .then((res) => {
-    //       idValidacion = res.data.idValidacion;
-    //       idUsuario = res.data.idUsuario;
+      axios({
+        method: "post",
+        url: url,
+        data: formulario,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((res) => {
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
 
-    //       console.log(idValidacion, idUsuario);
-    //     })
-    //     .catch((err) => {
-    //       console.error(err);
-    //       setLoadingPost(false);
-    //       setErrorPost(true);
-    //     })
-    //     .finally(() => {
-    //       if (tipoParam === "1") {
-    //         window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
-    //       }
+          console.log(idValidacion, idUsuario);
+        })
+        .catch((err) => {
+          console.error(err);
+          setLoadingPost(false);
+          setErrorPost(true);
+        })
+        .finally(() => {
+          if (tipoParam === "1") {
+            window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+          }
 
-    //       if (tipoParam === "3") {
-    //         window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-    //       }
-    //     });
+          if (tipoParam === "3") {
+            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+          }
+        });
     }
   };
 
@@ -414,7 +391,7 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
-        <>{esMobile ? <>hola</> : <CodigoQR />}</>
+        <>{esMobile ? <></> : <CodigoQR />}</>
       </main>
     </>
   );

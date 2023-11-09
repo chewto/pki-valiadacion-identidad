@@ -1,14 +1,23 @@
-import { useEffect } from "react";
+import {useEffect, useState} from 'react'
 import QRCode from "react-qr-code";
+import '../../styles/qr.component.css'
 
 export const CodigoQR: React.FC = () => {
-  useEffect(() => {
 
-  }, []);
+  const [direccion, setDireccion] = useState<string>('')
+
+  useEffect(()=> {
+    setDireccion(window.location.href)
+  },[])
+
+  useEffect(()=> {
+    console.log(direccion)
+  }, [direccion])
 
   return (
-    <>
-      <QRCode value="hola" />
-    </>
+    <div className="qr-container">
+      <p>Si desea continuar en su dispositivo movil, escanee el siguiente <a href="#codigo-qr">codigo QR</a></p>
+      <QRCode value={direccion} className="qr" id="codigo-qr"/>
+    </div>
   );
 };
