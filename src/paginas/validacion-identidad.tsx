@@ -27,8 +27,11 @@ import {
   setDispostivoNavegador,
 } from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
+import { useMobile } from "../nucleo/hooks/useMobile";
+import { CodigoQR } from "../componentes/shared/codigo-qr";
 
 export const ValidacionIdentidad: React.FC = () => {
+
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
@@ -49,7 +52,7 @@ export const ValidacionIdentidad: React.FC = () => {
       : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
-  const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
+  const urlUsuario = `${URLS.obtenerUsuario}?id=${idParam}`;
 
   const formulario = new FormData();
 
@@ -58,6 +61,8 @@ export const ValidacionIdentidad: React.FC = () => {
     reverso: "reverso",
     foto_persona: "foto_persona",
   };
+
+  const esMobile = useMobile();
 
   const hora = useHour();
   const fecha = useDate();
@@ -77,11 +82,10 @@ export const ValidacionIdentidad: React.FC = () => {
   const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
-    console.log(informacion, informacionFirmador, validacionOCR);
-  }, [informacion, informacionFirmador, validacionOCR]);
-
-  useEffect(() => {
     document.title = "Validacion identidad";
+
+    axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
+    .then(res => console.log(res.data))
 
     axios({
       method: "get",
@@ -96,6 +100,19 @@ export const ValidacionIdentidad: React.FC = () => {
     obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+
+    setInterval(() => {
+      axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
+      .then(res => {
+        console.log(res.data.proceso.estado)
+        if (res.data.proceso.estado === 'finalizado') {
+          window.location.href = URLS.resultados
+        }
+      })
+    }, 4000)
+  }, [])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -367,6 +384,7 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
+        <>{esMobile ? <></> : <CodigoQR />}</>
       </main>
     </>
   );

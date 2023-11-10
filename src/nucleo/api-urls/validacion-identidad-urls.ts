@@ -22,5 +22,8 @@ export const URLS = {
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
   obtenerFirmador: firmadorUrlBase,
+  obtenerUsuario: `${urlBase}/obtener-usuario`,
+  iniciarProceso: `${urlBase}/iniciar`,
+  comprobarProceso: `${urlBase}/comprobar`,
   resultados: 'https://efirma.pkiservices.co/efirma.php/'
 }
