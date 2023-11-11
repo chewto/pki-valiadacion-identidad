@@ -30,7 +30,10 @@ export const formdataKeys = {
   longitud: "longitud",
   hora: "hora",
   fecha: "fecha",
-  ocrNombre: "ocr_nombre",
-  ocrApellido: "ocr_apellido",
-  ocrDocumento: "ocr_documento"
+  porcentajeNombreOCR: "porcentaje_nombre_ocr",
+  porcentajeApellidoOCR: "porcentaje_apellido_ocr",
+  porcentajeDocumentoOCR: "porcentaje_documento_ocr",
+  nombreOCR: "nombre_ocr",
+  apellidoOCR: "apellido_ocr",
+  documentoOCR: "documento_ocr"
 };

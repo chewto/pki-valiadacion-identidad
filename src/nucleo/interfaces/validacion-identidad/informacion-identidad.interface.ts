@@ -27,9 +27,20 @@ export interface Dato {
 }
 
 export interface ValidacionOCR{
-  ocrNombre: string;
-  ocrApellido: string;
-  ocrDocumento: string;
+  ocr: OCR;
+  porcentajes: Porcentajes;
+}
+
+interface OCR{
+  nombreOCR: string;
+  apellidoOCR: string;
+  documentoOCR: string;
+}
+
+interface Porcentajes{
+  porcentajeNombreOCR: string;
+  porcentajeApellidoOCR: string;
+  porcentajeDocumentoOCR: string;
 }
 
 

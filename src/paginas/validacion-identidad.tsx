@@ -183,19 +183,37 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrNombre,
-      validacionOCR.ocrNombre
+      formdataKeys.porcentajeNombreOCR,
+      validacionOCR.porcentajes.porcentajeNombreOCR
     );
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrApellido,
-      validacionOCR.ocrApellido
+      formdataKeys.porcentajeApellidoOCR,
+      validacionOCR.porcentajes.porcentajeApellidoOCR
     );
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrDocumento,
-      validacionOCR.ocrDocumento
+      formdataKeys.porcentajeDocumentoOCR,
+      validacionOCR.porcentajes.porcentajeDocumentoOCR
     );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.nombreOCR,
+      validacionOCR.ocr.nombreOCR
+    )
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.apellidoOCR,
+      validacionOCR.ocr.apellidoOCR
+    )
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.documentoOCR,
+      validacionOCR.ocr.documentoOCR
+    )
 
     if (tipoParam === "3") {
       ValidadorFormdata(
