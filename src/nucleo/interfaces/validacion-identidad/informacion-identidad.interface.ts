@@ -29,6 +29,7 @@ export interface Dato {
 export interface ValidacionOCR{
   ocr: OCR;
   porcentajes: Porcentajes;
+  rostro: boolean;
 }
 
 interface OCR{

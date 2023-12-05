@@ -69,16 +69,16 @@ export const ValidacionIdentidad: React.FC = () => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
-  const [loadingPost, setLoadingPost] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
-  const [errorPost, setErrorPost] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
-  useEffect(() => {
-    console.log(informacion, informacionFirmador, validacionOCR);
-  }, [informacion, informacionFirmador, validacionOCR]);
+  // useEffect(() => {
+  //   console.log(informacion, informacionFirmador, validacionOCR);
+  // }, [informacion, informacionFirmador, validacionOCR]);
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -90,7 +90,8 @@ export const ValidacionIdentidad: React.FC = () => {
       .then((res) => {
         dispatch(setFirmador(res.data.dato));
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false))
 
     geolocation();
     obtenerIp();
@@ -245,7 +246,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ) {
       console.log(formulario);
       setMostrar(true);
-      setLoadingPost(true);
+      setLoading(true);
 
       let idValidacion = 0;
       let idUsuario = 0;
@@ -266,8 +267,8 @@ export const ValidacionIdentidad: React.FC = () => {
         })
         .catch((err) => {
           console.error(err);
-          setLoadingPost(false);
-          setErrorPost(true);
+          setLoading(false);
+          setError(true);
         })
         .finally(() => {
           if (tipoParam === "1") {
@@ -280,6 +281,10 @@ export const ValidacionIdentidad: React.FC = () => {
         });
     }
   };
+
+  useEffect(()=> {
+    console.log(continuarBoton)
+  }, [continuarBoton])
 
   return (
     <>
@@ -375,15 +380,20 @@ export const ValidacionIdentidad: React.FC = () => {
               />
             </Stepper>
           </div>
-          {mostrarMensaje === true && (
+          {mostrarMensaje && loading && (
             <MensajeVerificacion
-              loadingPost={loadingPost}
-              mostrarMensaje={mostrarMensaje}
-              setMostrarMensaje={setMostrar}
-              error={errorPost}
-              setError={setErrorPost}
+              loading={loading}
+              error={error}
+              mensaje="Verificando Información"
             />
           )}
+            {loading &&(
+              <MensajeVerificacion
+              loading={loading}
+              error={error}
+              mensaje="Cargando Información"
+            />
+            )}
         </div>
       </main>
     </>

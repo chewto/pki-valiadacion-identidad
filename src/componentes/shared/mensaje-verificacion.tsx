@@ -1,38 +1,33 @@
 import { Alert, Spinner } from "reactstrap";
 import "../../styles/mensaje-style.component.css";
-import { Dispatch, SetStateAction } from "react";
-import { Mensaje } from "./mensaje";
 
 interface Props {
-  loadingPost: boolean;
-  mostrarMensaje: boolean;
-  setMostrarMensaje: Dispatch<SetStateAction<boolean>>;
+  loading: boolean;
   error: boolean;
-  setError: Dispatch<SetStateAction<boolean>>;
+  mensaje: string;
 }
 
 export const MensajeVerificacion: React.FC<Props> = ({
-  loadingPost,
-  error
+  loading,
+  error,
+  mensaje
 }) => {
 
   return (
     <div className="mensaje-container">
       <div className="mensaje-content">
-        {loadingPost && (
+        {loading && (
           <>
-            <Alert color="secondary">Verificando Información</Alert>
+            <Alert color="secondary">{mensaje}</Alert>
             <Spinner color="primary" />
           </>
         )}
 
-        {(error && !loadingPost) && (
-          <>
-            <Mensaje
-              textoMensaje="Error con la conexion al servidor"
-              colorMensaje="danger"
-            />
-          </>
+        {(error && !loading) && (
+
+          <Alert color="danger">
+            Error con la conexion al servidor
+          </Alert>
         )} 
       </div>
     </div>

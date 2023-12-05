@@ -12,7 +12,8 @@ const initialState: ValidacionOCR = {
     porcentajeNombreOCR: '',
     porcentajeApellidoOCR: '',
     porcentajeDocumentoOCR: ''
-  }
+  },
+  rostro: false
 }
 
 export const validacionOCRSlice = createSlice({
@@ -20,7 +21,7 @@ export const validacionOCRSlice = createSlice({
   initialState,
   reducers:{
     setValidacionOCR: (state, action:PayloadAction<ValidacionOCR>) => {
-      const {ocr, porcentajes} = action.payload
+      const {ocr, porcentajes, rostro} = action.payload
       state.ocr = {
         nombreOCR: ocr.nombreOCR,
         apellidoOCR: ocr.apellidoOCR,
@@ -31,6 +32,7 @@ export const validacionOCRSlice = createSlice({
         porcentajeApellidoOCR: `${porcentajes.porcentajeApellidoOCR}`,
         porcentajeDocumentoOCR: `${porcentajes.porcentajeDocumentoOCR}`
       }
+      state.rostro = rostro
     }
   }
 })
