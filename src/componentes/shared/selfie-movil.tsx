@@ -9,6 +9,8 @@ interface Props {
   conteo: number;
   setConteo: Dispatch<SetStateAction<number>>;
   setMostrarPreviewCamara: Dispatch<SetStateAction<boolean>>;
+  continuarBoton: boolean;
+  setContinuarBoton: Dispatch<SetStateAction<boolean>>;
 }
 
 export const CapturadorSelfie: React.FC<Props> = ({
@@ -16,7 +18,10 @@ export const CapturadorSelfie: React.FC<Props> = ({
   conteo,
   setConteo,
   setMostrarPreviewCamara,
+
+  setContinuarBoton
 }) => {
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -55,6 +60,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
 
 
       setConteo(conteo + 1);
+      setContinuarBoton(true)
       setMostrarPreviewCamara(true);
     }
   };
@@ -89,6 +95,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
     dispatch(setVaciarFoto())
     setCapturarOtravez(false);
     setConteo(0);
+    setContinuarBoton(false)
   };
 
   return (
@@ -99,7 +106,8 @@ export const CapturadorSelfie: React.FC<Props> = ({
             <div className="video">
               {labelFoto === "foto_persona" && (
                 <>
-                  <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} ></video>
+                  <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} >
+                  </video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
                   <Button color="success" onClick={() => tomarFoto(labelFoto)}>

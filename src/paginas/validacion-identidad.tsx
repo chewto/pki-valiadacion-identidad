@@ -91,7 +91,7 @@ export const ValidacionIdentidad: React.FC = () => {
         dispatch(setFirmador(res.data.dato));
       })
       .catch((err) => console.log(err))
-      .finally(() => setLoading(false))
+      .finally(() => setLoading(false));
 
     geolocation();
     obtenerIp();
@@ -142,29 +142,29 @@ export const ValidacionIdentidad: React.FC = () => {
   const enviar = (step: number) => {
     console.log(step);
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.anverso_documento,
-        informacion.anverso
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.anverso_documento,
+      informacion.anverso
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.reverso_documento,
-        informacion.reverso
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.reverso_documento,
+      informacion.reverso
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.foto_persona,
-        informacion.foto_persona
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.foto_persona,
+      informacion.foto_persona
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.tipoDocumento,
-        informacion.tipoDocumento
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.tipoDocumento,
+      informacion.tipoDocumento
+    );
 
     ValidadorFormdata(
       formulario,
@@ -202,19 +202,19 @@ export const ValidacionIdentidad: React.FC = () => {
       formulario,
       formdataKeys.nombreOCR,
       validacionOCR.ocr.nombreOCR
-    )
+    );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.apellidoOCR,
       validacionOCR.ocr.apellidoOCR
-    )
+    );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.documentoOCR,
       validacionOCR.ocr.documentoOCR
-    )
+    );
 
     if (tipoParam === "3") {
       ValidadorFormdata(
@@ -282,9 +282,9 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  useEffect(()=> {
-    console.log(continuarBoton)
-  }, [continuarBoton])
+  useEffect(() => {
+    console.log(continuarBoton);
+  }, [continuarBoton]);
 
   return (
     <>
@@ -331,7 +331,9 @@ export const ValidacionIdentidad: React.FC = () => {
               submitBtn={
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
-                informacion.reverso !== "" ? (
+                informacion.reverso !== "" && 
+                continuarBoton
+                ? (
                   <button
                     className="stepper-btn"
                     style={{ position: "absolute", left: "71%", top: "10%" }}
@@ -356,6 +358,15 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
               />
 
+              <AccesoCamara setContinuarBoton={setContinuarBoton} />
+
+              <FormularioFotoPersona
+                continuarBoton={continuarBoton}
+                setContinuarBoton={setContinuarBoton}
+                preview={informacion.foto_persona}
+                selfie={labelFoto.foto_persona}
+              />
+
               <FormularioDocumento
                 tipoDocumento={informacion.tipoDocumento}
                 preview={informacion.anverso}
@@ -371,13 +382,6 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento={labelFoto.reverso}
               />
-
-              <AccesoCamara setContinuarBoton={setContinuarBoton} />
-
-              <FormularioFotoPersona
-                preview={informacion.foto_persona}
-                selfie={labelFoto.foto_persona}
-              />
             </Stepper>
           </div>
           {mostrarMensaje && loading && (
@@ -387,13 +391,13 @@ export const ValidacionIdentidad: React.FC = () => {
               mensaje="Verificando Información"
             />
           )}
-            {loading &&(
-              <MensajeVerificacion
+          {loading && (
+            <MensajeVerificacion
               loading={loading}
               error={error}
               mensaje="Cargando Información"
             />
-            )}
+          )}
         </div>
       </main>
     </>

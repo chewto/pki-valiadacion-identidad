@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { CapturadorSelfie } from "../shared/selfie-movil";
 import { Previsualizacion } from "../shared/previsualizacion";
 import "../../styles/styles.css";
@@ -7,12 +7,20 @@ import "../../styles/styles.css";
 interface Props {
   preview: string;
   selfie: string;
+  continuarBoton: boolean;
+  setContinuarBoton: Dispatch<SetStateAction<boolean>>
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
   preview,
-  selfie
+  selfie,
+  continuarBoton,
+  setContinuarBoton
 }) => {
+
+  useEffect(() => {
+    setContinuarBoton(false)
+  }, [])
 
   const [conteo, setConteo] = useState<number>(0);
   const [mostrarPreviewCamara, setMostrarPreviewCamara] =
@@ -44,6 +52,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
               conteo={conteo}
               setConteo={setConteo}
               setMostrarPreviewCamara={setMostrarPreviewCamara}
+              continuarBoton={continuarBoton}
+              setContinuarBoton={setContinuarBoton}
             />
           ) : (
             <button

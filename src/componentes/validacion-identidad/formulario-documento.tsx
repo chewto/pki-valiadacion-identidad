@@ -25,10 +25,12 @@ interface Props {
 export const FormularioDocumento: React.FC<Props> = ({
   tipoDocumento,
   preview,
+  continuarBoton,
   setContinuarBoton,
   ladoDocumento,
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
+  const informacion = useSelector((state: RootState) => state.informacion);
   const validacionOCR = useSelector((state: RootState) => state.ocr);
   const dispatch = useDispatch();
 
@@ -71,6 +73,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     setMostrarMensaje(false);
+    console.log("asdasdasd");
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -109,11 +112,14 @@ export const FormularioDocumento: React.FC<Props> = ({
             informacionFirmador.apellido,
             informacionFirmador.documento,
             ladoDocumento,
-            tipoDocumento
+            tipoDocumento,
+            informacion.foto_persona
           );
         };
       }
     };
+
+    evento.target.value = "";
   };
 
   // const getResolutionFromDataURL = (dataURL: any): string => {
@@ -130,27 +136,32 @@ export const FormularioDocumento: React.FC<Props> = ({
   // };
 
   const validarDocumento = (
-    dataImagen: string | ArrayBuffer | null,
+    imagenDocumento: string | ArrayBuffer | null,
     nombre: string,
     apellido: string,
     documento: string,
     ladoDocumento: string,
-    tipoDocumento: string
+    tipoDocumento: string,
+    imagenPersona: string
   ) => {
+    setError(false)
     setLoading(true);
     nombre = nombre.toUpperCase();
     apellido = apellido.toUpperCase();
 
     const data = {
-      imagen: dataImagen,
+      imagen: imagenDocumento,
       nombre: nombre,
       apellido: apellido,
       documento: documento,
       ladoDocumento: ladoDocumento,
       tipoDocumento: tipoDocumento,
+      imagenPersona: imagenPersona,
     };
 
-    console.log("ocr enviado");
+    const nombreFirmador = informacionFirmador.nombre.toUpperCase();
+    const apellidoFirmador = informacionFirmador.apellido.toUpperCase();
+    const documentoFirmador = informacionFirmador.documento.toUpperCase();
 
     axios({
       method: "post",
@@ -158,47 +169,57 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res) => {
-        dispatch(setValidacionOCR(res.data));
+        console.log(res.data);
 
-        // const ocrData = res.data.ocr
+        if (ladoDocumento === "anverso") {
+          dispatch(setValidacionOCR(res.data));
 
-        // let contadorAciertosOcr = 0
+          const ocr = res.data.ocr;
 
-        // for (const data in ocrData) {
-        //   if(nombre === ocrData[data]){
-        //     contadorAciertosOcr = contadorAciertosOcr + 1
-        //   }
+          let encontrados = 0;
 
-        //   if(apellido === ocrData[data]){
-        //     contadorAciertosOcr = contadorAciertosOcr + 1
-        //   }
+          for (const valor in ocr) {
+            if (nombreFirmador.includes(ocr[valor])) {
+              encontrados += 1;
+            }
 
-        //   if(documento === ocrData[data]){
-        //     contadorAciertosOcr = contadorAciertosOcr + 1
-        //   }
-        // }
+            if (apellidoFirmador.includes(ocr[valor])) {
+              encontrados += 1;
+            }
 
-        // console.log(contadorAciertosOcr)
+            if (documentoFirmador.includes(ocr[valor])) {
+              encontrados += 1;
+            }
+          }
 
-        if (res.data.rostro) {
-          setContinuarBoton(true);
-          setConteo(0);
-        }
+          if (res.data.rostro && res.data.ladoValido && encontrados >= 1) {
+            setConteo(0);
+            setContinuarBoton(true);
+          } else {
+            setMostrarMensaje(true);
+            setConteo((prev) => prev + 1);
+          }
 
-        if (res.data.rostro === false) {
-          console.log("asadas");
-          setContinuarBoton(false);
-          setConteo(conteo + 1);
-
-          if (conteo >= 2) {
+          if (conteo >= 1) {
+            setMostrarMensaje(false);
             setContinuarBoton(true);
           }
         }
 
-        if (res.data.rostro === false && conteo <= 1) {
-          setMostrarMensaje(true);
+        if (ladoDocumento === "reverso") {
+          if (res.data.ladoValido) {
+            setConteo(0);
+            setContinuarBoton(true);
+          } else {
+            setMostrarMensaje(true);
+            setConteo((prev) => prev + 1);
+          }
+
+          if (conteo >= 1) {
+            setMostrarMensaje(false);
+            setContinuarBoton(true);
+          }
         }
-        console.log(res.data);
       })
       .catch((error) => {
         setError(true);
@@ -213,6 +234,12 @@ export const FormularioDocumento: React.FC<Props> = ({
       <h2 className="documento-title">
         Subir foto del {placeholder} de su {tipoDocumento}
       </h2>
+
+      {mostrarMensaje && (
+        <>
+          <Alert color="warning" style={{textAlign: 'center'}}>Por favor, vuelva a intentarlo</Alert>
+        </>
+      )}
 
       {mobile ? (
         <label
@@ -233,9 +260,18 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          {preview.length >= 1
-            ? "Volver a tomar foto si no se ve correctamente"
-            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+          {preview.length >= 1 ? (
+            <>
+              {loading && <Spinner></Spinner>}
+              {mostrarMensaje && "Reintentar subir documento"}
+              {continuarBoton &&
+                (ladoDocumento === "anverso"
+                  ? "Seleccione siguiente para continuar"
+                  : "Seleccione finalizar")}
+            </>
+          ) : (
+            `Subir foto del ${placeholder} de su ${tipoDocumento}`
+          )}
         </label>
       ) : (
         <label
@@ -251,22 +287,23 @@ export const FormularioDocumento: React.FC<Props> = ({
             onChange={cambioArchivo}
             style={{ display: "none" }}
           />
-          {preview.length >= 1
-            ? "Volver a subir el documento si no se ve correctamente"
-            : `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+          {preview.length >= 1 ? (
+            <>
+              {loading && <Spinner></Spinner>}
+              {mostrarMensaje && "Reintentar subir documento"}
+              {continuarBoton &&
+                (ladoDocumento === "anverso"
+                  ? "Seleccione siguiente para continuar"
+                  : "Seleccione finalizar")}
+            </>
+          ) : (
+            `Subir foto del ${placeholder} de su ${tipoDocumento}`
+          )}
         </label>
       )}
 
       {preview.length >= 1 && !loading && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
-      )}
-
-      {mostrarMensaje && (
-        <>
-          <Alert color="warning">
-            por favor suba una imagen con mejor calidad
-          </Alert>
-        </>
       )}
 
       {error && (
