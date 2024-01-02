@@ -74,18 +74,22 @@ export const ValidacionIdentidad: React.FC = () => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
-  const [loadingPost, setLoadingPost] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
-  const [errorPost, setErrorPost] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
+    console.log(informacion, informacionFirmador, validacionOCR);
+  }, [informacion, informacionFirmador, validacionOCR]);
+
+  useEffect(() => {
     document.title = "Validacion identidad";
 
-    axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
-    .then(res => console.log(res.data))
+    // axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
+    // .then(res => console.log(res.data))
 
     axios({
       method: "get",
@@ -94,25 +98,26 @@ export const ValidacionIdentidad: React.FC = () => {
       .then((res) => {
         dispatch(setFirmador(res.data.dato));
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
 
     geolocation();
     obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    setInterval(() => {
-      axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
-      .then(res => {
-        console.log(res.data.proceso.estado)
-        if (res.data.proceso.estado === 'finalizado') {
-          window.location.href = URLS.resultados
-        }
-      })
-    }, 4000)
-  }, [])
+  //   setInterval(() => {
+  //     axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
+  //     .then(res => {
+  //       console.log(res.data.proceso.estado)
+  //       if (res.data.proceso.estado === 'finalizado') {
+  //         window.location.href = URLS.resultados
+  //       }
+  //     })
+  //   }, 4000)
+  // }, [])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -158,29 +163,29 @@ export const ValidacionIdentidad: React.FC = () => {
   const enviar = (step: number) => {
     console.log(step);
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.anverso_documento,
-        informacion.anverso
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.anverso_documento,
+      informacion.anverso
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.reverso_documento,
-        informacion.reverso
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.reverso_documento,
+      informacion.reverso
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.foto_persona,
-        informacion.foto_persona
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.foto_persona,
+      informacion.foto_persona
+    );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.tipoDocumento,
-        informacion.tipoDocumento
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.tipoDocumento,
+      informacion.tipoDocumento
+    );
 
     ValidadorFormdata(
       formulario,
@@ -200,18 +205,36 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrNombre,
-      validacionOCR.ocrNombre
+      formdataKeys.porcentajeNombreOCR,
+      validacionOCR.porcentajes.porcentajeNombreOCR
     );
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrApellido,
-      validacionOCR.ocrApellido
+      formdataKeys.porcentajeApellidoOCR,
+      validacionOCR.porcentajes.porcentajeApellidoOCR
     );
     ValidadorFormdata(
       formulario,
-      formdataKeys.ocrDocumento,
-      validacionOCR.ocrDocumento
+      formdataKeys.porcentajeDocumentoOCR,
+      validacionOCR.porcentajes.porcentajeDocumentoOCR
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.nombreOCR,
+      validacionOCR.ocr.nombreOCR
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.apellidoOCR,
+      validacionOCR.ocr.apellidoOCR
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.documentoOCR,
+      validacionOCR.ocr.documentoOCR
     );
 
     if (tipoParam === "3") {
@@ -244,7 +267,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ) {
       console.log(formulario);
       setMostrar(true);
-      setLoadingPost(true);
+      setLoading(true);
 
       let idValidacion = 0;
       let idUsuario = 0;
@@ -265,8 +288,8 @@ export const ValidacionIdentidad: React.FC = () => {
         })
         .catch((err) => {
           console.error(err);
-          setLoadingPost(false);
-          setErrorPost(true);
+          setLoading(false);
+          setError(true);
         })
         .finally(() => {
           if (tipoParam === "1") {
@@ -279,6 +302,10 @@ export const ValidacionIdentidad: React.FC = () => {
         });
     }
   };
+
+  useEffect(() => {
+    console.log(continuarBoton);
+  }, [continuarBoton]);
 
   return (
     <>
@@ -310,22 +337,24 @@ export const ValidacionIdentidad: React.FC = () => {
                     onClick={avanzarPasos}
                     style={{ position: "absolute", left: "71%", top: "10%" }}
                   >
-                    Siguiente
+                    Continuar
                   </button>
                 ) : (
                   <button
                     className="stepper-btn"
                     disabled
-                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                    style={{ position: "absolute", left: "71%", top: "10%", background: '#080338' }}
                   >
-                    Siguiente
+                    Esperando
                   </button>
                 )
               }
               submitBtn={
                 informacion.foto_persona !== "" &&
                 informacion.anverso !== "" &&
-                informacion.reverso !== "" ? (
+                informacion.reverso !== "" && 
+                continuarBoton
+                ? (
                   <button
                     className="stepper-btn"
                     style={{ position: "absolute", left: "71%", top: "10%" }}
@@ -338,7 +367,7 @@ export const ValidacionIdentidad: React.FC = () => {
                     disabled
                     style={{ position: "absolute", left: "71%", top: "10%" }}
                   >
-                    Finalizar
+                    Esperando
                   </button>
                 )
               }
@@ -348,6 +377,15 @@ export const ValidacionIdentidad: React.FC = () => {
                 tipoDocumento={informacion.tipoDocumento}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
+              />
+
+              <AccesoCamara setContinuarBoton={setContinuarBoton} />
+
+              <FormularioFotoPersona
+                continuarBoton={continuarBoton}
+                setContinuarBoton={setContinuarBoton}
+                preview={informacion.foto_persona}
+                selfie={labelFoto.foto_persona}
               />
 
               <FormularioDocumento
@@ -365,22 +403,20 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento={labelFoto.reverso}
               />
-
-              <AccesoCamara setContinuarBoton={setContinuarBoton} />
-
-              <FormularioFotoPersona
-                preview={informacion.foto_persona}
-                selfie={labelFoto.foto_persona}
-              />
             </Stepper>
           </div>
-          {mostrarMensaje === true && (
+          {mostrarMensaje && loading && (
             <MensajeVerificacion
-              loadingPost={loadingPost}
-              mostrarMensaje={mostrarMensaje}
-              setMostrarMensaje={setMostrar}
-              error={errorPost}
-              setError={setErrorPost}
+              loading={loading}
+              error={error}
+              mensaje="Verificando Información"
+            />
+          )}
+          {loading && (
+            <MensajeVerificacion
+              loading={loading}
+              error={error}
+              mensaje="Cargando Información"
             />
           )}
         </div>
