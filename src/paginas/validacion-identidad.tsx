@@ -52,7 +52,7 @@ export const ValidacionIdentidad: React.FC = () => {
       : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
-  const urlUsuario = `${URLS.obtenerUsuario}?id=${idParam}`;
+  const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
   const formulario = new FormData();
 
@@ -80,10 +80,6 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
   const [pasos, setPasos] = useState<number>(0);
-
-  useEffect(() => {
-    console.log(informacion, informacionFirmador, validacionOCR);
-  }, [informacion, informacionFirmador, validacionOCR]);
 
   useEffect(() => {
     document.title = "Validacion identidad";
