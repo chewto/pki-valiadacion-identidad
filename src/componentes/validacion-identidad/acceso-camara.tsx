@@ -24,13 +24,14 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
               console.log("accesso permitido");
               setDesplegarCamara(1);
               setContinuarBoton(true);
+              video.srcObject.getVideoTracks().forEach((track) => track.stop())
             }
           })
           .catch(() => {
             setDesplegarCamara(2);
             console.log("accesso denegado");
           });
-      
+  
     }
   }
 

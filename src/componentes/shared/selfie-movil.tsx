@@ -6,8 +6,6 @@ import { setFotos, setVaciarFoto } from "../../nucleo/redux/slices/informacionSl
 
 interface Props {
   labelFoto: string;
-  conteo: number;
-  setConteo: Dispatch<SetStateAction<number>>;
   setMostrarPreviewCamara: Dispatch<SetStateAction<boolean>>;
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
@@ -15,14 +13,12 @@ interface Props {
 
 export const CapturadorSelfie: React.FC<Props> = ({
   labelFoto,
-  conteo,
-  setConteo,
   setMostrarPreviewCamara,
-
   setContinuarBoton
 }) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaStream = useRef<MediaStream | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
@@ -58,8 +54,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
       // Do something with the captured selfie (e.g., save it, display it, etc.)
       setCapturarOtravez(true);
 
-
-      setConteo(conteo + 1);
       setContinuarBoton(true)
       setMostrarPreviewCamara(true);
     }
@@ -72,11 +66,13 @@ export const CapturadorSelfie: React.FC<Props> = ({
       console.log("getUserMedia is not supported in this browser");
     }
 
+    
+
     // Request camera access
     navigator.mediaDevices
       .getUserMedia({ video: true })
       .then((stream) => {
-        // Camera access granted, stream contains the video stream
+        mediaStream.current = stream
         if (videoRef.current) {
           videoRef.current.setAttribute("autoplay", "");
           videoRef.current.setAttribute("muted", "");
@@ -89,14 +85,24 @@ export const CapturadorSelfie: React.FC<Props> = ({
         // Camera access denied or error occurred
         console.log("Error accessing camera:", error);
       });
-  });
+
+      return () => {
+        if(mediaStream.current){
+          mediaStream.current.getVideoTracks().forEach((track) => {
+            if(track.readyState == "live"){
+              track.stop()
+            }
+          })
+        }
+      }
+  }, []);
 
   const capturarOtra = () => {
     dispatch(setVaciarFoto())
     setCapturarOtravez(false);
-    setConteo(0);
     setContinuarBoton(false)
   };
+
 
   return (
     <>
@@ -127,7 +133,7 @@ export const CapturadorSelfie: React.FC<Props> = ({
         {capturarOtraVez && (
           <>
             <div className="preview">
-              <Button color="danger" onClick={capturarOtra}>
+              <Button color="success" onClick={capturarOtra}>
                 Capturar otra vez, si la imagen no se ve correctamente
               </Button>
             </div>

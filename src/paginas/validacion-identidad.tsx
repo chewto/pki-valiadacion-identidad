@@ -316,15 +316,15 @@ export const ValidacionIdentidad: React.FC = () => {
                     onClick={avanzarPasos}
                     style={{ position: "absolute", left: "71%", top: "10%" }}
                   >
-                    Siguiente
+                    Continuar
                   </button>
                 ) : (
                   <button
                     className="stepper-btn"
                     disabled
-                    style={{ position: "absolute", left: "71%", top: "10%" }}
+                    style={{ position: "absolute", left: "71%", top: "10%", background: '#080338' }}
                   >
-                    Siguiente
+                    Esperando
                   </button>
                 )
               }
@@ -346,7 +346,7 @@ export const ValidacionIdentidad: React.FC = () => {
                     disabled
                     style={{ position: "absolute", left: "71%", top: "10%" }}
                   >
-                    Finalizar
+                    Esperando
                   </button>
                 )
               }

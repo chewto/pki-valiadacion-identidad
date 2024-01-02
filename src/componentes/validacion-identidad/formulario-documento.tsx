@@ -73,6 +73,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     setMostrarMensaje(false);
+    setContinuarBoton(false);
     console.log("asdasdasd");
 
     const archivo = evento.target.files?.[0];
@@ -121,19 +122,6 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     evento.target.value = "";
   };
-
-  // const getResolutionFromDataURL = (dataURL: any): string => {
-  //   const img = new Image();
-
-  //   img.onload = () => {
-  //     const { width, height } = img;
-  //     console.log(`Image resolution: ${width} x ${height}`)
-  //   };
-
-  //   img.src = dataURL;
-
-  //   return `width: ${img.width}, height: ${img.height} `;
-  // };
 
   const validarDocumento = (
     imagenDocumento: string | ArrayBuffer | null,
@@ -241,11 +229,40 @@ export const FormularioDocumento: React.FC<Props> = ({
         </>
       )}
 
+      {continuarBoton && (
+        <>
+          <Alert color="success" style={{textAlign: 'center'}}>Seleccione {ladoDocumento === 'anverso' ? 'continuar' : 'finalizar'}</Alert>
+        </>
+      )}
+
+      {preview.length >= 1 && !loading && (
+        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
+        )}
+      
+        {error && (
+          <>
+            <Alert color="danger">ha ocurrido un error con el servidor</Alert>
+          </>
+        )}
+        
+        {loading && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignContent: "center",
+              margin: "20px 0",
+            }}
+          >
+            <Spinner></Spinner>
+          </div>
+        )}
+
       {mobile ? (
         <label
           className="file-input"
           style={{
-            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+            background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
           }}
         >
           <input
@@ -260,24 +277,21 @@ export const FormularioDocumento: React.FC<Props> = ({
             }}
             capture="environment"
           />
-          {preview.length >= 1 ? (
-            <>
-              {loading && <Spinner></Spinner>}
-              {mostrarMensaje && "Reintentar subir documento"}
-              {continuarBoton &&
-                (ladoDocumento === "anverso"
-                  ? "Seleccione siguiente para continuar"
-                  : "Seleccione finalizar")}
-            </>
-          ) : (
-            `Subir foto del ${placeholder} de su ${tipoDocumento}`
+          
+          {preview.length <= 0 &&  (
+            `Tomar foto del ${placeholder} de su ${tipoDocumento}`
           )}
+          {mostrarMensaje && 'Reintentar tomar foto del documento'}
+          {loading && <Spinner></Spinner>}
+          {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
+          {error && 'El servidor ha fallado'}
+          {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
         </label>
       ) : (
         <label
           className="file-input"
           style={{
-            background: preview.length >= 1 ? "#fd0d0d" : "#0d6efd",
+            background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
           }}
         >
           <input
@@ -287,43 +301,18 @@ export const FormularioDocumento: React.FC<Props> = ({
             onChange={cambioArchivo}
             style={{ display: "none" }}
           />
-          {preview.length >= 1 ? (
-            <>
-              {loading && <Spinner></Spinner>}
-              {mostrarMensaje && "Reintentar subir documento"}
-              {continuarBoton &&
-                (ladoDocumento === "anverso"
-                  ? "Seleccione siguiente para continuar"
-                  : "Seleccione finalizar")}
-            </>
-          ) : (
+          {preview.length <= 0 &&  (
             `Subir foto del ${placeholder} de su ${tipoDocumento}`
           )}
+          {mostrarMensaje && 'Reintentar subir documento'}
+          {loading && <Spinner></Spinner>}
+          {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
+          {error && 'El servidor ha fallado'}
+          {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
         </label>
       )}
 
-      {preview.length >= 1 && !loading && (
-        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
-      )}
 
-      {error && (
-        <>
-          <Alert color="danger">ha ocurrido un error con el servidor</Alert>
-        </>
-      )}
-
-      {loading && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignContent: "center",
-            margin: "20px 0",
-          }}
-        >
-          <Spinner></Spinner>
-        </div>
-      )}
     </div>
   );
 };
