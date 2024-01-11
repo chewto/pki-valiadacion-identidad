@@ -1,27 +1,29 @@
-import { useState, Dispatch, SetStateAction, useRef, useEffect } from "react";
+import { Dispatch, SetStateAction, useRef, useEffect } from "react";
 import "../../styles/selfie-movil.component.css";
 import { Button } from "reactstrap";
 import { useDispatch } from "react-redux";
-import { setFotos, setVaciarFoto } from "../../nucleo/redux/slices/informacionSlice";
+import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 
 interface Props {
   labelFoto: string;
   setMostrarPreviewCamara: Dispatch<SetStateAction<boolean>>;
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  setCapturarOtravez: Dispatch<SetStateAction<boolean>>;
+  capturarOtravez: boolean;
 }
 
 export const CapturadorSelfie: React.FC<Props> = ({
   labelFoto,
   setMostrarPreviewCamara,
-  setContinuarBoton
+  setContinuarBoton,
+  setCapturarOtravez,
+  capturarOtravez
 }) => {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaStream = useRef<MediaStream | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
 
   const dispatch = useDispatch()
 
@@ -60,13 +62,14 @@ export const CapturadorSelfie: React.FC<Props> = ({
   };
 
   useEffect(() => {
+
+    console.log('asdasd')
+
     if (
       !("mediaDevices" in navigator && "getUserMedia" in navigator.mediaDevices)
     ) {
       console.log("getUserMedia is not supported in this browser");
     }
-
-    
 
     // Request camera access
     navigator.mediaDevices
@@ -97,22 +100,18 @@ export const CapturadorSelfie: React.FC<Props> = ({
       }
   }, []);
 
-  const capturarOtra = () => {
-    dispatch(setVaciarFoto())
-    setCapturarOtravez(false);
-    setContinuarBoton(false)
-  };
-
-
   return (
     <>
       <div className="selfie-container">
-        {!capturarOtraVez && labelFoto === "foto_persona" && (
+        {!capturarOtravez && (
           <>
             <div className="video">
               {labelFoto === "foto_persona" && (
                 <>
-                  <video ref={videoRef} className="video-captura" style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} >
+                  <video 
+                    ref={videoRef} 
+                    className="video-captura" 
+                    style={{ transform: 'scaleX(-1)', WebkitTransform: 'scaleX(-1)' }} >
                   </video>
                   <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
 
@@ -121,21 +120,10 @@ export const CapturadorSelfie: React.FC<Props> = ({
                   </Button>
                 </>
               )}
-              {labelFoto === "foto_persona" && (
+
                 <div className="mascara">
                   <div className="indicador-persona"></div>
                 </div>
-              )}
-            </div>
-          </>
-        )}
-
-        {capturarOtraVez && (
-          <>
-            <div className="preview">
-              <Button color="success" onClick={capturarOtra}>
-                Capturar otra vez, si la imagen no se ve correctamente
-              </Button>
             </div>
           </>
         )}

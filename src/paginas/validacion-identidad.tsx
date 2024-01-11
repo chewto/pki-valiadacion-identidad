@@ -6,6 +6,7 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
+import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
@@ -375,12 +376,22 @@ export const ValidacionIdentidad: React.FC = () => {
                 ladoDocumento={labelFoto.anverso}
               />
 
+              <EditarImagen
+                imagen={informacion.anverso}
+                keyFoto={labelFoto.anverso}
+              />
+
               <FormularioDocumento
                 tipoDocumento={informacion.tipoDocumento}
                 preview={informacion.reverso}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento={labelFoto.reverso}
+              />
+
+              <EditarImagen
+                imagen={informacion.reverso}
+                keyFoto={labelFoto.reverso}
               />
             </Stepper>
           </div>
