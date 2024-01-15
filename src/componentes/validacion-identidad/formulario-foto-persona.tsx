@@ -2,9 +2,9 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { CapturadorSelfie } from "../shared/selfie-movil";
 import { Previsualizacion } from "../shared/previsualizacion";
 import "../../styles/styles.css";
-import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
+import { setFotos, setVaciarFoto } from "../../nucleo/redux/slices/informacionSlice";
 import { useDispatch } from "react-redux";
-import { Alert } from "reactstrap";
+import { Alert, Button } from "reactstrap";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -34,9 +34,17 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(iphone ? true : false);
 
+  const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
+
+  const capturarOtra = () => {
+    dispatch(setVaciarFoto())
+    setCapturarOtravez(false);
+    setContinuarBoton(false)
+  };
+
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    evento.preventDefault();
     setMostrarMensaje(false);
-    console.log();
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -107,9 +115,17 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           <Previsualizacion preview={preview} nombrePreview={selfie} />
         )}
 
-        {mostrarCamara ? (
+        {capturarOtraVez && (
+          <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+            <Button color="success" onClick={capturarOtra}>
+            Capturar otra vez, si la imagen no se ve correctamente
+          </Button>
+          </div>
+        )}
+
+        {mostrarCamara && (
           <>
-            {iphone ? (
+            {iphone && (
               <label
               className="file-input"
               style={{
@@ -134,16 +150,20 @@ export const FormularioFotoPersona: React.FC<Props> = ({
                 `Tomar selfie`
               )}
             </label>
-            ) : (
+            )}
+            {!iphone && !capturarOtraVez && (
               <CapturadorSelfie
                 labelFoto={selfie}
                 setMostrarPreviewCamara={setMostrarPreviewCamara}
                 continuarBoton={continuarBoton}
                 setContinuarBoton={setContinuarBoton}
+                setCapturarOtravez={setCapturarOtravez}
+                capturarOtravez={capturarOtraVez}
               />
             )}
           </>
-        ) : (
+        )}
+        { !mostrarCamara && (
           <button
             className="stepper-btn"
             style={{ width: "100%", margin: "10px 0 0 0" }}

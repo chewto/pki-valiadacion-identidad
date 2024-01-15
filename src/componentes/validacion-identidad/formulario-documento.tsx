@@ -72,6 +72,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   ]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    evento.preventDefault();
+
     setMostrarMensaje(false);
     setContinuarBoton(false);
     console.log("asdasdasd");
