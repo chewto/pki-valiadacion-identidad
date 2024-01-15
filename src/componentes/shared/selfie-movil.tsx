@@ -63,8 +63,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
 
   useEffect(() => {
 
-    console.log('asdasd')
-
     if (
       !("mediaDevices" in navigator && "getUserMedia" in navigator.mediaDevices)
     ) {
