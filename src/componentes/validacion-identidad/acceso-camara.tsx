@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
 import "../../styles/acceso-camara.component.css";
+import accesoCamara from '../../assets/img/acceso-camara.jpg'
 
 interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
@@ -52,6 +53,8 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
             Veras una ventana emergente que te pedirá acceso a tu cámara. Por
             favor, asegurate de hacer click en permitir.
           </p>
+
+          <img src={accesoCamara} alt="acceso ejemplo" className="imagen-ejemplo" />
           <Button color="success" onClick={iniciarCamara}>
             Permitir acceso a la cámara
           </Button>

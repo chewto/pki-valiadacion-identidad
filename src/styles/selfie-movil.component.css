@@ -1,7 +1,7 @@
 .selfie-container{
   width: 100%;
   height: 100%;
-  margin: 25px 0 0 0;
+  margin: 10px 0 0 0;
   display: flex;
   justify-content: center;
 }
@@ -17,7 +17,7 @@
 
 .video-captura{
   width: 80%;
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
 }
 
 .mascara{
@@ -85,7 +85,7 @@
   background: #810011;
 }
 
-.video > .react-html5-camera-photo > #container-circles{
+/* .video > .react-html5-camera-photo > #container-circles{
   cursor: pointer;
   left: 53.5%;
   top: 100%;
@@ -104,7 +104,7 @@
   height: 20px;
   margin-top: -25px;
   margin-left: -11px
-}
+} */
 
 @media screen and (max-width: 1440px){
 

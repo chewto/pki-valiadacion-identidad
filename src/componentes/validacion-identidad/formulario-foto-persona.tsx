@@ -92,14 +92,13 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         <div
           style={{
             textAlign: "center",
-            fontSize: "22px",
+            fontSize: "20px",
           }}
         >
-          <p>Realice un selfie para la verificación </p>
-          <span
+          <p style={{margin: '0'}}>Realice un selfie para la verificación </p>
+          <span className="advertencia"
             style={{
               fontSize: "16px",
-              margin: "0 0 10px 0",
               textAlign: "center",
             }}
           >

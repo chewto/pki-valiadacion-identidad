@@ -6,7 +6,8 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
-import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
+import { Prueba } from "../componentes/validacion-identidad/selfie-prueba";
+//import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
@@ -28,8 +29,8 @@ import {
   setDispostivoNavegador,
 } from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
-import { useMobile } from "../nucleo/hooks/useMobile";
-import { CodigoQR } from "../componentes/shared/codigo-qr";
+// import { useMobile } from "../nucleo/hooks/useMobile";
+// import { CodigoQR } from "../componentes/shared/codigo-qr";
 
 export const ValidacionIdentidad: React.FC = () => {
 
@@ -63,7 +64,7 @@ export const ValidacionIdentidad: React.FC = () => {
     foto_persona: "foto_persona",
   };
 
-  const esMobile = useMobile();
+  // const esMobile = useMobile();
 
   const hora = useHour();
   const fecha = useDate();
@@ -300,10 +301,6 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log(continuarBoton);
-  }, [continuarBoton]);
-
   return (
     <>
       <main className="main-container">
@@ -393,10 +390,12 @@ export const ValidacionIdentidad: React.FC = () => {
                 ladoDocumento={labelFoto.anverso}
               />
 
-              <EditarImagen
+              <Prueba/>
+
+              {/* <EditarImagen
                 imagen={informacion.anverso}
                 keyFoto={labelFoto.anverso}
-              />
+              /> */}
 
               <FormularioDocumento
                 tipoDocumento={informacion.tipoDocumento}
@@ -405,11 +404,11 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento={labelFoto.reverso}
               />
-
+{/* 
               <EditarImagen
                 imagen={informacion.reverso}
                 keyFoto={labelFoto.reverso}
-              />
+              /> */}
             </Stepper>
           </div>
           {mostrarMensaje && loading && (
@@ -427,7 +426,7 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
-        <>{esMobile ? <></> : <CodigoQR />}</>
+        {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
     </>
   );

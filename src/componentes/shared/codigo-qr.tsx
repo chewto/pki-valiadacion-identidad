@@ -10,9 +10,9 @@ export const CodigoQR: React.FC = () => {
     setDireccion(window.location.href)
   },[])
 
-  useEffect(()=> {
-    console.log(direccion)
-  }, [direccion])
+  // useEffect(()=> {
+  //   console.log(direccion)
+  // }, [direccion])
 
   return (
     <div className="qr-container">

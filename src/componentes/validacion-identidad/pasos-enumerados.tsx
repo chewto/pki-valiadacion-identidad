@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+// import { useEffect } from "react";
 
 interface Props {
   tipo: string | null;
@@ -9,9 +9,9 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const pasosTipo1 = [1, 2, 3, 4, 5];
   const pasosTipo2 = [4, 5, 6, 7, 8];
 
-  useEffect(() => {
-    console.log(paso);
-  }, [paso]);
+  // useEffect(() => {
+  //   console.log(paso);
+  // }, [paso]);
 
   return (
     <div className="step-number-container">
