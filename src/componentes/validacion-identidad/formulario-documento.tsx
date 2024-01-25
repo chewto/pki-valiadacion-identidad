@@ -11,6 +11,9 @@ import axios from "axios";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
 import { Alert, Spinner } from "reactstrap";
+import 'react-html5-camera-photo/build/css/index.css'
+import Camera from "react-html5-camera-photo";
+import { FACING_MODES } from "react-html5-camera-photo"
 //import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
@@ -41,6 +44,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [mostrarMensaje, setMostrarMensaje] = useState<boolean>(false);
+  const [mostrarCamara, setMostrarCamara] = useState<boolean>(true)
 
   const mobile: boolean = useMobile();
 
@@ -76,7 +80,6 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     setMostrarMensaje(false);
     setContinuarBoton(false);
-    console.log("asdasdasd");
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -124,6 +127,29 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     evento.target.value = "";
   };
+
+  const tomarFoto = (dataURL:string) => {
+    setMostrarMensaje(false);
+    setContinuarBoton(false);
+    setMostrarCamara(false)
+
+    dispatch(setFotos({labelFoto: ladoDocumento, data: dataURL}))
+
+    validarDocumento(
+      dataURL,
+      informacionFirmador.nombre,
+      informacionFirmador.apellido,
+      informacionFirmador.documento,
+      ladoDocumento,
+      tipoDocumento,
+      informacion.foto_persona
+    );
+  }
+
+  const retomar = () => {
+    setMostrarCamara(true)
+    dispatch(setFotos({labelFoto: ladoDocumento, data: ''}))
+  }
 
   const validarDocumento = (
     imagenDocumento: string | ArrayBuffer | null,
@@ -261,34 +287,46 @@ export const FormularioDocumento: React.FC<Props> = ({
         )}
 
       {mobile ? (
-        <label
-          className="file-input"
-          style={{
-            background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
-          }}
-        >
-          <input
-            name={ladoDocumento}
-            type="file"
-            accept="image/*"
-            onChange={cambioArchivo}
-            style={{
-              display: "none",
-              zIndex: "8000",
-              background: "#5ecc7f",
-            }}
-            capture="environment"
-          />
+
+        <>
+          {mostrarCamara && preview.length <= 0 && (
+            <Camera
+            idealFacingMode={FACING_MODES.ENVIRONMENT}
+              onTakePhoto={(dataURL) => tomarFoto(dataURL)}
+            />
+          ) }
+          {!mostrarCamara && !loading && (<button className="file-input" onClick={retomar}>tomar foto de nuevo</button>)}
+        </>
+        
+
+        // <label
+        //   className="file-input"
+        //   style={{
+        //     background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
+        //   }}
+        // >
+        //   <input
+        //     name={ladoDocumento}
+        //     type="file"
+        //     accept="image/*"
+        //     onChange={cambioArchivo}
+        //     style={{
+        //       display: "none",
+        //       zIndex: "8000",
+        //       background: "#5ecc7f",
+        //     }}
+        //     capture="environment"
+        //   />
           
-          {preview.length <= 0 &&  (
-            `Tomar foto del ${placeholder} de su ${tipoDocumento}`
-          )}
-          {mostrarMensaje && 'Reintentar tomar foto del documento'}
-          {loading && <Spinner></Spinner>}
-          {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
-          {error && 'El servidor ha fallado'}
-          {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
-        </label>
+        //   {preview.length <= 0 &&  (
+        //     `Tomar foto del ${placeholder} de su ${tipoDocumento}`
+        //   )}
+        //   {mostrarMensaje && 'Reintentar tomar foto del documento'}
+        //   {loading && <Spinner></Spinner>}
+        //   {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
+        //   {error && 'El servidor ha fallado'}
+        //   {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
+        // </label>
       ) : (
         <label
           className="file-input"

@@ -1,14 +1,15 @@
-import { useState } from "react"
 import Camera from "react-html5-camera-photo"
 import 'react-html5-camera-photo/build/css/index.css'
 import { FACING_MODES } from "react-html5-camera-photo"
+import { useDispatch } from "react-redux"
+import { setFotos } from "../../nucleo/redux/slices/informacionSlice"
 
-export const Prueba:React.FC = () => {
+export const Camara:React.FC = () => {
 
-  const [foto, setFoto] = useState('')
+  const dispatch = useDispatch()
 
   const tomarFoto = (dataURL:string) => {
-    setFoto(dataURL)
+    dispatch(setFotos({labelFoto: '', data: dataURL}))
   }
   
   return(
@@ -16,8 +17,6 @@ export const Prueba:React.FC = () => {
     <Camera 
     idealFacingMode={FACING_MODES.ENVIRONMENT}
     onTakePhoto={(dataURL) => {tomarFoto(dataURL)}}/>
-
-    <img src={foto} alt="" />
   </div>
   )
 }

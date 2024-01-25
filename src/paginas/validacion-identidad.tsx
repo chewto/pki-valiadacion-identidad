@@ -6,7 +6,6 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
-import { Prueba } from "../componentes/validacion-identidad/selfie-prueba";
 //import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
@@ -389,8 +388,6 @@ export const ValidacionIdentidad: React.FC = () => {
                 setContinuarBoton={setContinuarBoton}
                 ladoDocumento={labelFoto.anverso}
               />
-
-              <Prueba/>
 
               {/* <EditarImagen
                 imagen={informacion.anverso}
