@@ -50,7 +50,7 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
         <>
           <h3>Permítenos usar su cámara</h3>
           <p>
-            Veras una ventana emergente que te pedirá acceso a tu cámara. Por
+            Si ve una ventana emergente que pida acceso a su cámara. Por
             favor, asegurate de hacer click en permitir.
           </p>
 

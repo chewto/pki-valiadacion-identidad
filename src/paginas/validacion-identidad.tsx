@@ -28,6 +28,8 @@ import {
   setDispostivoNavegador,
 } from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
+import { useIos } from "../nucleo/hooks/useMobile";
+import {Advertencia} from '../componentes/shared/advertencia'
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "../componentes/shared/codigo-qr";
 
@@ -75,6 +77,8 @@ export const ValidacionIdentidad: React.FC = () => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
+  const esIOS = useIos()
+
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -85,8 +89,8 @@ export const ValidacionIdentidad: React.FC = () => {
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    // axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
-    // .then(res => console.log(res.data))
+    axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
+    .then(res => console.log(res.data))
 
     axios({
       method: "get",
@@ -103,18 +107,18 @@ export const ValidacionIdentidad: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // useEffect(() => {
+  useEffect(() => {
 
-  //   setInterval(() => {
-  //     axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
-  //     .then(res => {
-  //       console.log(res.data.proceso.estado)
-  //       if (res.data.proceso.estado === 'finalizado') {
-  //         window.location.href = URLS.resultados
-  //       }
-  //     })
-  //   }, 4000)
-  // }, [])
+    setInterval(() => {
+      axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
+      .then(res => {
+        console.log(res.data.estado)
+        if (res.data.estado === 'finalizado') {
+          window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+        }
+      })
+    }, 4000)
+  }, [])
 
   const avanzarPasos = () => {
     setPasos((prev) => prev + 1);
@@ -157,8 +161,11 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = (step: number) => {
+  const enviar = async (step: number) => {
     console.log(step);
+
+
+    await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
     ValidadorFormdata(
       formulario,
@@ -269,7 +276,7 @@ export const ValidacionIdentidad: React.FC = () => {
       let idValidacion = 0;
       let idUsuario = 0;
 
-      axios({
+      await axios({
         method: "post",
         url: url,
         data: formulario,
@@ -423,6 +430,8 @@ export const ValidacionIdentidad: React.FC = () => {
             />
           )}
         </div>
+
+        {esIOS && navegador !== 'Safari' && (<Advertencia titulo='Advertencia' contenido='Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari'/>)}
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
     </>

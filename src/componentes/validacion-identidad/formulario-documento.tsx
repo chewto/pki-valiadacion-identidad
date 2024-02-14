@@ -346,9 +346,9 @@ export const FormularioDocumento: React.FC<Props> = ({
           )}
           {mostrarMensaje && 'Reintentar subir documento'}
           {loading && <Spinner></Spinner>}
-          {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
+          {continuarBoton && ladoDocumento === 'anverso' && 'Pulse aqui para subir una nueva foto'}
           {error && 'El servidor ha fallado'}
-          {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
+          {continuarBoton && ladoDocumento === 'reverso' && 'Pulse aqui para subir una nueva foto'}
         </label>
       )}
 
