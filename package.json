@@ -11,8 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
+    "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.15.10",
     "@reduxjs/toolkit": "^1.9.7",
     "@uidotdev/usehooks": "^2.3.1",
     "awesome-react-stepper": "^1.1.1",

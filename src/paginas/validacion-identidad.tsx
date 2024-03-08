@@ -10,7 +10,7 @@ import { FormularioDocumento } from "../componentes/validacion-identidad/formula
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
-import Stepper from "awesome-react-stepper";
+//import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
 import { AccesoCamara } from "../componentes/validacion-identidad/acceso-camara";
@@ -29,12 +29,14 @@ import {
 } from "../nucleo/redux/slices/informacionSlice";
 import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
 import { useIos } from "../nucleo/hooks/useMobile";
-import {Advertencia} from '../componentes/shared/advertencia'
+import { Advertencia } from "../componentes/shared/advertencia";
+import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "../componentes/shared/codigo-qr";
+import Button from "@mui/material/Button";
+
 
 export const ValidacionIdentidad: React.FC = () => {
-
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
@@ -77,20 +79,19 @@ export const ValidacionIdentidad: React.FC = () => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
-  const esIOS = useIos()
+  const esIOS = useIos();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
-  const [pasos, setPasos] = useState<number>(0);
 
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
-    .then(res => console.log(res.data))
+    // axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
+    // .then(res => console.log(res.data))
 
     axios({
       method: "get",
@@ -107,26 +108,18 @@ export const ValidacionIdentidad: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    setInterval(() => {
-      axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
-      .then(res => {
-        console.log(res.data.estado)
-        if (res.data.estado === 'finalizado') {
-          window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
-        }
-      })
-    }, 4000)
-  }, [])
-
-  const avanzarPasos = () => {
-    setPasos((prev) => prev + 1);
-  };
-
-  const volverPasos = () => {
-    setPasos((prev) => prev - 1);
-  };
+  //   setInterval(() => {
+  //     axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
+  //     .then(res => {
+  //       console.log(res.data.estado)
+  //       if (res.data.estado === 'finalizado') {
+  //         window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+  //       }
+  //     })
+  //   }, 4000)
+  // }, [])
 
   const obtenerIp = () => {
     axios({
@@ -161,11 +154,8 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = async (step: number) => {
-    console.log(step);
-
-
-    await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
+  const enviar = async () => {
+    // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
     ValidadorFormdata(
       formulario,
@@ -307,13 +297,90 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
+  const steps = ["1", "2", "3", "4", "5"];
+
+  const [activeSteps, setActiveSteps] = useState<number>(0);
+  const [progreso, setProgreso] = useState<number>(0)
+  
+  const handleNext = () => {
+    setActiveSteps((prevActiveStep) => prevActiveStep + 1);
+    setProgreso((prev) => prev + 25)
+  };
+
+  const handleBack = () => {
+    setActiveSteps((prevActiveStep) => prevActiveStep - 1);
+    setProgreso((prev) => prev - 25)
+  };
+
+  const componentsSteps = [
+    <SelectorTipoDocumento
+      tipoDocumento={informacion.tipoDocumento}
+      continuarBoton={continuarBoton}
+      setContinuarBoton={setContinuarBoton}
+    />,
+    <AccesoCamara setContinuarBoton={setContinuarBoton} />,
+    <FormularioFotoPersona
+      continuarBoton={continuarBoton}
+      setContinuarBoton={setContinuarBoton}
+      preview={informacion.foto_persona}
+      selfie={labelFoto.foto_persona}
+    />,
+    <FormularioDocumento
+      tipoDocumento={informacion.tipoDocumento}
+      preview={informacion.anverso}
+      continuarBoton={continuarBoton}
+      setContinuarBoton={setContinuarBoton}
+      ladoDocumento={labelFoto.anverso}
+      urlOCR={URLS.validarDocumentoAnverso}
+    />,
+    <FormularioDocumento
+      tipoDocumento={informacion.tipoDocumento}
+      preview={informacion.reverso}
+      continuarBoton={continuarBoton}
+      setContinuarBoton={setContinuarBoton}
+      ladoDocumento={labelFoto.reverso}
+      urlOCR={URLS.validarDocumentoReverso}
+    />,
+  ];
+
   return (
     <>
       <main className="main-container">
         <div className="content-container">
           <Header titulo="Validación de identidad" />
           <div style={{ margin: "17px", position: "relative" }}>
-            <PasosEnumerados tipo={tipoParam} paso={pasos} />
+            <PasosEnumerados tipo='3' paso={activeSteps} progreso={progreso}/>
+            <div className="content-buttons">
+              <Button disabled={activeSteps === 0} onClick={handleBack}>
+                Volver
+              </Button>
+
+              {activeSteps <= steps.length - 2 && (
+                <Button
+                  disabled={!continuarBoton}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleNext}
+                >
+                  {continuarBoton ? 'Continuar' : 'Esperando'}
+                </Button>
+              )}
+
+              {activeSteps === steps.length - 1 && (
+                <Button
+                  disabled={!continuarBoton}
+                  variant="contained"
+                  color="primary"
+                  onClick={enviar}
+                >
+                  {continuarBoton ? 'Finalizar' : 'Esperando'}
+                </Button>
+              )}
+            </div>
+
+            {componentsSteps[activeSteps]}
+
+            {/* <PasosEnumerados tipo={tipoParam} paso={pasos} />
             <Stepper
               allowClickControl={false}
               strokeColor="#0d6efd"
@@ -373,47 +440,7 @@ export const ValidacionIdentidad: React.FC = () => {
               }
               onSubmit={enviar}
             >
-              <SelectorTipoDocumento
-                tipoDocumento={informacion.tipoDocumento}
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-              />
-
-              <AccesoCamara setContinuarBoton={setContinuarBoton} />
-
-              <FormularioFotoPersona
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-                preview={informacion.foto_persona}
-                selfie={labelFoto.foto_persona}
-              />
-
-              <FormularioDocumento
-                tipoDocumento={informacion.tipoDocumento}
-                preview={informacion.anverso}
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-                ladoDocumento={labelFoto.anverso}
-              />
-
-              {/* <EditarImagen
-                imagen={informacion.anverso}
-                keyFoto={labelFoto.anverso}
-              /> */}
-
-              <FormularioDocumento
-                tipoDocumento={informacion.tipoDocumento}
-                preview={informacion.reverso}
-                continuarBoton={continuarBoton}
-                setContinuarBoton={setContinuarBoton}
-                ladoDocumento={labelFoto.reverso}
-              />
-{/* 
-              <EditarImagen
-                imagen={informacion.reverso}
-                keyFoto={labelFoto.reverso}
-              /> */}
-            </Stepper>
+            </Stepper>*/}
           </div>
           {mostrarMensaje && loading && (
             <MensajeVerificacion
@@ -431,7 +458,13 @@ export const ValidacionIdentidad: React.FC = () => {
           )}
         </div>
 
-        {esIOS && navegador !== 'Safari' && (<Advertencia titulo='Advertencia' contenido='Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari'/>)}
+        {esIOS && navegador !== "Safari" && (
+          <Advertencia
+            titulo="Advertencia"
+            contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
+            icon={safari}
+          />
+        )}
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
     </>

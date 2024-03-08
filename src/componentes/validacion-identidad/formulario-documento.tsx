@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import "../../styles/styles.css";
 import "../../styles/formulario-style.component.css";
 import { Previsualizacion } from "../shared/previsualizacion";
@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
 import axios from "axios";
-import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
 import { Alert, Spinner } from "reactstrap";
 import 'react-html5-camera-photo/build/css/index.css'
@@ -23,6 +22,7 @@ interface Props {
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
+  urlOCR: string;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -31,6 +31,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   continuarBoton,
   setContinuarBoton,
   ladoDocumento,
+  urlOCR
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -47,6 +48,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(true)
 
   const mobile: boolean = useMobile();
+
+  const elementoScroll = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!mostrarPreview) {
@@ -74,6 +77,10 @@ export const FormularioDocumento: React.FC<Props> = ({
     tipoDocumento,
     validacionOCR.rostro,
   ]);
+
+  useEffect(()=> {
+    elementoScroll.current?.scrollIntoView({behavior: 'smooth'})
+  }, [])
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
@@ -181,7 +188,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     axios({
       method: "post",
-      url: URLS.validarDocumento,
+      url: urlOCR,
       data: data,
     })
       .then((res) => {
@@ -290,10 +297,13 @@ export const FormularioDocumento: React.FC<Props> = ({
 
         <>
           {mostrarCamara && preview.length <= 0 && (
-            <Camera
-            idealFacingMode={FACING_MODES.ENVIRONMENT}
-              onTakePhoto={(dataURL) => tomarFoto(dataURL)}
-            />
+            <>
+              <Camera
+                idealFacingMode={FACING_MODES.ENVIRONMENT}
+                onTakePhoto={(dataURL) => tomarFoto(dataURL)}
+              />
+              <div ref={elementoScroll}></div>
+            </>
           ) }
           {!mostrarCamara && !loading && (<button className="file-input" onClick={retomar}>tomar foto de nuevo</button>)}
         </>

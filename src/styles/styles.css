@@ -31,24 +31,58 @@ header > h2{
   width: 50%;
 }
 
+
 .step-number-container{
-  font-size: 14px;
-  width: 98%;
+  margin: 0 0 20px 0;
+  font-size: 10px;
+  width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 0;
-  position: absolute;
-  left: 1%;
-  top: -1px;
   z-index: 3000;
+}
+
+.step{
+  background-color: #3882f1;
+  padding: 5px 11px;
+  border-radius: 100%;
+  color: #fff;
+  z-index: 2000;
 }
 
 .step-checked{
   color: #fff;
-  position: relative;
-  left: 0%;
-  top: 3px;
   font-size: 10px;
+  background-color: #3882f1;
+  padding: 5px 10px;
+  border-radius: 100%;
+  animation: checked-animation 250ms;
+  z-index: 2000;
+}
+
+@keyframes checked-animation {
+  0%{
+    opacity: 0;
+  }
+  100%{
+    opacity: 1;
+  }
+}
+
+.stepper-progress-bar{
+  position: absolute;
+  height: 15px;
+  background-color: #b0cefb;
+  width: 92%;
+  margin: 0 0 0 10px;
+  z-index: 1000;
+}
+
+.progress-bar{
+  height: 15px;
+  background-color: #0759d4;
+  z-index: 1500;
 }
 
 .stepper-btn{
@@ -87,6 +121,12 @@ header > h2{
   animation-duration: 2s;
 }
 
+.content-buttons{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
 @keyframes advertencia {
   0% {
     background: #eeec7a;
@@ -113,7 +153,7 @@ header > h2{
   }
 }
 
-@media screen and (max-width: 426px) {
+@media screen and (max-width: 450px) {
 
   
 header > img{
@@ -126,10 +166,10 @@ header > img{
     box-shadow: 0 0 0 0 #fff;
   }
 }
-
+/* 
 @media screen and (max-width: 375px){
   .step-number-container{
     width: 96.9%;
     padding: 0 0 0 3px;
   }
-}
+} */

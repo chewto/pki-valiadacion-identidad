@@ -3,18 +3,18 @@
 interface Props {
   tipo: string | null;
   paso: number;
+  progreso: number;
 }
 
-export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
+export const PasosEnumerados: React.FC<Props> = ({ tipo, paso, progreso }) => {
   const pasosTipo1 = [1, 2, 3, 4, 5];
   const pasosTipo2 = [4, 5, 6, 7, 8];
 
-  // useEffect(() => {
-  //   console.log(paso);
-  // }, [paso]);
-
   return (
     <div className="step-number-container">
+      <div className="stepper-progress-bar">
+        <div className="progress-bar" style={{width: `${progreso}%`}}></div>
+      </div>
       {tipo === "1" && (
         <>
           {pasosTipo1.map((index) => (
@@ -47,7 +47,8 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
               ) : (
                 <div
                   key={index}
-                  style={{ color: paso + 4 === index ? "#fff" : "#000" }}
+                  // style={{ opacity: paso + 4 === index ? '1' : '.7' }}
+                  className="step"
                 >
                   {index}
                 </div>

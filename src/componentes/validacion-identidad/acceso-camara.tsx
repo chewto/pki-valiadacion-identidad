@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
 import "../../styles/acceso-camara.component.css";
 import accesoCamara from '../../assets/img/acceso-camara.jpg'
+import { useMobile } from "../../nucleo/hooks/useMobile";
 
 interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
@@ -10,6 +11,8 @@ interface Props {
 export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [desplegarCamara, setDesplegarCamara] = useState<number>(0);
+
+  const esMobile = useMobile()
 
   const iniciarCamara = () => {
     const video = videoRef.current;
@@ -37,6 +40,8 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
   }
 
   useEffect(() => {
+
+    console.log(esMobile)
     setContinuarBoton(false)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,7 +59,7 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
             favor, asegurate de hacer click en permitir.
           </p>
 
-          <img src={accesoCamara} alt="acceso ejemplo" className="imagen-ejemplo" />
+          {!esMobile && <img src={accesoCamara} alt="acceso ejemplo" className="imagen-ejemplo" />}
           <Button color="success" onClick={iniciarCamara}>
             Permitir acceso a la cámara
           </Button>
