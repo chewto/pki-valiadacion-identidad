@@ -13,35 +13,47 @@ export interface InformacionIdentidad {
 }
 
 export interface Dato {
-  id?: number
-  firmaElectronicaId?: number
-  nombre: string
-  apellido: string
-  correo: string
-  tipoDocumento?: string
-  documento: string
-  evidenciasCargadas?: boolean
-  enlaceTemporal?: string
-  ordenFirma?: number
-  fechaCreacion?: string
+  id?: number;
+  firmaElectronicaId?: number;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  tipoDocumento?: string;
+  documento: string;
+  evidenciasCargadas?: boolean;
+  enlaceTemporal?: string;
+  ordenFirma?: number;
+  fechaCreacion?: string;
 }
 
-export interface ValidacionOCR{
+export interface ValidacionOCR {
   ocr: OCR;
   porcentajes: Porcentajes;
   rostro: boolean;
 }
 
-interface OCR{
+interface OCR {
   nombreOCR: string;
   apellidoOCR: string;
   documentoOCR: string;
 }
 
-interface Porcentajes{
+interface Porcentajes {
   porcentajeNombreOCR: string;
   porcentajeApellidoOCR: string;
   porcentajeDocumentoOCR: string;
 }
 
+export interface ValidacionCB {
+  reconocido: string;
+  nombre: string;
+  apellido: string;
+  documento: string;
+}
 
+export interface ComprobacionProceso{
+  id: number;
+  idValidacion: string;
+  idProceso: string;
+  estado: string
+}

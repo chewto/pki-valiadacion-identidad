@@ -33,5 +33,9 @@ export const formdataKeys = {
   porcentajeDocumentoOCR: "porcentaje_documento_ocr",
   nombreOCR: "nombre_ocr",
   apellidoOCR: "apellido_ocr",
-  documentoOCR: "documento_ocr"
+  documentoOCR: "documento_ocr",
+  reconocidoCB: "reconocido_CB",
+  nombreCB: "nombre_CB",
+  apellidoCB: "apellido_CB",
+  documentoCB: "documento_CB"
 };

@@ -1,13 +1,10 @@
-
-//mo6TixVJ
-
 // ruta desarrollo
 const urlBase ='http://127.0.0.1:4000'
 
 // ruta produccion
 //const urlBase = 'https://libertador.pkiservices.co/validacion-back'
 
-// const urlBase = 'https://panama.efirma.pkiservices.co/validacion-back/'
+//const urlBase = 'https://panama.efirma.pkiservices.co/validacion-back/'
 
 // ruta desarrollo
 const firmadorUrlBase = 'http://127.0.0.1:4000/obtener-firmador'
@@ -32,9 +29,8 @@ export const URLS = {
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
-  iniciarProceso: `${urlBase}/iniciar-proceso`,
-  comprobarProceso: `${urlBase}/comprobar-proceso`,
-  finalizarProceso: `${urlBase}/finalizar-proceso`,
+  comprobarProceso: `${urlBase}/comprobacion-proceso`,
+  comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`
 }

@@ -2,12 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import informacionReducer  from "./slices/informacionSlice";
 import firmadorReducer from './slices/firmadorSlice'
 import validacionOCRReducer from "./slices/validacionOCRSlice";
+import validacionCBReducer from "./slices/validacionCB";
 
 export const store = configureStore({
   reducer: {
     informacion: informacionReducer,
     firmador: firmadorReducer,
-    ocr: validacionOCRReducer
+    ocr: validacionOCRReducer,
+    cb: validacionCBReducer
   }
 })
 

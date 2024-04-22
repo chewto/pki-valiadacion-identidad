@@ -7,12 +7,14 @@ import { useMobile } from "../../nucleo/hooks/useMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
 import { Alert, Spinner } from "reactstrap";
 import 'react-html5-camera-photo/build/css/index.css'
 import Camera from "react-html5-camera-photo";
 import { FACING_MODES } from "react-html5-camera-photo"
+import { setValidacionCB } from "../../nucleo/redux/slices/validacionCB";
+import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 //import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
 //import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
 
@@ -30,8 +32,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   preview,
   continuarBoton,
   setContinuarBoton,
-  ladoDocumento,
-  urlOCR
+  ladoDocumento
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -188,11 +189,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     axios({
       method: "post",
-      url: urlOCR,
+      url: ladoDocumento == 'anverso' ? URLS.validarDocumentoAnverso : URLS.validarDocumentoReverso,
       data: data,
     })
-      .then((res) => {
-        console.log(res.data);
+      .then((res: AxiosResponse<any>) => {
 
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
@@ -230,6 +230,8 @@ export const FormularioDocumento: React.FC<Props> = ({
         }
 
         if (ladoDocumento === "reverso") {
+          dispatch(setValidacionCB(res.data.codigoBarra))
+
           if (res.data.ladoValido) {
             setConteo(0);
             setContinuarBoton(true);

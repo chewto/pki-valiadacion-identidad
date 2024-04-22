@@ -46,6 +46,7 @@ export const ValidacionIdentidad: React.FC = () => {
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const validacionOCR = useSelector((state: RootState) => state.ocr);
+  const validacionCB = useSelector((state:RootState) => state.cb)
 
   const dispatch = useDispatch();
 
@@ -87,11 +88,16 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
+  const [validaciones, setValidaciones] = useState<number>(0)
+
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    // axios.post(`${URLS.iniciarProceso}?id=${idParam}`)
-    // .then(res => console.log(res.data))
+    axios.get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+      .then((res) => {
+        const numeroValidaciones = res.data.validaciones
+        setValidaciones(numeroValidaciones)
+      })
 
     axios({
       method: "get",
@@ -107,19 +113,6 @@ export const ValidacionIdentidad: React.FC = () => {
     obtenerIp();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // useEffect(() => {
-
-  //   setInterval(() => {
-  //     axios.get(`${URLS.comprobarProceso}?id=${idParam}`)
-  //     .then(res => {
-  //       console.log(res.data.estado)
-  //       if (res.data.estado === 'finalizado') {
-  //         window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
-  //       }
-  //     })
-  //   }, 4000)
-  // }, [])
 
   const obtenerIp = () => {
     axios({
@@ -229,6 +222,30 @@ export const ValidacionIdentidad: React.FC = () => {
       formulario,
       formdataKeys.documentoOCR,
       validacionOCR.ocr.documentoOCR
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.reconocidoCB,
+      validacionCB.reconocido
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.nombreCB,
+      validacionCB.nombre
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.apellidoCB,
+      validacionCB.apellido
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.documentoCB,
+      validacionCB.documento
     );
 
     if (tipoParam === "3") {
@@ -380,67 +397,6 @@ export const ValidacionIdentidad: React.FC = () => {
 
             {componentsSteps[activeSteps]}
 
-            {/* <PasosEnumerados tipo={tipoParam} paso={pasos} />
-            <Stepper
-              allowClickControl={false}
-              strokeColor="#0d6efd"
-              fillStroke="#0d6efd"
-              activeColor="#0d6efd"
-              activeProgressBorder="2px solid #0d6efd"
-              contentBoxClassName="contenido"
-              backBtn={
-                <button
-                  className="stepper-btn"
-                  onClick={volverPasos}
-                  style={{ position: "absolute", left: "10%", top: "10%" }}
-                >
-                  Volver
-                </button>
-              }
-              continueBtn={
-                continuarBoton ? (
-                  <button
-                    className="stepper-btn"
-                    onClick={avanzarPasos}
-                    style={{ position: "absolute", left: "71%", top: "10%" }}
-                  >
-                    Continuar
-                  </button>
-                ) : (
-                  <button
-                    className="stepper-btn"
-                    disabled
-                    style={{ position: "absolute", left: "71%", top: "10%", background: '#080338' }}
-                  >
-                    Esperando
-                  </button>
-                )
-              }
-              submitBtn={
-                informacion.foto_persona !== "" &&
-                informacion.anverso !== "" &&
-                informacion.reverso !== "" && 
-                continuarBoton
-                ? (
-                  <button
-                    className="stepper-btn"
-                    style={{ position: "absolute", left: "71%", top: "10%" }}
-                  >
-                    Finalizar
-                  </button>
-                ) : (
-                  <button
-                    className="stepper-btn"
-                    disabled
-                    style={{ position: "absolute", left: "71%", top: "10%" }}
-                  >
-                    Esperando
-                  </button>
-                )
-              }
-              onSubmit={enviar}
-            >
-            </Stepper>*/}
           </div>
           {mostrarMensaje && loading && (
             <MensajeVerificacion
@@ -462,9 +418,18 @@ export const ValidacionIdentidad: React.FC = () => {
           <Advertencia
             titulo="Advertencia"
             contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
-            icon={safari}
+            elemento={<img src={safari} style={{width: '50%'}}/>}
           />
         )}
+
+        {validaciones >= 1 && (
+          <Advertencia
+            titulo="Su validación esta siendo procesada"
+            contenido=""
+            elemento={<>Su validación se encuentra en proceso</>}
+          />
+        )}
+
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
     </>
