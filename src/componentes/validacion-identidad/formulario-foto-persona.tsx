@@ -96,12 +96,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           }}
         >
           <p style={{margin: '0'}}>Realice un selfie para la verificación </p>
-          <span className="advertencia"
-            style={{
-              fontSize: "16px",
-              textAlign: "center",
-            }}
-          >
+          <span className="advertencia">
             Por favor, quítese la gafas o gorra para realizar la verificación.
           </span>
         </div>

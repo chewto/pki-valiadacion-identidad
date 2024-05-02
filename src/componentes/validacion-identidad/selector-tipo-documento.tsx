@@ -52,6 +52,10 @@ export const SelectorTipoDocumento: React.FC<Props> = ({
       id: 3,
       valor: "Tarjeta de identidad",
     },
+    {
+      id: 4,
+      valor: "Pasaporte"
+    }
   ];
 
   return (
