@@ -10,13 +10,12 @@ import { RootState } from "../../nucleo/redux/store";
 import axios, { AxiosResponse } from "axios";
 import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
 import { Alert, Spinner } from "reactstrap";
-import 'react-html5-camera-photo/build/css/index.css'
+import "react-html5-camera-photo/build/css/index.css";
 import Camera from "react-html5-camera-photo";
-import { FACING_MODES } from "react-html5-camera-photo"
+import { FACING_MODES } from "react-html5-camera-photo";
 import { setValidacionCB } from "../../nucleo/redux/slices/validacionCB";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
-//import { getImageSizeFromDataURL } from "../../nucleo/services/optimizadorImg";
-//import { getImageSizeFromDataURL, optimizadorImg } from "../../nucleo/services/optimizadorImg";
+import {imagePlaceholder} from '../dataurl'
 
 interface Props {
   tipoDocumento: string;
@@ -32,7 +31,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   preview,
   continuarBoton,
   setContinuarBoton,
-  ladoDocumento
+  ladoDocumento,
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -46,11 +45,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [mostrarMensaje, setMostrarMensaje] = useState<boolean>(false);
-  const [mostrarCamara, setMostrarCamara] = useState<boolean>(true)
+  const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
 
   const mobile: boolean = useMobile();
 
-  const elementoScroll = useRef<HTMLDivElement>(null)
+  const elementoScroll = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!mostrarPreview) {
@@ -79,9 +78,16 @@ export const FormularioDocumento: React.FC<Props> = ({
     validacionOCR.rostro,
   ]);
 
-  useEffect(()=> {
-    elementoScroll.current?.scrollIntoView({behavior: 'smooth'})
-  }, [])
+  useEffect(() => {
+    if (ladoDocumento === "reverso" && tipoDocumento === "Pasaporte") {
+      dispatch(setFotos({ labelFoto: ladoDocumento, data: imagePlaceholder }));
+      setContinuarBoton(true);
+    }
+  }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
+
+  useEffect(() => {
+    elementoScroll.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
@@ -136,12 +142,12 @@ export const FormularioDocumento: React.FC<Props> = ({
     evento.target.value = "";
   };
 
-  const tomarFoto = (dataURL:string) => {
+  const tomarFoto = (dataURL: string) => {
     setMostrarMensaje(false);
     setContinuarBoton(false);
-    setMostrarCamara(false)
+    setMostrarCamara(false);
 
-    dispatch(setFotos({labelFoto: ladoDocumento, data: dataURL}))
+    dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
 
     validarDocumento(
       dataURL,
@@ -152,12 +158,12 @@ export const FormularioDocumento: React.FC<Props> = ({
       tipoDocumento,
       informacion.foto_persona
     );
-  }
+  };
 
   const retomar = () => {
-    setMostrarCamara(true)
-    dispatch(setFotos({labelFoto: ladoDocumento, data: ''}))
-  }
+    setMostrarCamara(true);
+    dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
+  };
 
   const validarDocumento = (
     imagenDocumento: string | ArrayBuffer | null,
@@ -168,7 +174,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     tipoDocumento: string,
     imagenPersona: string
   ) => {
-    setError(false)
+    setError(false);
     setLoading(true);
     nombre = nombre.toUpperCase();
     apellido = apellido.toUpperCase();
@@ -189,11 +195,13 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     axios({
       method: "post",
-      url: ladoDocumento == 'anverso' ? URLS.validarDocumentoAnverso : URLS.validarDocumentoReverso,
+      url:
+        ladoDocumento == "anverso"
+          ? URLS.validarDocumentoAnverso
+          : URLS.validarDocumentoReverso,
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
 
@@ -230,7 +238,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         }
 
         if (ladoDocumento === "reverso") {
-          dispatch(setValidacionCB(res.data.codigoBarra))
+          dispatch(setValidacionCB(res.data.codigoBarra));
 
           if (res.data.ladoValido) {
             setConteo(0);
@@ -262,109 +270,99 @@ export const FormularioDocumento: React.FC<Props> = ({
 
       {mostrarMensaje && (
         <>
-          <Alert color="warning" style={{textAlign: 'center'}}>Por favor, vuelva a intentarlo</Alert>
+          <Alert color="warning" style={{ textAlign: "center" }}>
+            Por favor, vuelva a intentarlo
+          </Alert>
         </>
       )}
 
       {continuarBoton && (
         <>
-          <Alert color="success" style={{textAlign: 'center'}}>Seleccione {ladoDocumento === 'anverso' ? 'continuar' : 'finalizar'}</Alert>
+          <Alert color="success" style={{ textAlign: "center" }}>
+            Seleccione {ladoDocumento === "anverso" ? "continuar" : "finalizar"}
+          </Alert>
         </>
       )}
 
-      {preview.length >= 1 && !loading && (
+      {preview.length >= 1 && !loading && tipoDocumento != 'Pasaporte' && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
-        )}
-      
-        {error && (
-          <>
-            <Alert color="danger">ha ocurrido un error con el servidor</Alert>
-          </>
-        )}
-        
-        {loading && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignContent: "center",
-              margin: "20px 0",
-            }}
-          >
-            <Spinner></Spinner>
-          </div>
-        )}
+      )}
 
-      {mobile ? (
+      {preview.length >= 1 && !loading && tipoDocumento == 'Pasaporte' && ladoDocumento == 'anverso' && (
+        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
+      )}
 
+      {error && (
         <>
-          {mostrarCamara && preview.length <= 0 && (
-            <>
-              <Camera
-                idealFacingMode={FACING_MODES.ENVIRONMENT}
-                onTakePhoto={(dataURL) => tomarFoto(dataURL)}
-              />
-              <div ref={elementoScroll}></div>
-            </>
-          ) }
-          {!mostrarCamara && !loading && (<button className="file-input" onClick={retomar}>tomar foto de nuevo</button>)}
+          <Alert color="danger">ha ocurrido un error con el servidor</Alert>
         </>
-        
+      )}
 
-        // <label
-        //   className="file-input"
-        //   style={{
-        //     background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
-        //   }}
-        // >
-        //   <input
-        //     name={ladoDocumento}
-        //     type="file"
-        //     accept="image/*"
-        //     onChange={cambioArchivo}
-        //     style={{
-        //       display: "none",
-        //       zIndex: "8000",
-        //       background: "#5ecc7f",
-        //     }}
-        //     capture="environment"
-        //   />
-          
-        //   {preview.length <= 0 &&  (
-        //     `Tomar foto del ${placeholder} de su ${tipoDocumento}`
-        //   )}
-        //   {mostrarMensaje && 'Reintentar tomar foto del documento'}
-        //   {loading && <Spinner></Spinner>}
-        //   {continuarBoton && ladoDocumento === 'anverso' && 'Seleccione continuar'}
-        //   {error && 'El servidor ha fallado'}
-        //   {continuarBoton && ladoDocumento === 'reverso' && 'Seleccione finalizar'}
-        // </label>
-      ) : (
-        <label
-          className="file-input"
+      {loading && (
+        <div
           style={{
-            background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
+            margin: "20px 0",
           }}
         >
-          <input
-            name={ladoDocumento}
-            type="file"
-            accept="image/jpeg"
-            onChange={cambioArchivo}
-            style={{ display: "none" }}
-          />
-          {preview.length <= 0 &&  (
-            `Subir foto del ${placeholder} de su ${tipoDocumento}`
-          )}
-          {mostrarMensaje && 'Reintentar subir documento'}
-          {loading && <Spinner></Spinner>}
-          {continuarBoton && ladoDocumento === 'anverso' && 'Pulse aqui para subir una nueva foto'}
-          {error && 'El servidor ha fallado'}
-          {continuarBoton && ladoDocumento === 'reverso' && 'Pulse aqui para subir una nueva foto'}
-        </label>
+          <Spinner></Spinner>
+        </div>
       )}
 
+      {ladoDocumento === "reverso" && tipoDocumento === "Pasaporte" ? (
+        <></>
+      ) : (
+        <>
+          {mobile && (
+            <>
+              {mostrarCamara && preview.length <= 0 && (
+                <>
+                  <Camera
+                    idealFacingMode={FACING_MODES.ENVIRONMENT}
+                    onTakePhoto={(dataURL) => tomarFoto(dataURL)}
+                  />
+                  <div ref={elementoScroll}></div>
+                </>
+              )}
+              {!mostrarCamara && !loading && (
+                <button className="file-input" onClick={retomar}>
+                  tomar foto de nuevo
+                </button>
+              )}
+            </>
+          )}
 
+          {!mobile && (
+            <label
+              className="file-input"
+              style={{
+                background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
+              }}
+            >
+              <input
+                name={ladoDocumento}
+                type="file"
+                accept="image/jpeg"
+                onChange={cambioArchivo}
+                style={{ display: "none" }}
+              />
+              {preview.length <= 0 &&
+                `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+              {mostrarMensaje && "Reintentar subir documento"}
+              {loading && <Spinner></Spinner>}
+              {continuarBoton &&
+                ladoDocumento === "anverso" &&
+                "Pulse aqui para subir una nueva foto"}
+              {error && "El servidor ha fallado"}
+              {continuarBoton &&
+                ladoDocumento === "reverso" &&
+                "Pulse aqui para subir una nueva foto"}
+            </label>
+          )}
+        </>
+      )}
     </div>
   );
 };
