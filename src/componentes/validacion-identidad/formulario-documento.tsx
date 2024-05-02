@@ -256,9 +256,9 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   return (
     <div className="documento-container">
-      <h2 className="documento-title">
+      {tipoDocumento !== 'Pasaporte' && ladoDocumento === 'anverso'  &&  <h2 className="documento-title">
         Subir foto del {placeholder} de su {tipoDocumento}
-      </h2>
+      </h2>}
 
       {mostrarMensaje && (
         <>

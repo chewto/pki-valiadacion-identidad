@@ -52,13 +52,10 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
-  const url =
-    tipoParam === "3"
-      ? `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
-      : `${URLS.ValidacionIdentidadTipo1}?${urlParams}`;
+  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
-  const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
+  //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
   const formulario = new FormData();
 
@@ -101,7 +98,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
     axios({
       method: "get",
-      url: tipoParam === "3" ? urlFirmador : urlUsuario,
+      url: urlFirmador,
     })
       .then((res) => {
         dispatch(setFirmador(res.data.dato));
@@ -303,13 +300,7 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
-          if (tipoParam === "1") {
             window.location.href = `${URLS.resultados}?id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
-          }
-
-          if (tipoParam === "3") {
-            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-          }
         });
     }
   };
