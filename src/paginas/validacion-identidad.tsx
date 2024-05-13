@@ -245,7 +245,6 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionCB.documento
     );
 
-    if (tipoParam === "3") {
       ValidadorFormdata(
         formulario,
         formdataKeys.nombres,
@@ -266,7 +265,6 @@ export const ValidacionIdentidad: React.FC = () => {
         formdataKeys.numero_documento,
         informacionFirmador.documento
       );
-    }
 
     if (
       informacion.foto_persona !== "" &&
