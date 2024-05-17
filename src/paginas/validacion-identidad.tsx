@@ -34,6 +34,7 @@ import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "../componentes/shared/codigo-qr";
 import Button from "@mui/material/Button";
+import { VideoRecorder } from "../componentes/validacion-identidad/prueba-vida";
 
 
 export const ValidacionIdentidad: React.FC = () => {
@@ -418,6 +419,8 @@ export const ValidacionIdentidad: React.FC = () => {
             elemento={<>Su validación se encuentra en proceso</>}
           />
         )}
+
+        <VideoRecorder/>
 
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
