@@ -37,5 +37,8 @@ export const formdataKeys = {
   reconocidoCB: "reconocido_CB",
   nombreCB: "nombre_CB",
   apellidoCB: "apellido_CB",
-  documentoCB: "documento_CB"
+  documentoCB: "documento_CB",
+  movimiento: "movimiento_prueba_vida",
+  idCarpetaEntidad: "carpeta_entidad_prueba_vida",
+  idCarpetaUsuario: "carpeta_usuario_prueba_vida"
 };

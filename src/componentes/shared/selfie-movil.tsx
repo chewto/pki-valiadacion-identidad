@@ -99,7 +99,6 @@ export const CapturadorSelfie: React.FC<Props> = ({
   }, []);
 
   return (
-    <>
       <div className="selfie-container">
         {!capturarOtravez && (
           <>
@@ -126,6 +125,5 @@ export const CapturadorSelfie: React.FC<Props> = ({
           </>
         )}
       </div>
-    </>
   );
 };

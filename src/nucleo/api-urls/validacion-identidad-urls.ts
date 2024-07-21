@@ -1,33 +1,31 @@
-// ruta desarrollo
-//const urlBase ='http://127.0.0.1:4000'
+const pais = 'desarrollo'
 
-// ruta produccion
+const rutasURL = {
+  desarrollo:{
+    validacion: "http://127.0.0.1:4000",
+    fe: "http://127.0.0.1:4000/obtener-firmador",
+    resultados: "https://efirma.pkiservices.co/efirma.php/"
+  },
+  libertador:{
+    validacion: "https://libertador.pkiservices.co/validacion-back",
+    fe: "https://libertador.pkiservices.co/fe-back/api/Firmador",
+    resultados: "https://efirma.pkiservices.co/efirma.php/"
+  },
+  eFirmaPanama:{
+    validacion: "https://panama.efirma.pkiservices.co/validacion-back",
+    fe: "https://panama.efirma.pkiservices.co/fe-back/api/Firmador",
+    resultados: "https://panama.efirma.pkiservices.co/efirma.php/"
+  },
+  eFirmaCO:{
+    validacion: "https://e-firma.pkiservices.co/validacion-back",
+    fe: "https://e-firma.pkiservices.co/fe-back/api/Firmador",
+    resultados: "https://e-firma.pkiservices.co/efirma.php/"
+  }
+}
 
-const urlBase = "https://e-firma.pkiservices.co/validacion-back"
-
-//const urlBase = 'https://libertador.pkiservices.co/validacion-back'
-
-//const urlBase = 'https://panama.efirma.pkiservices.co/validacion-back/'
-
-// ruta desarrollo
-//const firmadorUrlBase = 'http://127.0.0.1:4000/obtener-firmador'
-
-// ruta produccion
-
-const firmadorUrlBase = 'https://e-firma.pkiservices.co/fe-back/api/Firmador'
-
-//const firmadorUrlBase = 'https://libertador.pkiservices.co/fe-back/api/Firmador'
-
-//const firmadorUrlBase = 'https://panama.efirma.pkiservices.co/fe-back/api/Firmador'
-
-//colombia
-
-const efirmaUrl = 'https://e-firma.pkiservices.co/efirma.php/'
-
-//const efirmaUrl = 'https://efirma.pkiservices.co/efirma.php/'
-
-//panama
-//const efirmaUrl = 'https://panama.efirma.pkiservices.co/efirma.php/'
+const firmadorUrlBase = rutasURL[pais]["fe"]
+const urlBase = rutasURL[pais]["validacion"]
+const efirmaUrl = rutasURL[pais]["resultados"]
 
 export const URLS = {
   ValidacionIdentidadTipo1: `${urlBase}/validacion-identidad-tipo-1`,
@@ -41,5 +39,6 @@ export const URLS = {
   comprobarProceso: `${urlBase}/comprobacion-proceso`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
-  resultados: `${efirmaUrl}`
+  resultados: `${efirmaUrl}`,
+  pruebaVida: `${urlBase}/prueba-vida`
 }

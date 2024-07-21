@@ -1,3 +1,9 @@
+export interface PruebaVida{
+  movimiento: string;
+  idCarpetaEntidad: string;
+  idCarpetaUsuario: string;
+}
+
 export interface InformacionIdentidad {
   anverso: string;
   reverso: string;

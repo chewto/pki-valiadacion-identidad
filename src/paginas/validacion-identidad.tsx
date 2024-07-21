@@ -34,8 +34,6 @@ import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "../componentes/shared/codigo-qr";
 import Button from "@mui/material/Button";
-import { VideoRecorder } from "../componentes/validacion-identidad/prueba-vida";
-
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -47,13 +45,14 @@ export const ValidacionIdentidad: React.FC = () => {
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const validacionOCR = useSelector((state: RootState) => state.ocr);
-  const validacionCB = useSelector((state:RootState) => state.cb)
+  const validacionCB = useSelector((state: RootState) => state.cb);
+  const pruebaVida = useSelector((state: RootState) => state.pruebaVida)
 
   const dispatch = useDispatch();
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
-  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
+  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
@@ -86,16 +85,17 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
-  const [validaciones, setValidaciones] = useState<number>(0)
+  const [validaciones, setValidaciones] = useState<number>(0);
 
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    axios.get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+    axios
+      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
-        const numeroValidaciones = res.data.validaciones
-        setValidaciones(numeroValidaciones)
-      })
+        const numeroValidaciones = res.data.validaciones;
+        setValidaciones(numeroValidaciones);
+      });
 
     axios({
       method: "get",
@@ -145,7 +145,7 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = async () => {
+  const enviar = () => {
     // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
     ValidadorFormdata(
@@ -228,11 +228,7 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionCB.reconocido
     );
 
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.nombreCB,
-      validacionCB.nombre
-    );
+    ValidadorFormdata(formulario, formdataKeys.nombreCB, validacionCB.nombre);
 
     ValidadorFormdata(
       formulario,
@@ -246,40 +242,57 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionCB.documento
     );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.nombres,
-        informacionFirmador.nombre
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.apellidos,
-        informacionFirmador.apellido
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.email,
-        informacionFirmador.correo
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.numero_documento,
-        informacionFirmador.documento
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.nombres,
+      informacionFirmador.nombre
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.apellidos,
+      informacionFirmador.apellido
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.email,
+      informacionFirmador.correo
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.numero_documento,
+      informacionFirmador.documento
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.movimiento,
+      pruebaVida.movimiento
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.idCarpetaEntidad,
+      pruebaVida.idCarpetaEntidad
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.idCarpetaUsuario,
+      pruebaVida.idCarpetaUsuario
+    );
 
     if (
       informacion.foto_persona !== "" &&
       informacion.anverso !== "" &&
       informacion.reverso !== ""
     ) {
-      console.log(formulario);
       setMostrar(true);
       setLoading(true);
 
       let idValidacion = 0;
       let idUsuario = 0;
 
-      await axios({
+      axios({
         method: "post",
         url: url,
         data: formulario,
@@ -299,7 +312,7 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
-            window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         });
     }
   };
@@ -307,16 +320,16 @@ export const ValidacionIdentidad: React.FC = () => {
   const steps = ["1", "2", "3", "4", "5"];
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
-  const [progreso, setProgreso] = useState<number>(0)
-  
+  const [progreso, setProgreso] = useState<number>(0);
+
   const handleNext = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
-    setProgreso((prev) => prev + 25)
+    setProgreso((prev) => prev + 25);
   };
 
   const handleBack = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep - 1);
-    setProgreso((prev) => prev - 25)
+    setProgreso((prev) => prev - 25);
   };
 
   const componentsSteps = [
@@ -327,7 +340,6 @@ export const ValidacionIdentidad: React.FC = () => {
     />,
     <AccesoCamara setContinuarBoton={setContinuarBoton} />,
     <FormularioFotoPersona
-      continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
       preview={informacion.foto_persona}
       selfie={labelFoto.foto_persona}
@@ -356,7 +368,7 @@ export const ValidacionIdentidad: React.FC = () => {
         <div className="content-container">
           <Header titulo="Validación de identidad" />
           <div style={{ margin: "17px", position: "relative" }}>
-            <PasosEnumerados tipo='3' paso={activeSteps} progreso={progreso}/>
+            <PasosEnumerados tipo="3" paso={activeSteps} progreso={progreso} />
             <div className="content-buttons">
               <Button disabled={activeSteps === 0} onClick={handleBack}>
                 Volver
@@ -369,7 +381,7 @@ export const ValidacionIdentidad: React.FC = () => {
                   color="primary"
                   onClick={handleNext}
                 >
-                  {continuarBoton ? 'Continuar' : 'Esperando'}
+                  {continuarBoton ? "Continuar" : "Esperando"}
                 </Button>
               )}
 
@@ -380,13 +392,12 @@ export const ValidacionIdentidad: React.FC = () => {
                   color="primary"
                   onClick={enviar}
                 >
-                  {continuarBoton ? 'Finalizar' : 'Esperando'}
+                  {continuarBoton ? "Finalizar" : "Esperando"}
                 </Button>
               )}
             </div>
 
             {componentsSteps[activeSteps]}
-
           </div>
           {mostrarMensaje && loading && (
             <MensajeVerificacion
@@ -408,7 +419,7 @@ export const ValidacionIdentidad: React.FC = () => {
           <Advertencia
             titulo="Advertencia"
             contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
-            elemento={<img src={safari} style={{width: '50%'}}/>}
+            elemento={<img src={safari} style={{ width: "50%" }} />}
           />
         )}
 
@@ -419,8 +430,6 @@ export const ValidacionIdentidad: React.FC = () => {
             elemento={<>Su validación se encuentra en proceso</>}
           />
         )}
-
-        <VideoRecorder/>
 
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
       </main>
