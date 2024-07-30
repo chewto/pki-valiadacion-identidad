@@ -10,7 +10,6 @@ import { FormularioDocumento } from "../componentes/validacion-identidad/formula
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
-//import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
 import { AccesoCamara } from "../componentes/validacion-identidad/acceso-camara";

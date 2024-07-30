@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ValidacionIdentidad } from "./paginas/validacion-identidad";
+import { EKYCValidation } from "./paginas/ekyc-validation";
 
 function App() {
   return (
@@ -7,6 +8,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/validacion" element={<ValidacionIdentidad />}/>
+          <Route path="/eKYC" element={<EKYCValidation/>}/>
         </Routes>
       </BrowserRouter>
     </>
