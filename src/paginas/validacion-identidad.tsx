@@ -92,8 +92,6 @@ export const ValidacionIdentidad: React.FC = () => {
 
     axios.get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
-
-        console.log(res)
         const numeroValidaciones = res.data
         setValidaciones(numeroValidaciones)
       })
