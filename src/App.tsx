@@ -8,7 +8,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/validacion" element={<ValidacionIdentidad />}/>
-          <Route path="/eKYC" element={<EKYCValidation/>}/>
+          <Route path="/eKYC-validation" element={<EKYCValidation/>}/>
         </Routes>
       </BrowserRouter>
     </>
