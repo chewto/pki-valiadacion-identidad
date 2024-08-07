@@ -6,7 +6,7 @@
 //const urlBase = 'https://e-firma.pkiservices.co/validacion-nack'
 //const urlBase = 'https://libertador.pkiservices.co/validacion-back'
 
-const urlBase = 'https://panama.efirma.pkiservices.co/validacion-back/'
+const urlBase = 'https://panama.efirma.pkiservices.co/validacion-back'
 
 // ruta desarrollo
 //const firmadorUrlBase = 'http://127.0.0.1:4000/obtener-firmador'
