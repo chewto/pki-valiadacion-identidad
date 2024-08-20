@@ -2,6 +2,7 @@ export interface PruebaVida{
   movimiento: string;
   idCarpetaEntidad: string;
   idCarpetaUsuario: string;
+  // isReal: boolean;
 }
 
 export interface InformacionIdentidad {

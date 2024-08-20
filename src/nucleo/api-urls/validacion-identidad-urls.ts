@@ -1,4 +1,4 @@
-const pais = 'desarrollo'
+const pais = 'eFirmaPanama'
 
 const rutasURL = {
   desarrollo:{
@@ -28,10 +28,11 @@ const urlBase = rutasURL[pais]["validacion"]
 const efirmaUrl = rutasURL[pais]["resultados"]
 
 export const URLS = {
+  validationProvider: `${urlBase}/validation/validation-provider`,
   ValidacionIdentidadTipo1: `${urlBase}/validacion-identidad-tipo-1`,
-  ValidacionIdentidadTipo3: `${urlBase}/validacion-identidad-tipo-3`,
-  validarDocumentoAnverso: `${urlBase}/ocr-anverso`,
-  validarDocumentoReverso: `${urlBase}/ocr-reverso`,
+  ValidacionIdentidadTipo3: `${urlBase}/validation/type-3`,
+  validarDocumentoAnverso: `${urlBase}/ocr/anverso`,
+  validarDocumentoReverso: `${urlBase}/ocr/reverso`,
   validacionVida: `${urlBase}/validacion-vida`,
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
@@ -40,5 +41,10 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`,
-  pruebaVida: `${urlBase}/prueba-vida`
+  pruebaVida: `${urlBase}/anti-spoof`
+}
+
+export const validationRedirects = {
+  "EFIRMA": "/validacion",
+  "EKYC_LLEIDA":"/eKYC-validation"
 }

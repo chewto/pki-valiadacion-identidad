@@ -118,7 +118,11 @@ export const ValidacionVida: React.FC<Props> = ({
       },
     })
       .then((res) => {
-        const preview: string = res.data.preview;
+
+        console.log(res)
+
+        const preview: string = res.data.photo;
+
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,
           idCarpetaEntidad: res.data.idCarpetaEntidad,

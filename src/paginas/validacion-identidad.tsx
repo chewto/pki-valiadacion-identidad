@@ -6,7 +6,6 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
-//import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
@@ -33,21 +32,24 @@ import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "../componentes/shared/codigo-qr";
 import Button from "@mui/material/Button";
+import { useValidationRedirect } from "../nucleo/hooks/useValidationRedirect";
 
 export const ValidacionIdentidad: React.FC = () => {
+  const validationName = "EFIRMA";
+
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
 
+  const dispatch = useDispatch();
+
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const validacionOCR = useSelector((state: RootState) => state.ocr);
   const validacionCB = useSelector((state: RootState) => state.cb);
-  const pruebaVida = useSelector((state: RootState) => state.pruebaVida)
-
-  const dispatch = useDispatch();
+  const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
@@ -65,6 +67,8 @@ export const ValidacionIdentidad: React.FC = () => {
   };
 
   // const esMobile = useMobile();
+
+  useValidationRedirect(validationName, idUsuarioParam, idParam, tipoParam);
 
   const hora = useHour();
   const fecha = useDate();
@@ -202,13 +206,11 @@ export const ValidacionIdentidad: React.FC = () => {
       formdataKeys.porcentajeDocumentoOCR,
       validacionOCR.porcentajes.porcentajeDocumentoOCR
     );
-
     ValidadorFormdata(
       formulario,
       formdataKeys.nombreOCR,
       validacionOCR.ocr.nombreOCR
     );
-
     ValidadorFormdata(
       formulario,
       formdataKeys.apellidoOCR,
@@ -228,19 +230,16 @@ export const ValidacionIdentidad: React.FC = () => {
     );
 
     ValidadorFormdata(formulario, formdataKeys.nombreCB, validacionCB.nombre);
-
     ValidadorFormdata(
       formulario,
       formdataKeys.apellidoCB,
       validacionCB.apellido
     );
-
     ValidadorFormdata(
       formulario,
       formdataKeys.documentoCB,
       validacionCB.documento
     );
-
     ValidadorFormdata(
       formulario,
       formdataKeys.nombres,
@@ -302,11 +301,9 @@ export const ValidacionIdentidad: React.FC = () => {
         .then((res) => {
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
-
-          console.log(idValidacion, idUsuario);
         })
         .catch((err) => {
-          console.error(err);
+          console.log(err)
           setLoading(false);
           setError(true);
         })
