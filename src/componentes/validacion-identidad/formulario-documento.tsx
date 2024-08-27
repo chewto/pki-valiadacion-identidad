@@ -24,6 +24,7 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
   urlOCR: string;
+  codigoBarras: boolean;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -32,6 +33,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   continuarBoton,
   setContinuarBoton,
   ladoDocumento,
+  codigoBarras
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -133,7 +135,8 @@ export const FormularioDocumento: React.FC<Props> = ({
             informacionFirmador.documento,
             ladoDocumento,
             tipoDocumento,
-            informacion.foto_persona
+            informacion.foto_persona,
+            codigoBarras
           );
         };
       }
@@ -156,7 +159,8 @@ export const FormularioDocumento: React.FC<Props> = ({
       informacionFirmador.documento,
       ladoDocumento,
       tipoDocumento,
-      informacion.foto_persona
+      informacion.foto_persona,
+      codigoBarras
     );
   };
 
@@ -172,7 +176,8 @@ export const FormularioDocumento: React.FC<Props> = ({
     documento: string,
     ladoDocumento: string,
     tipoDocumento: string,
-    imagenPersona: string
+    imagenPersona: string,
+    lectura:boolean
   ) => {
     setError(false);
     setLoading(true);
@@ -180,6 +185,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     apellido = apellido.toUpperCase();
 
     const data = {
+      lectura: lectura,
       imagen: imagenDocumento,
       nombre: nombre,
       apellido: apellido,
@@ -332,7 +338,7 @@ export const FormularioDocumento: React.FC<Props> = ({
               )}
               {!mostrarCamara && !loading && (
                 <button className="file-input" onClick={retomar}>
-                  tomar foto de nuevo
+                  Tomar foto del {placeholder}
                 </button>
               )}
             </>

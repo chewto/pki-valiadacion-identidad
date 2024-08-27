@@ -6,11 +6,9 @@ import {
 } from "../nucleo/validadores/validacion-identidad/validador-formdata";
 import { FormularioFotoPersona } from "../componentes/validacion-identidad/formulario-foto-persona";
 import { FormularioDocumento } from "../componentes/validacion-identidad/formulario-documento";
-//import { EditarImagen } from "../componentes/validacion-identidad/editar-imagen";
 import { useSearchParams } from "react-router-dom";
 import { MensajeVerificacion } from "../componentes/shared/mensaje-verificacion";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
-//import Stepper from "awesome-react-stepper";
 import { Header } from "../componentes/shared/header";
 import { SelectorTipoDocumento } from "../componentes/validacion-identidad/selector-tipo-documento";
 import { AccesoCamara } from "../componentes/validacion-identidad/acceso-camara";
@@ -31,10 +29,7 @@ import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
 import { useIos } from "../nucleo/hooks/useMobile";
 import { Advertencia } from "../componentes/shared/advertencia";
 import safari from "../assets/img/safari.png";
-// import { useMobile } from "../nucleo/hooks/useMobile";
-// import { CodigoQR } from "../componentes/shared/codigo-qr";
 import Button from "@mui/material/Button";
-
 
 export const ValidacionIdentidad: React.FC = () => {
   const [params] = useSearchParams();
@@ -46,13 +41,13 @@ export const ValidacionIdentidad: React.FC = () => {
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const validacionOCR = useSelector((state: RootState) => state.ocr);
-  const validacionCB = useSelector((state:RootState) => state.cb)
+  const validacionCB = useSelector((state: RootState) => state.cb);
 
   const dispatch = useDispatch();
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
-  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`
+  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`;
 
   const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
@@ -85,16 +80,27 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
-  const [validaciones, setValidaciones] = useState({validaciones: 0, estado: ''})
+  const [estadoValidacion, setEstadoValidacion] = useState("")
+
+  const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
+
+  const [proveedor, setProveedor] = useState(false)
 
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    axios.get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+    axios
+      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
-        const numeroValidaciones = res.data
-        setValidaciones(numeroValidaciones)
-      })
+        const estado = res.data.estado;
+        setEstadoValidacion(estado);
+      });
+
+    axios.get(`${URLS.proveedorLector}?entityId=${idUsuarioParam}`)
+    .then((res)=>{
+      const proveedor = res.data.proveedor
+      setProveedor(proveedor)
+    })
 
     axios({
       method: "get",
@@ -145,7 +151,8 @@ export const ValidacionIdentidad: React.FC = () => {
   };
 
   const enviar = async () => {
-    // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
+    setMostrar(true);
+    setLoading(true);
 
     ValidadorFormdata(
       formulario,
@@ -227,11 +234,7 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionCB.reconocido
     );
 
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.nombreCB,
-      validacionCB.nombre
-    );
+    ValidadorFormdata(formulario, formdataKeys.nombreCB, validacionCB.nombre);
 
     ValidadorFormdata(
       formulario,
@@ -245,36 +248,54 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionCB.documento
     );
 
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.nombres,
-        informacionFirmador.nombre
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.apellidos,
-        informacionFirmador.apellido
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.email,
-        informacionFirmador.correo
-      );
-      ValidadorFormdata(
-        formulario,
-        formdataKeys.numero_documento,
-        informacionFirmador.documento
-      );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.nombres,
+      informacionFirmador.nombre
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.apellidos,
+      informacionFirmador.apellido
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.email,
+      informacionFirmador.correo
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.numero_documento,
+      informacionFirmador.documento
+    );
+
+    let estadoValidaciones = "";
+
+    await axios
+      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+      .then((res) => {
+        const estado = res.data.estado;
+        estadoValidaciones = estado
+        setEstadoValidacion(estado)
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(true);
+      })
+      // .finally(() => {
+      //   setLoading(false);
+      //   if (
+      //     estadoValidaciones !== "se requiere nueva validación"
+      //   ) {
+      //     console.log("hola")
+      //     setMostrarAdvertencia(true);
+      //   }
+      // });
 
     if (
-      informacion.foto_persona !== "" &&
-      informacion.anverso !== "" &&
-      informacion.reverso !== ""
+      estadoValidaciones.length === 0 ||
+      estadoValidaciones === "se requiere nueva validación"
     ) {
-      console.log(formulario);
-      setMostrar(true);
-      setLoading(true);
-
       let idValidacion = 0;
       let idUsuario = 0;
 
@@ -289,8 +310,6 @@ export const ValidacionIdentidad: React.FC = () => {
         .then((res) => {
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
-
-          console.log(idValidacion, idUsuario);
         })
         .catch((err) => {
           console.error(err);
@@ -298,24 +317,29 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
+          setTimeout(function () {
             window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+          }, 250);
         });
+    }else{
+      setLoading(false)
+      setMostrarAdvertencia(true)
     }
   };
 
   const steps = ["1", "2", "3", "4", "5"];
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
-  const [progreso, setProgreso] = useState<number>(0)
-  
+  const [progreso, setProgreso] = useState<number>(0);
+
   const handleNext = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
-    setProgreso((prev) => prev + 25)
+    setProgreso((prev) => prev + 25);
   };
 
   const handleBack = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep - 1);
-    setProgreso((prev) => prev - 25)
+    setProgreso((prev) => prev - 25);
   };
 
   const componentsSteps = [
@@ -332,6 +356,7 @@ export const ValidacionIdentidad: React.FC = () => {
       selfie={labelFoto.foto_persona}
     />,
     <FormularioDocumento
+      codigoBarras={false}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.anverso}
       continuarBoton={continuarBoton}
@@ -340,6 +365,7 @@ export const ValidacionIdentidad: React.FC = () => {
       urlOCR={URLS.validarDocumentoAnverso}
     />,
     <FormularioDocumento
+      codigoBarras={proveedor}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.reverso}
       continuarBoton={continuarBoton}
@@ -355,7 +381,7 @@ export const ValidacionIdentidad: React.FC = () => {
         <div className="content-container">
           <Header titulo="Validación de identidad" />
           <div style={{ margin: "17px", position: "relative" }}>
-            <PasosEnumerados tipo='3' paso={activeSteps} progreso={progreso}/>
+            <PasosEnumerados tipo="3" paso={activeSteps} progreso={progreso} />
             <div className="content-buttons">
               <Button disabled={activeSteps === 0} onClick={handleBack}>
                 Volver
@@ -368,7 +394,7 @@ export const ValidacionIdentidad: React.FC = () => {
                   color="primary"
                   onClick={handleNext}
                 >
-                  {continuarBoton ? 'Continuar' : 'Esperando'}
+                  {continuarBoton ? "Continuar" : "Esperando"}
                 </Button>
               )}
 
@@ -379,13 +405,12 @@ export const ValidacionIdentidad: React.FC = () => {
                   color="primary"
                   onClick={enviar}
                 >
-                  {continuarBoton ? 'Finalizar' : 'Esperando'}
+                  {continuarBoton ? "Finalizar" : "Esperando"}
                 </Button>
               )}
             </div>
 
             {componentsSteps[activeSteps]}
-
           </div>
           {mostrarMensaje && loading && (
             <MensajeVerificacion
@@ -407,15 +432,23 @@ export const ValidacionIdentidad: React.FC = () => {
           <Advertencia
             titulo="Advertencia"
             contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
-            elemento={<img src={safari} style={{width: '50%'}}/>}
+            elemento={<img src={safari} style={{ width: "50%" }} />}
           />
         )}
 
-        {validaciones.validaciones >= 1 && (
+        {estadoValidacion.length >= 1 && estadoValidacion !== "se requiere nueva validación" && (
           <Advertencia
             titulo="Su validación ha finalizado."
-            contenido="A continuación el estado actual de la validacón:"
-            elemento={<p>{validaciones.estado}</p>}
+            contenido="A continuación el estado actual de la validación:"
+            elemento={<p>{estadoValidacion}</p>}
+          />
+        )}
+
+      {mostrarAdvertencia && (
+          <Advertencia
+            titulo="Su validación ha finalizado."
+            contenido="A continuación el estado actual de la validación:"
+            elemento={<p>Validando identidad.</p>}
           />
         )}
 
