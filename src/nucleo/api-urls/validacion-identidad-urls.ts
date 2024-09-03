@@ -1,26 +1,32 @@
-const pais = 'eFirmaPanama'
+const pais = 'honducert'
 
 const rutasURL = {
   desarrollo:{
     validacion: "http://127.0.0.1:4000",
     fe: "http://127.0.0.1:4000/obtener-firmador",
     resultados: "https://efirma.pkiservices.co/efirma.php/"
-  },
-  libertador:{
-    validacion: "https://libertador.pkiservices.co/validacion-back",
-    fe: "https://libertador.pkiservices.co/fe-back/api/Firmador",
-    resultados: "https://efirma.pkiservices.co/efirma.php/"
-  },
-  eFirmaPanama:{
-    validacion: "https://panama.efirma.pkiservices.co/validacion-back",
-    fe: "https://panama.efirma.pkiservices.co/fe-back/api/Firmador",
-    resultados: "https://panama.efirma.pkiservices.co/efirma.php/"
-  },
-  eFirmaCO:{
-    validacion: "https://e-firma.pkiservices.co/validacion-back",
-    fe: "https://e-firma.pkiservices.co/fe-back/api/Firmador",
-    resultados: "https://e-firma.pkiservices.co/efirma.php/"
   }
+  ,
+    honducert:{
+      validacion: "https://honducert.firma.e-custodia.com/validacion-back/",
+      fe: "https://honducert.firma.e-custodia.com/fe-back/api/Firmador",
+      resultados: "https://honducert.firma.e-custodia.com/efirma.php/"
+    }
+  // libertador:{
+  //   validacion: "https://libertador.pkiservices.co/validacion-back",
+  //   fe: "https://libertador.pkiservices.co/fe-back/api/Firmador",
+  //   resultados: "https://efirma.pkiservices.co/efirma.php/"
+  // },
+  // eFirmaPanama:{
+  //   validacion: "https://panama.efirma.pkiservices.co/validacion-back",
+  //   fe: "https://panama.efirma.pkiservices.co/fe-back/api/Firmador",
+  //   resultados: "https://panama.efirma.pkiservices.co/efirma.php/"
+  // },
+  // eFirmaCO:{
+  //   validacion: "https://e-firma.pkiservices.co/validacion-back",
+  //   fe: "https://e-firma.pkiservices.co/fe-back/api/Firmador",
+  //   resultados: "https://e-firma.pkiservices.co/efirma.php/"
+  // }
 }
 
 const firmadorUrlBase = rutasURL[pais]["fe"]

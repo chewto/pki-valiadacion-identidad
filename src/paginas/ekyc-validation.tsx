@@ -16,7 +16,7 @@ export const EKYCValidation: React.FC = () => {
 
   useValidationRedirect(validationName, idUsuarioParam, idParam, tipoParam);
 
-  const url = "https://panama.efirma.pkiservices.co/ekyc";
+  const url = "https://honducert.firma.e-custodia.com/ekyc";
 
   const [documentType, setDocumentType] = useState<string>("");
   const [coords, setCoords] = useState<string>("")
