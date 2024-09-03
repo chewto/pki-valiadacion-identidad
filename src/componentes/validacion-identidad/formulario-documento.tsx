@@ -24,7 +24,7 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
   urlOCR: string;
-  codigoBarras: boolean;
+  codigoBarras: string;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -177,7 +177,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     ladoDocumento: string,
     tipoDocumento: string,
     imagenPersona: string,
-    lectura:boolean
+    lectura:string
   ) => {
     setError(false);
     setLoading(true);

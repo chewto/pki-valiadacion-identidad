@@ -84,7 +84,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
 
-  const [proveedor, setProveedor] = useState(false)
+  const [proveedor, setProveedor] = useState('')
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -93,6 +93,7 @@ export const ValidacionIdentidad: React.FC = () => {
       .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
         const estado = res.data.estado;
+        console.log(estado)
         setEstadoValidacion(estado);
       });
 
@@ -356,7 +357,7 @@ export const ValidacionIdentidad: React.FC = () => {
       selfie={labelFoto.foto_persona}
     />,
     <FormularioDocumento
-      codigoBarras={false}
+      codigoBarras={''}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.anverso}
       continuarBoton={continuarBoton}
