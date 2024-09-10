@@ -68,7 +68,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
   // const esMobile = useMobile();
 
-  useValidationRedirect(validationName, idUsuarioParam, idParam, tipoParam);
+  useValidationRedirect(validationName, idUsuarioParam, `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`);
 
   const hora = useHour();
   const fecha = useDate();

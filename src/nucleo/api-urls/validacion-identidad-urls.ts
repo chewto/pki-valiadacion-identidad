@@ -47,10 +47,11 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`,
-  pruebaVida: `${urlBase}/anti-spoof`
+  pruebaVida: `${urlBase}/anti-spoof`,
+  lleidaValidation: `https://honducert.firma.e-custodia.com/ekyc`
 }
 
 export const validationRedirects = {
   "EFIRMA": "/validacion",
-  "EKYC_LLEIDA":"/eKYC-validation"
+  "EKYC_LLEIDA":"/eKYC-validation",
 }

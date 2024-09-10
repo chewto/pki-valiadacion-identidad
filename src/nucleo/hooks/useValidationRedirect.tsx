@@ -9,8 +9,7 @@ import {
 export const useValidationRedirect = (
   validationName: string,
   idUser: string | null,
-  id: string | null,
-  type: string | null
+  searchParams: string | null
 ) => {
   const navigate = useNavigate();
 
@@ -21,7 +20,8 @@ export const useValidationRedirect = (
       if (provider !== validationName) {
         const pageNav =
           validationRedirects[provider as keyof typeof validationRedirects];
-        navigate(`${pageNav}?id=${id}&idUsuario=${idUser}&tipo=${type}`);
+
+        navigate(`${pageNav}?${searchParams}`);
       }
     });
   }, []);

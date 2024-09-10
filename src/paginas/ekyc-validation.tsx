@@ -3,6 +3,9 @@ import { Selector } from "../componentes/eKYC-validation/selector";
 import { Button } from "@mui/material";
 import { useSearchParams } from "react-router-dom";
 import { useValidationRedirect } from "../nucleo/hooks/useValidationRedirect";
+import axios from "axios";
+import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
+import { Advertencia } from "../componentes/shared/advertencia";
 
 export const EKYCValidation: React.FC = () => {
 
@@ -13,10 +16,22 @@ export const EKYCValidation: React.FC = () => {
   const idParam = params.get("id");
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
+  
+  const [validaciones, setValidaciones] = useState<number>(0);
 
-  useValidationRedirect(validationName, idUsuarioParam, idParam, tipoParam);
+  useEffect(() => {
+    axios
+      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+      .then((res) => {
+        console.log(res)
+        const numeroValidaciones = res.data.validaciones;
+        setValidaciones(numeroValidaciones);
+      });
+  }, [])
 
-  const url = "https://honducert.firma.e-custodia.com/ekyc";
+
+  useValidationRedirect(validationName, idUsuarioParam, `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`);
+
 
   const [documentType, setDocumentType] = useState<string>("");
   const [coords, setCoords] = useState<string>("")
@@ -55,7 +70,7 @@ export const EKYCValidation: React.FC = () => {
           color="primary"
           >
             <a
-              href={`${url}?type=${documentType}&coords=${coords}&efirmaId=${idUsuarioParam}`}
+              href={`${URLS.lleidaValidation}?typeDocument=${documentType}&coords=${coords}&efirmaId=${idUsuarioParam}&tipo=${tipoParam}`}
               style={{ textDecoration: "none", color: "#fff" }}
             >
               Continuar la validación.
@@ -64,6 +79,13 @@ export const EKYCValidation: React.FC = () => {
         </article>
         <Selector setDocumentType={setDocumentType} />
       </section>
+      {validaciones >= 1 && (
+          <Advertencia
+            titulo="Su validación esta siendo procesada"
+            contenido=""
+            elemento={<>Su validación se encuentra en proceso</>}
+          />
+        )}
     </main>
   );
 };
