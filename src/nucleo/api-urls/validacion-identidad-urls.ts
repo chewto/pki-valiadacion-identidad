@@ -52,9 +52,9 @@ export const URLS = {
   lleidaValidation: `https://colombia.e-custodia.com/ekyc`
 }
 
-const baseRoute = 'validacion'
+// const baseRoute = '#'
 
 export const validationRedirects = {
-  "EFIRMA": `/${baseRoute}/ekyc-efirma`,
-  "EKYC_LLEIDA":`/${baseRoute}/ekyc`,
+  "EFIRMA": `/ekyc-efirma`,
+  "EKYC_LLEIDA":`/ekyc`,
 }
