@@ -8,7 +8,7 @@ const rutasURL = {
   }
   ,
     honducert:{
-      validacion: "https://honducert.firma.e-custodia.com/validacion-back/",
+      validacion: "https://honducert.firma.e-custodia.com/validacion-back",
       fe: "https://honducert.firma.e-custodia.com/fe-back/api/Firmador",
       resultados: "https://honducert.firma.e-custodia.com/efirma.php/"
     }
@@ -44,11 +44,12 @@ export const URLS = {
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
   comprobarProceso: `${urlBase}/comprobacion-proceso`,
+  comprobarValidacion: `${urlBase}/validation/check-validation`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`,
   pruebaVida: `${urlBase}/anti-spoof`,
-  lleidaValidation: `https://honducert.firma.e-custodia.com/ekyc`
+  lleidaValidation: `https://colombia.e-custodia.com/ekyc`
 }
 
 export const validationRedirects = {

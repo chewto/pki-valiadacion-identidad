@@ -88,16 +88,16 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
-  const [validaciones, setValidaciones] = useState<number>(0);
+  const [validaciones, setValidaciones] = useState<string>("");
 
   useEffect(() => {
     document.title = "Validacion identidad";
 
     axios
-      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+      .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
-        const numeroValidaciones = res.data.validaciones;
-        setValidaciones(numeroValidaciones);
+        const estadoValidacion = res.data.results.estado;
+        setValidaciones(estadoValidacion);
       });
 
     axios({
@@ -419,11 +419,11 @@ export const ValidacionIdentidad: React.FC = () => {
           />
         )}
 
-        {validaciones >= 1 && (
+        {validaciones.length >= 1 && validaciones !== 'se requiere nueva validación' && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
             contenido=""
-            elemento={<>Su validación se encuentra en proceso</>}
+            elemento={<>Estado de la validación: {validaciones}</>}
           />
         )}
 

@@ -17,15 +17,15 @@ export const EKYCValidation: React.FC = () => {
   const idUsuarioParam = params.get("idUsuario");
   const tipoParam = params.get("tipo");
   
-  const [validaciones, setValidaciones] = useState<number>(0);
+  const [validaciones, setValidaciones] = useState<string>('');
 
   useEffect(() => {
     axios
-      .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
+      .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
         console.log(res)
-        const numeroValidaciones = res.data.validaciones;
-        setValidaciones(numeroValidaciones);
+        const estadoValidacion = res.data.results.estado;
+        setValidaciones(estadoValidacion);
       });
   }, [])
 
@@ -79,11 +79,11 @@ export const EKYCValidation: React.FC = () => {
         </article>
         <Selector setDocumentType={setDocumentType} />
       </section>
-      {validaciones >= 1 && (
+      {validaciones.length >= 1 && validaciones !== 'se requiere nueva validación' && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
             contenido=""
-            elemento={<>Su validación se encuentra en proceso</>}
+            elemento={<>Estado de la validación: {validaciones}</>}
           />
         )}
     </main>
