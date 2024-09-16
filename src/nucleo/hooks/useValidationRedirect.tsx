@@ -21,6 +21,7 @@ export const useValidationRedirect = (
         const pageNav =
           validationRedirects[provider as keyof typeof validationRedirects];
 
+        console.log(pageNav)
         navigate(`${pageNav}?${searchParams}`);
       }
     });
