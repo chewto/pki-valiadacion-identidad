@@ -422,8 +422,8 @@ export const ValidacionIdentidad: React.FC = () => {
         {validaciones.length >= 1 && validaciones !== 'se requiere nueva validación' && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
-            contenido=""
-            elemento={<>Estado de la validación: {validaciones}</>}
+            contenido="Estado de la validación:"
+            elemento={<b>{validaciones}</b>}
           />
         )}
 

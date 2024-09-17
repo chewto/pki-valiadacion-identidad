@@ -6,6 +6,7 @@ import { useValidationRedirect } from "../nucleo/hooks/useValidationRedirect";
 import axios from "axios";
 import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
 import { Advertencia } from "../componentes/shared/advertencia";
+import { Header } from "../componentes/shared/header";
 
 export const EKYCValidation: React.FC = () => {
 
@@ -60,6 +61,7 @@ export const EKYCValidation: React.FC = () => {
   return (
     <main className="main-container">
       <section className="content-container">
+        <Header titulo="Validación de identidad"/>
         <article className="content-buttons" style={{justifyContent: 'center'}}>
           <Button
           style={{
@@ -82,8 +84,8 @@ export const EKYCValidation: React.FC = () => {
       {validaciones.length >= 1 && validaciones !== 'se requiere nueva validación' && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
-            contenido=""
-            elemento={<>Estado de la validación: {validaciones}</>}
+            contenido="Estado de la validación:"
+            elemento={<b>{validaciones}</b>}
           />
         )}
     </main>

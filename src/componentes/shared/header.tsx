@@ -1,4 +1,4 @@
-import logoPKI from '../../assets/img/logo-pki.png'
+import logo from '../../assets/img/logo-honducert.png'
 
 interface Props{
   titulo: string;
@@ -7,7 +7,7 @@ interface Props{
 export const Header:React.FC<Props> = ({titulo}) => {
   return(
     <header>
-      <img src={logoPKI} alt="pki" />
+      <img src={logo} alt="pki" style={{width: '50%', paddingBottom: '10px'}}/>
       <h2 className="title">{titulo}</h2>
     </header>
   )

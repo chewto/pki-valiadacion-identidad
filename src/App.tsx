@@ -23,8 +23,6 @@ function App() {
           </Route> */}
         </Routes>
       </Router>
-
-      <h1>Test router</h1>
     </>
   );
 }
