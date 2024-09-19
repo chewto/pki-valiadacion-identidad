@@ -81,6 +81,7 @@ export const ValidacionIdentidad: React.FC = () => {
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
   const [estadoValidacion, setEstadoValidacion] = useState("")
+  const [retry, setRetry] = useState(false)
 
   const [mostrarAdvertencia, setMostrarAdvertencia] = useState(false);
 
@@ -93,7 +94,8 @@ export const ValidacionIdentidad: React.FC = () => {
       .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
         const estado = res.data.estado;
-        console.log(estado)
+        const testValidation = estado.includes('se requiere nueva validación')
+        setRetry(testValidation)
         setEstadoValidacion(estado);
       });
 
@@ -271,12 +273,16 @@ export const ValidacionIdentidad: React.FC = () => {
     );
 
     let estadoValidaciones = "";
+    let retryValidation = false
 
     await axios
       .get(`${URLS.comprobarProceso}?idUsuarioEFirma=${idUsuarioParam}`)
       .then((res) => {
         const estado = res.data.estado;
         estadoValidaciones = estado
+        const testValidation = estado.includes('se requiere nueva validación')
+        retryValidation = testValidation
+        setRetry(testValidation)
         setEstadoValidacion(estado)
       })
       .catch((err) => {
@@ -295,7 +301,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
     if (
       estadoValidaciones.length === 0 ||
-      estadoValidaciones === "se requiere nueva validación"
+      retryValidation
     ) {
       let idValidacion = 0;
       let idUsuario = 0;
@@ -437,7 +443,7 @@ export const ValidacionIdentidad: React.FC = () => {
           />
         )}
 
-        {estadoValidacion.length >= 1 && estadoValidacion !== "se requiere nueva validación" && (
+        {estadoValidacion.length >= 1 && !retry && (
           <Advertencia
             titulo="Su validación ha finalizado."
             contenido="A continuación el estado actual de la validación:"
