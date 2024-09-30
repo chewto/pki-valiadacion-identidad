@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { ValidacionIdentidad } from "../../paginas/validacion-identidad";
+import { ValidacionIdentidad } from "../../layouts/validacion-identidad";
 import App  from "../../App";
 
 export const router = createBrowserRouter([
