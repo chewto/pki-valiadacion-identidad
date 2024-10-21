@@ -1,4 +1,7 @@
-const pais = 'honducert'
+const pais = 'desarrollo'
+
+const subdomain = 'honducert'
+const ekycSubdomain = 'honduras'
 
 const rutasURL = {
   desarrollo:{
@@ -8,9 +11,9 @@ const rutasURL = {
   }
   ,
     honducert:{
-      validacion: "https://honducert.firma.e-custodia.com/validacion-back",
-      fe: "https://honducert.firma.e-custodia.com/fe-back/api/Firmador",
-      resultados: "https://honducert.firma.e-custodia.com/efirma.php/"
+      validacion: `https://${subdomain}.firma.e-custodia.com/validacion-back`,
+      fe: `https://${subdomain}.firma.e-custodia.com/fe-back/api/Firmador`,
+      resultados: `https://${subdomain}.firma.e-custodia.com/efirma.php/`
     }
   // libertador:{
   //   validacion: "https://libertador.pkiservices.co/validacion-back",
@@ -49,10 +52,8 @@ export const URLS = {
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`,
   pruebaVida: `${urlBase}/anti-spoof`,
-  lleidaValidation: `https://colombia.e-custodia.com/ekyc`
+  lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`
 }
-
-// const baseRoute = '#'
 
 export const validationRedirects = {
   "EFIRMA": `/ekyc-efirma`,

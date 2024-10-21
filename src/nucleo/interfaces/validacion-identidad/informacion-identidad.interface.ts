@@ -33,10 +33,12 @@ export interface Dato {
   fechaCreacion?: string;
 }
 
-export interface ValidacionOCR {
+export interface ValidacionDocumento {
   ocr: OCR;
-  porcentajes: Porcentajes;
+  porcentajesOCR: Porcentajes;
   rostro: boolean;
+  mrz: string;
+  codigoBarras: string
 }
 
 interface OCR {

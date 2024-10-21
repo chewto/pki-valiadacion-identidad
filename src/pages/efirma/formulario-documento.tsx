@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import "../../styles/styles.css";
-import "../../styles/formulario-style.component.css";
+import "@styles/styles.css";
+import "@styles/formulario-style.component.css";
 import { Previsualizacion } from "@components/ui/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
 import axios, { AxiosResponse } from "axios";
-import { setValidacionOCR } from "../../nucleo/redux/slices/validacionOCRSlice";
+import { setValidacionOCR, setValidacionCodigoBarras, setValidacionMRZ, setValidacionRostro } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
 import Camera from "react-html5-camera-photo";
 import { FACING_MODES } from "react-html5-camera-photo";
-import { setValidacionCB } from "../../nucleo/redux/slices/validacionCB";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import {imagePlaceholder} from '@components/dataurl'
 
 interface Props {
+  id: string | null;
   tipoDocumento: string;
   preview: string;
   continuarBoton: boolean;
@@ -27,6 +27,7 @@ interface Props {
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
+  id,
   tipoDocumento,
   preview,
   continuarBoton,
@@ -35,7 +36,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
-  const validacionOCR = useSelector((state: RootState) => state.ocr);
+  const validaiconDocumento = useSelector((state: RootState) => state.validacionDocumento);
   const dispatch = useDispatch();
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
@@ -63,11 +64,11 @@ export const FormularioDocumento: React.FC<Props> = ({
       setContinuarBoton(false);
     }
 
-    // if (preview.length >= 1 && validacionOCR.rostro === true){
+    // if (preview.length >= 1 && validaiconDocumento.rostro === true){
     //   setContinuarBoton(true)
     // }
 
-    // if (conteo >= 3 && preview.length >= 1 && validacionOCR.rostro === false){
+    // if (conteo >= 3 && preview.length >= 1 && validaiconDocumento.rostro === false){
     //   setContinuarBoton(true)
     // }
   }, [
@@ -75,7 +76,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     setContinuarBoton,
     preview.length,
     tipoDocumento,
-    validacionOCR.rostro,
+    validaiconDocumento.rostro,
   ]);
 
   useEffect(() => {
@@ -127,6 +128,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
 
           validarDocumento(
+            id,
             imagenResized,
             informacionFirmador.nombre,
             informacionFirmador.apellido,
@@ -150,6 +152,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
 
     validarDocumento(
+      id,
       dataURL,
       informacionFirmador.nombre,
       informacionFirmador.apellido,
@@ -166,6 +169,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = (
+    id: string | null,
     imagenDocumento: string | ArrayBuffer | null,
     nombre: string,
     apellido: string,
@@ -180,6 +184,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     apellido = apellido.toUpperCase();
 
     const data = {
+      id:id,
       imagen: imagenDocumento,
       nombre: nombre,
       apellido: apellido,
@@ -202,8 +207,12 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
+        console.log(res.data)
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
+          dispatch(setValidacionCodigoBarras(res.data))
+          dispatch(setValidacionMRZ(res.data))
+          dispatch(setValidacionRostro(res.data))
 
           const ocr = res.data.ocr;
 
@@ -238,7 +247,8 @@ export const FormularioDocumento: React.FC<Props> = ({
         }
 
         if (ladoDocumento === "reverso") {
-          dispatch(setValidacionCB(res.data.codigoBarra));
+          dispatch(setValidacionCodigoBarras(res.data))
+          dispatch(setValidacionMRZ(res.data))
 
           if (res.data.ladoValido) {
             setConteo(0);

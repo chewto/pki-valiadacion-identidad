@@ -25,6 +25,7 @@ import {
 // import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { Button } from "reactstrap";
 import { Advertencia } from "@components/ui/advertencia";
+import { documentTypes } from "@nucleo/documents/documentsTypes";
 // import Lleida from "@pages/ekyc-lleida/lleida";
 
 export default function EKYCLleida() {
@@ -113,19 +114,6 @@ export default function EKYCLleida() {
     }
   };
 
-  const documentList = [
-    {
-      id: 0,
-      value: "PHOTO_ID",
-      label: "Documento de identidad",
-    },
-    {
-      id: 1,
-      value: "PASSPORT",
-      label: "Pasaporte",
-    },
-  ];
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center xsm:px-1">
       <Card>
@@ -146,7 +134,7 @@ export default function EKYCLleida() {
         </div>
         <DocumentSelector
           tipoDocumento={informacion.tipoDocumento}
-          documentList={documentList}
+          documentList={documentTypes['hndLleida']}
           continuarBoton={contiueButton}
           setContinuarBoton={setContiueButton}
         />

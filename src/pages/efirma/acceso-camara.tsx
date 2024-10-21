@@ -1,8 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
-import "../../styles/acceso-camara.component.css";
 import accesoCamara from '../../assets/img/acceso-camara.jpg'
-import { useMobile } from "../../nucleo/hooks/useMobile";
+import { useMobile } from "@nucleo/hooks/useMobile";
 
 interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
@@ -48,18 +47,18 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
   }, []);
 
   return (
-    <div className="acceso-container">
+    <div className="flex flex-col items-center my-3">
       <video src="" ref={videoRef} style={{ display: "none" }}></video>
 
       {desplegarCamara == 0 && (
         <>
-          <h3>Permítenos usar su cámara</h3>
-          <p>
+          <h3 className="text-lg font-bold text-slate-800 ">Permítenos usar su cámara</h3>
+          <p className="xsm:text-sm md:text-base text-center text-slate-800">
             Si ve una ventana emergente que pida acceso a su cámara. Por
             favor, asegurate de hacer click en permitir.
           </p>
 
-          {!esMobile && <img src={accesoCamara} alt="acceso ejemplo" className="imagen-ejemplo" />}
+          {!esMobile && <img src={accesoCamara} alt="acceso ejemplo" className="my-2" />}
           <Button color="success" onClick={iniciarCamara}>
             Permitir acceso a la cámara
           </Button>
@@ -68,15 +67,15 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
 
       {desplegarCamara == 1 && (
         <>
-          <h3>El acceso a la cámara concedido</h3>
-          <p>Puede continuar con la verificación</p>
+          <h3 className="text-lg font-bold text-slate-800">El acceso a la cámara concedido</h3>
+          <p className="text-center text-slate-800">Puede continuar con la verificación</p>
         </>
       )}
 
       {desplegarCamara == 2 &&  (
         <>
-          <h3>El acceso a la cámara fue denegado</h3>
-          <p>Por favor recargue la página</p>
+          <h3 className="text-lg font-bold text-slate-800">El acceso a la cámara fue denegado</h3>
+          <p className="text-center text-slate-800">Por favor recargue la página</p>
         </>
       )}
     </div>

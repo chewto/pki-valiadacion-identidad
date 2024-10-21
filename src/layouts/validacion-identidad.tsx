@@ -33,6 +33,8 @@ import safari from "../assets/img/safari.png";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
 import { useValidationRedirect } from "../nucleo/hooks/useValidationRedirect";
+import { documentTypes } from "@nucleo/documents/documentsTypes";
+import Card from "@components/ui/card";
 
 export const ValidacionIdentidad: React.FC = () => {
   const validationName = "EFIRMA";
@@ -47,7 +49,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
-  const validacionOCR = useSelector((state: RootState) => state.ocr);
+  const validacionDocumento = useSelector((state: RootState) => state.validacionDocumento);
   const validacionCB = useSelector((state: RootState) => state.cb);
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
@@ -194,52 +196,46 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeNombreOCR,
-      validacionOCR.porcentajes.porcentajeNombreOCR
+      validacionDocumento.porcentajesOCR.porcentajeNombreOCR
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeApellidoOCR,
-      validacionOCR.porcentajes.porcentajeApellidoOCR
+      validacionDocumento.porcentajesOCR.porcentajeApellidoOCR
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeDocumentoOCR,
-      validacionOCR.porcentajes.porcentajeDocumentoOCR
+      validacionDocumento.porcentajesOCR.porcentajeDocumentoOCR
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.nombreOCR,
-      validacionOCR.ocr.nombreOCR
+      validacionDocumento.ocr.nombreOCR
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.apellidoOCR,
-      validacionOCR.ocr.apellidoOCR
+      validacionDocumento.ocr.apellidoOCR
     );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.documentoOCR,
-      validacionOCR.ocr.documentoOCR
+      validacionDocumento.ocr.documentoOCR
     );
 
     ValidadorFormdata(
       formulario,
-      formdataKeys.reconocidoCB,
-      validacionCB.reconocido
+      formdataKeys.mrz,
+      validacionDocumento.mrz
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.codigoBarras,
+      validacionDocumento.codigoBarras
     );
 
-    ValidadorFormdata(formulario, formdataKeys.nombreCB, validacionCB.nombre);
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.apellidoCB,
-      validacionCB.apellido
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.documentoCB,
-      validacionCB.documento
-    );
     ValidadorFormdata(
       formulario,
       formdataKeys.nombres,
@@ -308,7 +304,10 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
-          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+          for (const [key, value] of formulario.entries()) {
+            console.log(`${key}: ${value}`);
+          }
+          // window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         });
     }
   };
@@ -325,38 +324,10 @@ export const ValidacionIdentidad: React.FC = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const tiposDocumentos = [
-    {
-      id: 0,
-      value: "Cédula de ciudadanía",
-      label: "Cédula de ciudadanía"
-    },
-    {
-      id: 1,
-      value: "Cédula de extranjería",
-      label: "Cédula de extranjería"
-    },
-    {
-      id: 2,
-      value: "Permiso por protección temporal",
-      label: "Permiso por protección temporal"
-    },
-    {
-      id: 3,
-      value: "Tarjeta de identidad",
-      label: "Tarjeta de identidad"
-    },
-    {
-      id: 4,
-      value: "Pasaporte",
-      label: "Pasaporte"
-    }
-  ];
-
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={tiposDocumentos}
+      documentList={documentTypes['hnd']}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
@@ -367,6 +338,7 @@ export const ValidacionIdentidad: React.FC = () => {
       selfie={labelFoto.foto_persona}
     />,
     <FormularioDocumento
+      id={idUsuarioParam}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.anverso}
       continuarBoton={continuarBoton}
@@ -375,6 +347,7 @@ export const ValidacionIdentidad: React.FC = () => {
       urlOCR={URLS.validarDocumentoAnverso}
     />,
     <FormularioDocumento
+      id={idUsuarioParam}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.reverso}
       continuarBoton={continuarBoton}
@@ -386,10 +359,10 @@ export const ValidacionIdentidad: React.FC = () => {
 
   return (
     <>
-      <main className="main-container">
-        <div className="content-container">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center xsm:px-1">
+        <Card>
           <Header titulo="Validación de identidad" />
-          <div className="m-4 relative">
+          <div className="m-0">
             <PasosEnumerados tipo="3" paso={activeSteps} />
             <div className="content-buttons">
               <Button disabled={activeSteps === 0} onClick={handleBack}>
@@ -435,7 +408,7 @@ export const ValidacionIdentidad: React.FC = () => {
               mensaje="Cargando Información"
             />
           )}
-        </div>
+        </Card>
 
         {esIOS && navegador !== "Safari" && (
           <Advertencia

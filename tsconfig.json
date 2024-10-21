@@ -28,6 +28,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "sdk/js/LleidaSDK.js", "sdk"],
+  "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

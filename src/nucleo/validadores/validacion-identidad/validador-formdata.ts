@@ -40,5 +40,7 @@ export const formdataKeys = {
   documentoCB: "documento_CB",
   movimiento: "movimiento_prueba_vida",
   idCarpetaEntidad: "carpeta_entidad_prueba_vida",
-  idCarpetaUsuario: "carpeta_usuario_prueba_vida"
+  idCarpetaUsuario: "carpeta_usuario_prueba_vida",
+  mrz: "mrz",
+  codigoBarras: "codigo_barras"
 };
