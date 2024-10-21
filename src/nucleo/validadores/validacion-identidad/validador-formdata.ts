@@ -1,7 +1,7 @@
 export const ValidadorFormdata = (
   form: FormData,
   key: string,
-  value: File | string
+  value: File | string 
 ) => {
   if (form.has(key)) {
     form.set(key, value);
@@ -10,8 +10,6 @@ export const ValidadorFormdata = (
   if (!form.has(key)) {
     form.append(key, value);
   }
-
-  console.log(form.get(key));
 };
 
 export const formdataKeys = {
@@ -29,5 +27,20 @@ export const formdataKeys = {
   latitud: "latitud",
   longitud: "longitud",
   hora: "hora",
-  fecha: "fecha"
+  fecha: "fecha",
+  porcentajeNombreOCR: "porcentaje_nombre_ocr",
+  porcentajeApellidoOCR: "porcentaje_apellido_ocr",
+  porcentajeDocumentoOCR: "porcentaje_documento_ocr",
+  nombreOCR: "nombre_ocr",
+  apellidoOCR: "apellido_ocr",
+  documentoOCR: "documento_ocr",
+  reconocidoCB: "reconocido_CB",
+  nombreCB: "nombre_CB",
+  apellidoCB: "apellido_CB",
+  documentoCB: "documento_CB",
+  movimiento: "movimiento_prueba_vida",
+  idCarpetaEntidad: "carpeta_entidad_prueba_vida",
+  idCarpetaUsuario: "carpeta_usuario_prueba_vida",
+  mrz: "mrz",
+  codigoBarras: "codigo_barras"
 };

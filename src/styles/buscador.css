@@ -1,0 +1,15 @@
+.tabla-buscador{
+  border: 1px solid red;
+}
+
+
+.th-headers-buscador{
+  border: 2px solid #000;
+  padding: 2px 15px;
+}
+
+.td-data-buscador{
+  border: 2px solid #000;
+  text-align: center;
+  padding: 5px 10px;
+}
