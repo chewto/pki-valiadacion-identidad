@@ -312,10 +312,10 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
-          for (const [key, value] of formulario.entries()) {
-            console.log(`${key}: ${value}`);
-          }
-          // window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+          // for (const [key, value] of formulario.entries()) {
+          //   console.log(`${key}: ${value}`);
+          // }
+          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         });
     }
   };
