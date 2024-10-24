@@ -8,7 +8,6 @@ import axios from "axios";
 import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
 // import { Advertencia } from "@components/ui/advertencia";
 import { Header } from "@components/ui/header";
-import CardContainer from "@components/ui/card-container";
 // import { PasosEnumerados } from "@components/ui/pasos-enumerados";
 import { DocumentSelector } from "@pages/shared/document-selector";
 import { useDispatch, useSelector } from "react-redux";
@@ -140,7 +139,7 @@ export default function EKYCLleida() {
         />
       </Card>
 
-      {!retry && (
+      {retry && (
         <Advertencia
           titulo="Su validación esta siendo procesada"
           contenido=""

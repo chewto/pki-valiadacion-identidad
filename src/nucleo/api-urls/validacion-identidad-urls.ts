@@ -1,4 +1,4 @@
-const pais = 'desarrollo'
+const pais = 'honducert'
 
 const subdomain = 'honducert'
 const ekycSubdomain = 'honduras'

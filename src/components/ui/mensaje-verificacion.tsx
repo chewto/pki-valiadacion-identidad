@@ -24,7 +24,6 @@ export const MensajeVerificacion: React.FC<Props> = ({
         )}
 
         {(error && !loading) && (
-
           <Alert color="danger">
             Error con la conexion al servidor
           </Alert>

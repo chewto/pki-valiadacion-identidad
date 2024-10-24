@@ -7,8 +7,6 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const pasosTipo1 = [1, 2, 3, 4, 5];
   const pasosTipo2 = [4, 5, 6, 7, 8];
 
-  
-
   return (
     <div className="flex sm:justify-evenly xsm:justify-between my-4 ">
 
@@ -36,22 +34,9 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
       {tipo === "3" && (
         <>
           {pasosTipo2.map((index) => (
-            <>
-            
-              {paso + 3 >= index && paso != 0 ? (
-                <div key={index} className="bg-green-500 text-white py-1 px-2 rounded-2xl font-bold text-xs">
-                  ✓
-                </div>
-              ) : (
-                <div
-                  key={index}
-                  // style={{ opacity: paso + 4 === index ? '1' : '.7' }}
-                  className="bg-blue-500 text-white py-1 px-2  rounded-2xl font-bold text-xs"
-                >
-                  {index}
-                </div>
-              )}
-            </>
+            <div key={index} className={`transition-colors duration-300 ${paso + 3 >= index && paso != 0 ? 'bg-green-500' : 'bg-blue-500'} text-white py-1 px-2 rounded-2xl font-bold text-xs`}>
+              {paso + 3 >= index && paso != 0 ? "✓" : `${index}`}
+            </div>
           ))}
         </>
       )}

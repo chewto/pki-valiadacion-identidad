@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Previsualizacion } from "@components/ui/previsualizacion";
-import "../../styles/styles.css";
-import { setVaciarFoto } from "../../nucleo/redux/slices/informacionSlice";
+import "@styles/styles.css";
+import { setVaciarFoto } from "@nucleo/redux/slices/informacionSlice";
 import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { ValidacionVida } from "./validacion-vida";
@@ -107,8 +107,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
               Por favor, quítese la gafas o gorra para realizar la verificación.
             </span>
             <p className="advertencia" style={{ margin: "15px 0 0 0" }}>
-              La selfie se tomara de forma automatica, por favor mantenga la
-              mirada hacia la camara
+              Presione el botón para abrir su camara y prosiga. La selfie tarda 4 segundos en ser capturada.
             </p>
           </>
         )}
@@ -167,7 +166,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             setMostrarCamara(true);
           }}
         >
-          Tomar selfie
+          Abrir camara
         </button>
       )}
     </>

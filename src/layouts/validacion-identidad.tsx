@@ -3,38 +3,38 @@ import { useState, useEffect } from "react";
 import {
   ValidadorFormdata,
   formdataKeys,
-} from "../nucleo/validadores/validacion-identidad/validador-formdata";
-import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
-import { FormularioDocumento } from "@pages/efirma/formulario-documento";
-import { DocumentSelector } from "@pages/shared/document-selector";
-import { AccesoCamara } from "@pages/efirma/acceso-camara";
-import { useSearchParams } from "react-router-dom";
-import { MensajeVerificacion } from "@components/ui/mensaje-verificacion";
-import { URLS } from "../nucleo/api-urls/validacion-identidad-urls";
-import { Header } from "@components/ui/header";
-import { useBrowser } from "../nucleo/hooks/useBrowser";
-import { useDevice } from "../nucleo/hooks/useDevice";
-import { useHour } from "../nucleo/hooks/useHour";
-import { useDate } from "../nucleo/hooks/useDate";
-import { PasosEnumerados } from "@components/ui/pasos-enumerados";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../nucleo/redux/store";
+} from "@nucleo/validadores/validacion-identidad/validador-formdata";
+import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { useBrowser } from "@nucleo/hooks/useBrowser";
+import { useDevice } from "@nucleo/hooks/useDevice";
+import { useHour } from "@nucleo/hooks/useHour";
+import { useDate } from "@nucleo/hooks/useDate";
+import { RootState } from "@nucleo/redux/store";
 import {
   setIp,
   setCoordenadas,
   setHoraFecha,
   setDispostivoNavegador,
-} from "../nucleo/redux/slices/informacionSlice";
-import { setFirmador } from "../nucleo/redux/slices/firmadorSlice";
-import { useIos } from "../nucleo/hooks/useMobile";
+} from "@nucleo/redux/slices/informacionSlice";
+import { setFirmador } from "@nucleo/redux/slices/firmadorSlice";
+import { useIos } from "@nucleo/hooks/useMobile";
+import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
+import { documentTypes } from "@nucleo/documents/documentsTypes";
+import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
+import { FormularioDocumento } from "@pages/efirma/formulario-documento";
+import { DocumentSelector } from "@pages/shared/document-selector";
+import { AccesoCamara } from "@pages/efirma/acceso-camara";
+import { Header } from "@components/ui/header";
+import { PasosEnumerados } from "@components/ui/pasos-enumerados";
 import { Advertencia } from "@components/ui/advertencia";
+import { MensajeVerificacion } from "@components/ui/mensaje-verificacion";
+import Card from "@components/ui/card";
+import { useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
-import { useValidationRedirect } from "../nucleo/hooks/useValidationRedirect";
-import { documentTypes } from "@nucleo/documents/documentsTypes";
-import Card from "@components/ui/card";
 
 export const ValidacionIdentidad: React.FC = () => {
   const validationName = "EFIRMA";
@@ -49,8 +49,10 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const informacion = useSelector((state: RootState) => state.informacion);
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
-  const validacionDocumento = useSelector((state: RootState) => state.validacionDocumento);
-  const validacionCB = useSelector((state: RootState) => state.cb);
+  const validacionDocumento = useSelector(
+    (state: RootState) => state.validacionDocumento
+  );
+  // const validacionCB = useSelector((state: RootState) => state.cb);
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
   const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
@@ -70,7 +72,11 @@ export const ValidacionIdentidad: React.FC = () => {
 
   // const esMobile = useMobile();
 
-  useValidationRedirect(validationName, idUsuarioParam, `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`);
+  useValidationRedirect(
+    validationName,
+    idUsuarioParam,
+    `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
+  );
 
   const hora = useHour();
   const fecha = useDate();
@@ -90,7 +96,8 @@ export const ValidacionIdentidad: React.FC = () => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
-  const [validaciones, setValidaciones] = useState<string>("");
+  const [retry, setRetry] = useState<boolean>(false);
+  const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -98,8 +105,13 @@ export const ValidacionIdentidad: React.FC = () => {
     axios
       .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
-        const estadoValidacion = res.data.results.estado;
-        setValidaciones(estadoValidacion);
+        console.log(res);
+        const estadoValidacion: string = res.data.results.estado;
+        const text = "se requiere nueva validación";
+        const test = estadoValidacion.includes(text);
+        console.log(test, "asdasd");
+        setRetry(test);
+        setEstadoValidacion(estadoValidacion);
       });
 
     axios({
@@ -225,11 +237,7 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionDocumento.ocr.documentoOCR
     );
 
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrz,
-      validacionDocumento.mrz
-    );
+    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz);
     ValidadorFormdata(
       formulario,
       formdataKeys.codigoBarras,
@@ -299,7 +307,7 @@ export const ValidacionIdentidad: React.FC = () => {
           idUsuario = res.data.idUsuario;
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err);
           setLoading(false);
           setError(true);
         })
@@ -327,7 +335,7 @@ export const ValidacionIdentidad: React.FC = () => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes['hnd']}
+      documentList={documentTypes["hnd"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
@@ -394,35 +402,37 @@ export const ValidacionIdentidad: React.FC = () => {
 
             {componentsSteps[activeSteps]}
           </div>
-          {mostrarMensaje && loading && (
-            <MensajeVerificacion
-              loading={loading}
-              error={error}
-              mensaje="Verificando Información"
-            />
-          )}
-          {loading && (
-            <MensajeVerificacion
-              loading={loading}
-              error={error}
-              mensaje="Cargando Información"
-            />
-          )}
+          <>
+            {mostrarMensaje && loading && (
+              <MensajeVerificacion
+                loading={loading}
+                error={error}
+                mensaje="Verificando Información"
+              />
+            )}
+            {loading && (
+              <MensajeVerificacion
+                loading={loading}
+                error={error}
+                mensaje="Cargando Información"
+              />
+            )}
+          </>
         </Card>
 
         {esIOS && navegador !== "Safari" && (
           <Advertencia
             titulo="Advertencia"
             contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
-            elemento={<img src={safari} style={{ width: "50%" }} />}
+            elemento={<img src={safari} className="w-1/4" />}
           />
         )}
 
-        {validaciones.length >= 1 && validaciones !== 'se requiere nueva validación' && (
+        {retry && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
             contenido="Estado de la validación:"
-            elemento={<b>{validaciones}</b>}
+            elemento={<b>{estadoValidacion}</b>}
           />
         )}
 
