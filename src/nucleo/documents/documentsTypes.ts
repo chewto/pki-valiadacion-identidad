@@ -47,18 +47,18 @@ export const documentTypes = {
   hndLleida: [
     {
       id: 0,
-      value: "DNI",
-      label: "PHOTO_ID",
+      value: "PHOTO_ID",
+      label: "DNI",
     },
     {
       id: 1,
-      value: "Carnet de residencia",
-      label: "PHOTO_ID",
+      value: "PHOTO_ID",
+      label: "Carnet de residencia",
     },
     {
       id: 2,
-      value: "Pasaporte",
-      label: "PASSPORT",
+      value: "PASSPORT",
+      label: "Pasaporte",
     }
   ]
 };

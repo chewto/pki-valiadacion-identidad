@@ -107,11 +107,16 @@ export const ValidacionIdentidad: React.FC = () => {
       .then((res) => {
         console.log(res);
         const estadoValidacion: string = res.data.results.estado;
-        const text = "se requiere nueva validación";
-        const test = estadoValidacion.includes(text);
-        console.log(test, "asdasd");
-        setRetry(test);
-        setEstadoValidacion(estadoValidacion);
+        if(estadoValidacion.length >= 1){
+          const text = "se requiere nueva validación";
+          const test = estadoValidacion.includes(text);
+          setRetry(test);
+          setEstadoValidacion(estadoValidacion);
+        }
+        if(estadoValidacion.length <= 0){
+          setRetry(true)
+          setEstadoValidacion(estadoValidacion);
+        }
       });
 
     axios({
@@ -312,9 +317,6 @@ export const ValidacionIdentidad: React.FC = () => {
           setError(true);
         })
         .finally(() => {
-          // for (const [key, value] of formulario.entries()) {
-          //   console.log(`${key}: ${value}`);
-          // }
           window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         });
     }
@@ -428,7 +430,7 @@ export const ValidacionIdentidad: React.FC = () => {
           />
         )}
 
-        {retry && (
+        {!retry && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
             contenido="Estado de la validación:"

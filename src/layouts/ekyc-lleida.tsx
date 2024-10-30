@@ -52,15 +52,21 @@ export default function EKYCLleida() {
       .then((res) => {
         console.log(res);
         const estadoValidacion: string = res.data.results.estado;
-        const text = "se requiere nueva validación";
-        const test = estadoValidacion.includes(text);
-        setRetry(test);
-        setEstadoValidacion(estadoValidacion);
+        if(estadoValidacion.length >= 1){
+          const text = "se requiere nueva validación";
+          const test = estadoValidacion.includes(text);
+          setRetry(test);
+          setEstadoValidacion(estadoValidacion);
+        }
+        if(estadoValidacion.length <= 0){
+          setRetry(true)
+          setEstadoValidacion(estadoValidacion);
+        }
       });
   }, []);
 
   const dispatch = useDispatch();
-
+ 
   const informacion = useSelector((state: RootState) => state.informacion);
 
   // const hora = useHour();
@@ -139,7 +145,7 @@ export default function EKYCLleida() {
         />
       </Card>
 
-      {retry && (
+      {!retry && (
         <Advertencia
           titulo="Su validación esta siendo procesada"
           contenido=""

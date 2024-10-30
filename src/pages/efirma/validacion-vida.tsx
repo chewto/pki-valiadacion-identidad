@@ -174,22 +174,22 @@ export const ValidacionVida: React.FC<Props> = ({
 
   return (
     <>
-      <div className="border-1 border-yellow-400 rounded-lg px-2 py-1 mb-2 text-center bg-yellow-200 text-sm">
+      <div className="border-1 border-yellow-400 rounded-lg px-2 py-1 my-1 text-center bg-yellow-200 text-sm">
         Consejo: mantengase quieto en el indicador
       </div>
       {!loading ? (
         <div className=" flex flex-col items-center relative mt-1">
           <div
-            className="absolute xsm:top-8 left-1/4"
+            className="absolute w-full"
             style={{ zIndex: "500" }}
           >
             <img
               src={faceTemplate}
-              className="xsm:w-4/6 md:w-5/6 lg:w-4/4"
+              className="w-6/12 mx-auto xsm:mt-5 md:mt-11"
               alt=""
             />
           </div>
-          <div className="absolute top-0 left-0 flex justify-center items-center gap-1 mx-2 my-2 px-2 py-1 bg-white rounded-lg">
+          <div className="absolute top-0 xsm:left-3 md:left-7 flex justify-center items-center gap-1 mx-2 my-2 px-2 py-1 bg-white rounded-lg">
             {counter} s
             <div className={`w-4 h-4 transition-colors duration-300 rounded-lg ${ recordingIndicator ? "bg-red-50" : 'bg-red-600'}`}>
 
@@ -197,7 +197,7 @@ export const ValidacionVida: React.FC<Props> = ({
           </div>
           <video
             ref={videoRef}
-            className="rounded-lg w-full h-auto aspect-auto"
+            className="rounded-lg w-11/12 h-auto aspect-auto"
             autoPlay
             muted
             controls={false}
