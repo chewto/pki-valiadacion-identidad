@@ -251,6 +251,18 @@ export const ValidacionIdentidad: React.FC = () => {
 
     ValidadorFormdata(
       formulario,
+      formdataKeys.frontCorrespondingSide,
+      validacionDocumento.correspondingSide.front
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backCorrespondingSide,
+      validacionDocumento.correspondingSide.back != undefined ? validacionDocumento.correspondingSide.back : ''
+    );
+
+    ValidadorFormdata(
+      formulario,
       formdataKeys.nombres,
       informacionFirmador.nombre
     );

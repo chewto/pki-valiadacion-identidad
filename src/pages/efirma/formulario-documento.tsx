@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
 import axios, { AxiosResponse } from "axios";
-import { setValidacionOCR, setValidacionCodigoBarras, setValidacionMRZ, setValidacionRostro } from "../../nucleo/redux/slices/validacionDocumentoSlice";
+import { setValidacionOCR, setValidacionCodigoBarras, setValidacionMRZ, setValidacionRostro, setFrontSide, setBackSide } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
 import Camera from "react-html5-camera-photo";
@@ -213,6 +213,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionCodigoBarras(res.data))
           dispatch(setValidacionMRZ(res.data))
           dispatch(setValidacionRostro(res.data))
+          dispatch(setFrontSide({front: res.data.ladoValido}))
 
           const ocr = res.data.ocr;
 
@@ -249,6 +250,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         if (ladoDocumento === "reverso") {
           dispatch(setValidacionCodigoBarras(res.data))
           dispatch(setValidacionMRZ(res.data))
+          dispatch(setBackSide({back: res.data.ladoValido}))
 
           if (res.data.ladoValido) {
             setConteo(0);

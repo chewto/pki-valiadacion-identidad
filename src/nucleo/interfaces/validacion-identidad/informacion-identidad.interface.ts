@@ -38,7 +38,13 @@ export interface ValidacionDocumento {
   porcentajesOCR: Porcentajes;
   rostro: boolean;
   mrz: string;
-  codigoBarras: string
+  codigoBarras: string;
+  correspondingSide: correspondingSide;
+}
+
+interface correspondingSide{
+  front: string;
+  back?: string;
 }
 
 interface OCR {

@@ -42,5 +42,7 @@ export const formdataKeys = {
   idCarpetaEntidad: "carpeta_entidad_prueba_vida",
   idCarpetaUsuario: "carpeta_usuario_prueba_vida",
   mrz: "mrz",
-  codigoBarras: "codigo_barras"
+  codigoBarras: "codigo_barras",
+  frontCorrespondingSide: "front_corresponding",
+  backCorrespondingSide: "back_corresponding"
 };
