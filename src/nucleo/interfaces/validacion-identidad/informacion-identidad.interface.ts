@@ -35,28 +35,59 @@ export interface Dato {
 
 export interface ValidacionDocumento {
   ocr: OCR;
-  porcentajesOCR: Porcentajes;
-  rostro: boolean;
-  mrz: string;
-  codigoBarras: string;
-  correspondingSide: correspondingSide;
+  face: boolean;
+  mrz: MRZ;
+  barcode: string;
+  validSide: string;
+  sides: CorrespondingSide;
 }
 
-interface correspondingSide{
-  front: string;
-  back?: string;
+export interface MRZ{
+  code: string;
+  data: MRZData;
+  percentages: MRZPercentages;
 }
+
+interface MRZPercentages{
+  name: string;
+  lastName: string;
+}
+
+interface MRZData{
+  name: string;
+  lastName: string;
+}
+
+export interface DocumentData{
+  correspond: string;
+  code: string;
+  country: string;
+  countryCheck: string;
+  type: string;
+  typeCheck: string;
+}
+
+interface CorrespondingSide{
+  front: DocumentData;
+  back: DocumentData;
+}
+
 
 interface OCR {
-  nombreOCR: string;
-  apellidoOCR: string;
-  documentoOCR: string;
+  data: OCRData;
+  percentage: OCRPercentage
 }
 
-interface Porcentajes {
-  porcentajeNombreOCR: string;
-  porcentajeApellidoOCR: string;
-  porcentajeDocumentoOCR: string;
+interface OCRData{
+  name: string;
+  lastName: string;
+  ID: string
+}
+
+interface OCRPercentage {
+  name: string;
+  lastName: string;
+  ID: string;
 }
 
 export interface ValidacionCB {

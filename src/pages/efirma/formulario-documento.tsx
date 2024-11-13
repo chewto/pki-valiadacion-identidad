@@ -8,13 +8,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
 import axios, { AxiosResponse } from "axios";
-import { setValidacionOCR, setValidacionCodigoBarras, setValidacionMRZ, setValidacionRostro, setFrontSide, setBackSide } from "../../nucleo/redux/slices/validacionDocumentoSlice";
+import {
+  setValidacionOCR,
+  setValidacionCodigoBarras,
+  setValidacionMRZ,
+  setValidacionRostro,
+  setFrontSide,
+  setBackSide,
+} from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
 import Camera from "react-html5-camera-photo";
 import { FACING_MODES } from "react-html5-camera-photo";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
-import {imagePlaceholder} from '@components/dataurl'
+import { imagePlaceholder } from "@components/dataurl";
 
 interface Props {
   id: string | null;
@@ -36,7 +43,9 @@ export const FormularioDocumento: React.FC<Props> = ({
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
-  const validaiconDocumento = useSelector((state: RootState) => state.validacionDocumento);
+  const validaiconDocumento = useSelector(
+    (state: RootState) => state.validacionDocumento
+  );
   const dispatch = useDispatch();
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
@@ -76,7 +85,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     setContinuarBoton,
     preview.length,
     tipoDocumento,
-    validaiconDocumento.rostro,
+    validaiconDocumento.face,
   ]);
 
   useEffect(() => {
@@ -184,7 +193,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     apellido = apellido.toUpperCase();
 
     const data = {
-      id:id,
+      id: id,
       imagen: imagenDocumento,
       nombre: nombre,
       apellido: apellido,
@@ -207,15 +216,15 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-        console.log(res.data)
+        console.log(res.data);
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
-          dispatch(setValidacionCodigoBarras(res.data))
-          dispatch(setValidacionMRZ(res.data))
-          dispatch(setValidacionRostro(res.data))
-          dispatch(setFrontSide({front: res.data.ladoValido}))
+          dispatch(setValidacionCodigoBarras(res.data));
+          dispatch(setValidacionMRZ(res.data.mrz));
+          dispatch(setValidacionRostro(res.data));
+          dispatch(setFrontSide(res.data.document));
 
-          const ocr = res.data.ocr;
+          const ocr = res.data.ocr.data;
 
           let encontrados = 0;
 
@@ -233,7 +242,11 @@ export const FormularioDocumento: React.FC<Props> = ({
             }
           }
 
-          if (res.data.rostro && res.data.ladoValido && encontrados >= 1) {
+          if (
+            res.data.face &&
+            res.data.validSide === "OK" &&
+            encontrados >= 1
+          ) {
             setConteo(0);
             setContinuarBoton(true);
           } else {
@@ -248,11 +261,11 @@ export const FormularioDocumento: React.FC<Props> = ({
         }
 
         if (ladoDocumento === "reverso") {
-          dispatch(setValidacionCodigoBarras(res.data))
-          dispatch(setValidacionMRZ(res.data))
-          dispatch(setBackSide({back: res.data.ladoValido}))
+          dispatch(setValidacionCodigoBarras(res.data));
+          dispatch(setValidacionMRZ(res.data.mrz));
+          dispatch(setBackSide(res.data.document));
 
-          if (res.data.ladoValido) {
+          if (res.data.validSide === "OK") {
             setConteo(0);
             setContinuarBoton(true);
           } else {
@@ -276,42 +289,32 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   return (
     <div className="documento-container">
-      {tipoDocumento === 'Pasaporte' && ladoDocumento === 'anverso'  &&  <h2 className="documento-title">
-        Subir foto del {placeholder} de su {tipoDocumento}
-      </h2>}
+      {tipoDocumento === "Pasaporte" && ladoDocumento === "anverso" && (
+        <h2 className="documento-title">
+          Subir foto del {placeholder} de su {tipoDocumento}
+        </h2>
+      )}
 
-      {tipoDocumento !== 'Pasaporte'  &&  <h2 className="documento-title">
-        Subir foto del {placeholder} de su {tipoDocumento}
-      </h2>}
+      {tipoDocumento !== "Pasaporte" && (
+        <h2 className="documento-title">
+          Subir foto del {placeholder} de su {tipoDocumento}
+        </h2>
+      )}
 
       {mostrarMensaje && (
-        <>
-          <Alert color="warning" style={{ textAlign: "center" }}>
-            Por favor, vuelva a intentarlo
-          </Alert>
-        </>
+        <Alert color="warning" style={{ textAlign: "center" }}>
+          Por favor, vuelva a intentarlo
+        </Alert>
       )}
 
       {continuarBoton && (
-        <>
-          <Alert color="success" style={{ textAlign: "center" }}>
-            Seleccione {ladoDocumento === "anverso" ? "continuar" : "finalizar"}
-          </Alert>
-        </>
-      )}
-
-      {preview.length >= 1 && !loading && tipoDocumento != 'Pasaporte' && (
-        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
-      )}
-
-      {preview.length >= 1 && !loading && tipoDocumento == 'Pasaporte' && ladoDocumento == 'anverso' && (
-        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
+        <Alert color="success" style={{ textAlign: "center" }}>
+          Seleccione {ladoDocumento === "anverso" ? "continuar" : "finalizar"}
+        </Alert>
       )}
 
       {error && (
-        <>
-          <Alert color="danger">ha ocurrido un error con el servidor</Alert>
-        </>
+        <Alert color="danger">ha ocurrido un error con el servidor</Alert>
       )}
 
       {loading && (
@@ -379,6 +382,18 @@ export const FormularioDocumento: React.FC<Props> = ({
           )}
         </>
       )}
+
+{preview.length >= 1 && !loading && tipoDocumento != "Pasaporte" && (
+        <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
+      )}
+
+      {preview.length >= 1 &&
+        !loading &&
+        tipoDocumento == "Pasaporte" &&
+        ladoDocumento == "anverso" && (
+          <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
+        )}
+
     </div>
   );
 };

@@ -99,22 +99,30 @@ export const ValidacionIdentidad: React.FC = () => {
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
+  const [validationParams, setValidationParams] = useState({
+    validationAttendance: "",
+    validationPercent: "",
+  });
+
+  useEffect(() => {
+    console.log(validacionDocumento);
+  }, [validacionDocumento]);
+
   useEffect(() => {
     document.title = "Validacion identidad";
 
     axios
       .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
-        console.log(res);
         const estadoValidacion: string = res.data.results.estado;
-        if(estadoValidacion.length >= 1){
+        if (estadoValidacion.length >= 1) {
           const text = "se requiere nueva validación";
           const test = estadoValidacion.includes(text);
           setRetry(test);
           setEstadoValidacion(estadoValidacion);
         }
-        if(estadoValidacion.length <= 0){
-          setRetry(true)
+        if (estadoValidacion.length <= 0) {
+          setRetry(true);
           setEstadoValidacion(estadoValidacion);
         }
       });
@@ -128,6 +136,30 @@ export const ValidacionIdentidad: React.FC = () => {
       })
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
+
+    axios({
+      method: "get",
+      url: `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`,
+    })
+      .then((res) => {
+        const { validationPercent, validationAttendance } = res.data;
+
+        setValidationParams({
+          validationAttendance:
+            validationAttendance === null
+              ? "AUTOMATICA"
+              : `${validationAttendance}`,
+          validationPercent:
+            validationPercent === null ? "75" : `${validationPercent}`,
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        setValidationParams({
+          validationAttendance: "AUTOMATICA",
+          validationPercent: "75",
+        });
+      });
 
     geolocation();
     obtenerIp();
@@ -213,52 +245,140 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeNombreOCR,
-      validacionDocumento.porcentajesOCR.porcentajeNombreOCR
+      validacionDocumento.ocr.percentage.name
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeApellidoOCR,
-      validacionDocumento.porcentajesOCR.porcentajeApellidoOCR
+      validacionDocumento.ocr.percentage.lastName
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.porcentajeDocumentoOCR,
-      validacionDocumento.porcentajesOCR.porcentajeDocumentoOCR
+      validacionDocumento.ocr.percentage.ID
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.nombreOCR,
-      validacionDocumento.ocr.nombreOCR
+      validacionDocumento.ocr.data.name
     );
     ValidadorFormdata(
       formulario,
       formdataKeys.apellidoOCR,
-      validacionDocumento.ocr.apellidoOCR
+      validacionDocumento.ocr.data.lastName
     );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.documentoOCR,
-      validacionDocumento.ocr.documentoOCR
+      validacionDocumento.ocr.data.ID
     );
 
-    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz);
+    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz.code);
+    ValidadorFormdata(formulario, formdataKeys.mrzName, validacionDocumento.mrz.data.name);
+    ValidadorFormdata(formulario, formdataKeys.mrzLastname, validacionDocumento.mrz.data.lastName);
+    ValidadorFormdata(formulario, formdataKeys.mrzNamePercent, validacionDocumento.mrz.percentages.name);
+    ValidadorFormdata(formulario, formdataKeys.mrzLastnamePercent, validacionDocumento.mrz.percentages.lastName);
+
     ValidadorFormdata(
       formulario,
       formdataKeys.codigoBarras,
-      validacionDocumento.codigoBarras
+      validacionDocumento.barcode
+    )
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.frontCorrespondingSide,
+      validacionDocumento.sides.front.correspond
     );
 
     ValidadorFormdata(
       formulario,
-      formdataKeys.frontCorrespondingSide,
-      validacionDocumento.correspondingSide.front
+      formdataKeys.frontCode,
+      validacionDocumento.sides.front.code
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.frontCountry,
+      validacionDocumento.sides.front.country
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.frontCountryCheck,
+      validacionDocumento.sides.front.countryCheck
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.frontType,
+      validacionDocumento.sides.front.type
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.frontTypeCheck,
+      validacionDocumento.sides.front.countryCheck
     );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.backCorrespondingSide,
-      validacionDocumento.correspondingSide.back != undefined ? validacionDocumento.correspondingSide.back : ''
+      `${
+        validacionDocumento.sides.back.correspond != undefined
+          ? validacionDocumento.sides.back.correspond
+          : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backCode,
+      `${
+        validacionDocumento.sides.back.code != undefined
+          ? validacionDocumento.sides.back.code
+          : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backCountry,
+      `${
+        validacionDocumento.sides.back.country != undefined
+          ? validacionDocumento.sides.back.country
+          : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backCountryCheck,
+      `${
+        validacionDocumento.sides.back.countryCheck != undefined
+          ? validacionDocumento.sides.back.countryCheck
+          : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backType,
+      `${
+        validacionDocumento.sides.back.type != undefined
+          ? validacionDocumento.sides.back.type
+          : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backTypeCheck,
+      `${
+        validacionDocumento.sides.back.typeCheck != undefined
+          ? validacionDocumento.sides.back.typeCheck
+          : ""
+      }`
     );
 
     ValidadorFormdata(
@@ -298,6 +418,18 @@ export const ValidacionIdentidad: React.FC = () => {
       formulario,
       formdataKeys.idCarpetaUsuario,
       pruebaVida.idCarpetaUsuario
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.validationAttendance,
+      validationParams.validationAttendance
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.validationPercent,
+      validationParams.validationPercent
     );
 
     if (

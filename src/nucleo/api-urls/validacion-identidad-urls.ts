@@ -43,6 +43,7 @@ export const URLS = {
   validarDocumentoAnverso: `${urlBase}/ocr/anverso`,
   validarDocumentoReverso: `${urlBase}/ocr/reverso`,
   validacionVida: `${urlBase}/validacion-vida`,
+  validationParameters: `${urlBase}/validation/validation-params`,
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
