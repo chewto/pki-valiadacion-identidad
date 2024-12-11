@@ -17,7 +17,7 @@ export default defineConfig({
   },
   plugins: [react(), mkcert()],
   server: {
-    https: true
+    https: false
   },
   build: {
     chunkSizeWarningLimit: 1600, // Adjust as needed

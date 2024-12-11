@@ -15,7 +15,10 @@ const initialState: ValidacionDocumento = {
   },
   face: false,
   mrz: {
-    code: '',
+    code: {
+      raw: '',
+      preprocessed:''
+    },
     data: {
       name: '',
       lastName: ''
@@ -26,10 +29,12 @@ const initialState: ValidacionDocumento = {
     }
   },
   barcode: "",
-  validSide: "",
+  sideResult:{
+    front:"",
+    back: ''
+  },
   sides:{
     front: {
-      correspond: '',
       code:'',
       country: '',
       countryCheck: '',
@@ -37,7 +42,6 @@ const initialState: ValidacionDocumento = {
       typeCheck: ''
     },
     back: {
-      correspond: '',
       code:'',
       country: '',
       countryCheck: '',
@@ -68,7 +72,10 @@ export const validacionDocumentolice = createSlice({
     },
     setValidacionMRZ: (state, action: PayloadAction<MRZ>) => {
       const { code, data, percentages } = action.payload;
-      state.mrz.code = code;
+      state.mrz.code = {
+        raw: code.raw,
+        preprocessed: code.preprocessed
+      };
       state.mrz.data = {
         name: data.name,
         lastName: data.lastName
@@ -92,21 +99,33 @@ export const validacionDocumentolice = createSlice({
       const { face } = action.payload;
       state.face = face;
     },
+    setBackResult:(
+      state,
+      action: PayloadAction<{sideResult: string}>
+    ) => {
+      const {sideResult} = action.payload
+      state.sideResult.back = sideResult
+    },
+    setFrontResult:(
+      state,
+      action: PayloadAction<{sideResult: string}>
+    ) => {
+      const {sideResult} = action.payload
+      state.sideResult.front = sideResult
+    },
     setFrontSide: (state, action: PayloadAction<DocumentData>) => {
-      const { correspond, code, country, countryCheck, type, typeCheck } = action.payload;
+      const { code, country, countryCheck, type, typeCheck } = action.payload;
       state.sides.front = {
-        correspond: correspond,
         code: code,
         country: country,
         countryCheck: countryCheck,
         type: type,
-        typeCheck: typeCheck
+        typeCheck: typeCheck,
       }
     },
     setBackSide: (state, action: PayloadAction<DocumentData>) => {
-      const { correspond, code, country, countryCheck, type, typeCheck } = action.payload;
+      const { code, country, countryCheck, type, typeCheck } = action.payload;
       state.sides.back = {
-        correspond: correspond,
         code: code,
         country: country,
         countryCheck: countryCheck,
@@ -123,7 +142,9 @@ export const {
   setValidacionCodigoBarras,
   setValidacionRostro,
   setFrontSide,
-  setBackSide
+  setBackSide,
+  setFrontResult,
+  setBackResult
 } = validacionDocumentolice.actions;
 
 export default validacionDocumentolice.reducer;

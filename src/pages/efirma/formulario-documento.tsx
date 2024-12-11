@@ -15,6 +15,8 @@ import {
   setValidacionRostro,
   setFrontSide,
   setBackSide,
+  setFrontResult,
+  setBackResult,
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
@@ -31,6 +33,9 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
   urlOCR: string;
+  tries: number;
+  attendance: string;
+  setMainCounter: Dispatch<SetStateAction<number>>;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -40,6 +45,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   continuarBoton,
   setContinuarBoton,
   ladoDocumento,
+  tries,
+  attendance,
+  setMainCounter
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -72,14 +80,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     if (preview.length <= 0) {
       setContinuarBoton(false);
     }
-
-    // if (preview.length >= 1 && validaiconDocumento.rostro === true){
-    //   setContinuarBoton(true)
-    // }
-
-    // if (conteo >= 3 && preview.length >= 1 && validaiconDocumento.rostro === false){
-    //   setContinuarBoton(true)
-    // }
   }, [
     conteo,
     setContinuarBoton,
@@ -96,8 +96,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
   useEffect(() => {
-    elementoScroll.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+    setConteo(0)
+  }, [ladoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
@@ -124,21 +124,18 @@ export const FormularioDocumento: React.FC<Props> = ({
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          const nuevoWidth = Math.floor(imagen.width / 2);
-          const nuevoHeigth = Math.floor(imagen.height / 2);
+          canvas.width = imagen.width;
+          canvas.height = imagen.height;
 
-          canvas.width = nuevoWidth;
-          canvas.height = nuevoHeigth;
+          ctx?.drawImage(imagen, 0, 0, imagen.width, imagen.height);
 
-          ctx?.drawImage(imagen, 0, 0, nuevoWidth, nuevoHeigth);
+          const dataURLImage = canvas.toDataURL("image/jpeg");
 
-          const imagenResized = canvas.toDataURL("image/jpeg");
-
-          dispatch(setFotos({ labelFoto: ladoDocumento, data: imagenResized }));
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
 
           validarDocumento(
             id,
-            imagenResized,
+            dataURLImage,
             informacionFirmador.nombre,
             informacionFirmador.apellido,
             informacionFirmador.documento,
@@ -157,6 +154,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     setMostrarMensaje(false);
     setContinuarBoton(false);
     setMostrarCamara(false);
+
 
     dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
 
@@ -203,10 +201,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       imagenPersona: imagenPersona,
     };
 
-    const nombreFirmador = informacionFirmador.nombre.toUpperCase();
-    const apellidoFirmador = informacionFirmador.apellido.toUpperCase();
-    const documentoFirmador = informacionFirmador.documento.toUpperCase();
-
     axios({
       method: "post",
       url:
@@ -216,45 +210,28 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-        console.log(res.data);
+        console.log(res.data)
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
           dispatch(setValidacionMRZ(res.data.mrz));
           dispatch(setValidacionRostro(res.data));
           dispatch(setFrontSide(res.data.document));
-
-          const ocr = res.data.ocr.data;
-
-          let encontrados = 0;
-
-          for (const valor in ocr) {
-            if (nombreFirmador.includes(ocr[valor])) {
-              encontrados += 1;
-            }
-
-            if (apellidoFirmador.includes(ocr[valor])) {
-              encontrados += 1;
-            }
-
-            if (documentoFirmador.includes(ocr[valor])) {
-              encontrados += 1;
-            }
-          }
+          dispatch(setFrontResult({sideResult: res.data.validSide}))
 
           if (
             res.data.face &&
-            res.data.validSide === "OK" &&
-            encontrados >= 1
+            res.data.validSide == "OK"
           ) {
             setConteo(0);
             setContinuarBoton(true);
           } else {
             setMostrarMensaje(true);
             setConteo((prev) => prev + 1);
+            // setMainCounter(prev => prev + 1)
           }
 
-          if (conteo >= 1) {
+          if (conteo >= tries) {
             setMostrarMensaje(false);
             setContinuarBoton(true);
           }
@@ -264,16 +241,19 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionCodigoBarras(res.data));
           dispatch(setValidacionMRZ(res.data.mrz));
           dispatch(setBackSide(res.data.document));
+          dispatch(setBackResult({sideResult: res.data.validSide}))
 
           if (res.data.validSide === "OK") {
             setConteo(0);
             setContinuarBoton(true);
-          } else {
+          } 
+          else {
             setMostrarMensaje(true);
             setConteo((prev) => prev + 1);
+            setMainCounter(prev => prev + 1)
           }
 
-          if (conteo >= 1) {
+          if (conteo >= tries && attendance !== 'AUTOMATICA') {
             setMostrarMensaje(false);
             setContinuarBoton(true);
           }

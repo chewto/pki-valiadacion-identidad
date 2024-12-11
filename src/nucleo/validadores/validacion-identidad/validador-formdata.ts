@@ -42,6 +42,7 @@ export const formdataKeys = {
   idCarpetaEntidad: "carpeta_entidad_prueba_vida",
   idCarpetaUsuario: "carpeta_usuario_prueba_vida",
   mrz: "mrz",
+  mrzPre: "mrz_pre",
   mrzName: "mrz_name",
   mrzLastname: "mrz_lastname",
   mrzNamePercent: "mrz_name_percent",

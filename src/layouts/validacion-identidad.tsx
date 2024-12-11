@@ -36,6 +36,7 @@ import safari from "../assets/img/safari.png";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
 
+
 export const ValidacionIdentidad: React.FC = () => {
   const validationName = "EFIRMA";
 
@@ -99,14 +100,23 @@ export const ValidacionIdentidad: React.FC = () => {
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
+  const [mainCounter, setMainCounter] = useState<number>(0)
+
   const [validationParams, setValidationParams] = useState({
     validationAttendance: "",
     validationPercent: "",
+    documentsTries: 0
   });
 
   useEffect(() => {
-    console.log(validacionDocumento);
-  }, [validacionDocumento]);
+    console.log(validacionDocumento)
+  },[validacionDocumento])
+
+  useEffect(() => {
+    if(mainCounter >= validationParams.documentsTries + 1){
+      enviar(true)
+    }
+  },[mainCounter])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -115,17 +125,20 @@ export const ValidacionIdentidad: React.FC = () => {
       .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
+
         if (estadoValidacion.length >= 1) {
-          const text = "se requiere nueva validación";
-          const test = estadoValidacion.includes(text);
+          const textList = ["se requiere nueva validación", "validación fallida"];
+          const  isIncluided = (text:string) => {
+            return estadoValidacion.includes(text)
+          }
+          const test = textList.some(isIncluided)
           setRetry(test);
           setEstadoValidacion(estadoValidacion);
-        }
-        if (estadoValidacion.length <= 0) {
+        }else {
           setRetry(true);
           setEstadoValidacion(estadoValidacion);
         }
-      });
+  });
 
     axios({
       method: "get",
@@ -142,7 +155,7 @@ export const ValidacionIdentidad: React.FC = () => {
       url: `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`,
     })
       .then((res) => {
-        const { validationPercent, validationAttendance } = res.data;
+        const { validationPercent, validationAttendance, documentsTries } = res.data;
 
         setValidationParams({
           validationAttendance:
@@ -150,14 +163,15 @@ export const ValidacionIdentidad: React.FC = () => {
               ? "AUTOMATICA"
               : `${validationAttendance}`,
           validationPercent:
-            validationPercent === null ? "75" : `${validationPercent}`,
+            validationPercent === null ? "60" : `${validationPercent}`,
+          documentsTries: documentsTries
         });
       })
-      .catch((e) => {
-        console.log(e);
+      .catch(() => {
         setValidationParams({
           validationAttendance: "AUTOMATICA",
-          validationPercent: "75",
+          validationPercent: "60",
+          documentsTries: 2
         });
       });
 
@@ -199,7 +213,7 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = () => {
+  const enviar = (failed:boolean) => {
     // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
     ValidadorFormdata(
@@ -274,7 +288,8 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionDocumento.ocr.data.ID
     );
 
-    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz.code);
+    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz.code.raw);
+    ValidadorFormdata(formulario, formdataKeys.mrzPre, validacionDocumento.mrz.code.preprocessed);
     ValidadorFormdata(formulario, formdataKeys.mrzName, validacionDocumento.mrz.data.name);
     ValidadorFormdata(formulario, formdataKeys.mrzLastname, validacionDocumento.mrz.data.lastName);
     ValidadorFormdata(formulario, formdataKeys.mrzNamePercent, validacionDocumento.mrz.percentages.name);
@@ -285,11 +300,6 @@ export const ValidacionIdentidad: React.FC = () => {
       formdataKeys.codigoBarras,
       validacionDocumento.barcode
     )
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontCorrespondingSide,
-      validacionDocumento.sides.front.correspond
-    );
 
     ValidadorFormdata(
       formulario,
@@ -319,16 +329,6 @@ export const ValidacionIdentidad: React.FC = () => {
       formulario,
       formdataKeys.frontTypeCheck,
       validacionDocumento.sides.front.countryCheck
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backCorrespondingSide,
-      `${
-        validacionDocumento.sides.back.correspond != undefined
-          ? validacionDocumento.sides.back.correspond
-          : ""
-      }`
     );
 
     ValidadorFormdata(
@@ -432,11 +432,7 @@ export const ValidacionIdentidad: React.FC = () => {
       validationParams.validationPercent
     );
 
-    if (
-      informacion.foto_persona !== "" &&
-      informacion.anverso !== "" &&
-      informacion.reverso !== ""
-    ) {
+    if (!failed) {
       setMostrar(true);
       setLoading(true);
 
@@ -462,6 +458,51 @@ export const ValidacionIdentidad: React.FC = () => {
         })
         .finally(() => {
           window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+        });
+    }
+
+    if(failed){
+
+      ValidadorFormdata(
+        formulario,
+        'failed',
+        'OK'
+      );
+
+      ValidadorFormdata(
+        formulario,
+        'failed_back',
+        validacionDocumento.sideResult.back
+      );
+
+      ValidadorFormdata(
+        formulario,
+        'failed_front',
+        validacionDocumento.sideResult.front
+      );
+
+      let idValidacion = 0;
+      let idUsuario = 0;
+
+      axios({
+        method: "post",
+        url: url,
+        data: formulario,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((res) => {
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+          setError(true);
+        })
+        .finally(() => {
+          window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         });
     }
   };
@@ -499,6 +540,9 @@ export const ValidacionIdentidad: React.FC = () => {
       setContinuarBoton={setContinuarBoton}
       ladoDocumento={labelFoto.anverso}
       urlOCR={URLS.validarDocumentoAnverso}
+      tries={validationParams.documentsTries}
+      attendance={validationParams.validationAttendance}
+      setMainCounter={setMainCounter}
     />,
     <FormularioDocumento
       id={idUsuarioParam}
@@ -508,6 +552,9 @@ export const ValidacionIdentidad: React.FC = () => {
       setContinuarBoton={setContinuarBoton}
       ladoDocumento={labelFoto.reverso}
       urlOCR={URLS.validarDocumentoReverso}
+      tries={validationParams.documentsTries}
+      attendance={validationParams.validationAttendance}
+      setMainCounter={setMainCounter}
     />,
   ];
 
@@ -539,13 +586,12 @@ export const ValidacionIdentidad: React.FC = () => {
                   disabled={!continuarBoton}
                   variant="contained"
                   color="primary"
-                  onClick={enviar}
+                  onClick={() => enviar(false)}
                 >
                   {continuarBoton ? "Finalizar" : "Esperando"}
                 </Button>
               )}
             </div>
-
             {componentsSteps[activeSteps]}
           </div>
           <>

@@ -1,19 +1,29 @@
-const pais = 'honducert'
+const pais = 'desarrollo'
 
-const subdomain = 'honducert'
+// const subdomain = 'honducert.firma'
+
+const subdomain = 'desarrollo'
 const ekycSubdomain = 'honduras'
 
 const rutasURL = {
   desarrollo:{
     validacion: "http://127.0.0.1:4000",
     fe: "http://127.0.0.1:4000/obtener-firmador",
-    resultados: "https://efirma.pkiservices.co/efirma.php/"
+    resultados: "",
+    rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
   }
   ,
+  honducert_desarrollo:{
+      validacion: `https://${subdomain}.e-custodia.com/validacion-back`,
+      fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
+      resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
+      rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
+    },
     honducert:{
-      validacion: `https://${subdomain}.firma.e-custodia.com/validacion-back`,
-      fe: `https://${subdomain}.firma.e-custodia.com/fe-back/api/Firmador`,
-      resultados: `https://${subdomain}.firma.e-custodia.com/efirma.php/`
+      validacion: `https://${subdomain}.e-custodia.com/validacion-back`,
+      fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
+      resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
+      rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     }
   // libertador:{
   //   validacion: "https://libertador.pkiservices.co/validacion-back",
@@ -35,6 +45,7 @@ const rutasURL = {
 const firmadorUrlBase = rutasURL[pais]["fe"]
 const urlBase = rutasURL[pais]["validacion"]
 const efirmaUrl = rutasURL[pais]["resultados"]
+const rejected = rutasURL[pais]['rejected']
 
 export const URLS = {
   validationProvider: `${urlBase}/validation/validation-provider`,
@@ -44,6 +55,7 @@ export const URLS = {
   validarDocumentoReverso: `${urlBase}/ocr/reverso`,
   validacionVida: `${urlBase}/validacion-vida`,
   validationParameters: `${urlBase}/validation/validation-params`,
+  validationFailed: `${urlBase}/validation/failed`,
   obtenerIp: 'https://api.ipify.org/?format=json',
   // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
@@ -52,6 +64,7 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
   resultados: `${efirmaUrl}`,
+  rejected:`${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
   lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`
 }

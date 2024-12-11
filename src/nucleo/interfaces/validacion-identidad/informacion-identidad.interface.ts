@@ -38,12 +38,18 @@ export interface ValidacionDocumento {
   face: boolean;
   mrz: MRZ;
   barcode: string;
-  validSide: string;
+  sideResult: {
+    front: string;
+    back: string;
+  }
   sides: CorrespondingSide;
 }
 
 export interface MRZ{
-  code: string;
+  code: {
+    preprocessed: string;
+    raw: string;
+  };
   data: MRZData;
   percentages: MRZPercentages;
 }
@@ -59,7 +65,6 @@ interface MRZData{
 }
 
 export interface DocumentData{
-  correspond: string;
   code: string;
   country: string;
   countryCheck: string;
