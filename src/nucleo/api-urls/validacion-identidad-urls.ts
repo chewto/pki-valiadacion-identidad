@@ -1,8 +1,8 @@
-const pais = 'desarrollo'
+const pais = 'honducert'
 
-// const subdomain = 'honducert.firma'
+const subdomain = 'honducert.firma'
 
-const subdomain = 'desarrollo'
+// const subdomain = 'desarrollo'
 const ekycSubdomain = 'honduras'
 
 const rutasURL = {

@@ -24,6 +24,7 @@ import Camera from "react-html5-camera-photo";
 import { FACING_MODES } from "react-html5-camera-photo";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
+import { Advertencia } from "@components/ui/advertencia";
 
 interface Props {
   id: string | null;
@@ -62,8 +63,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [mostrarMensaje, setMostrarMensaje] = useState<boolean>(false);
+  const [messages, setMessages] = useState<string[]>([]);
+  const [retry, setRetry] = useState<boolean>(false)
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
+
 
   const mobile: boolean = useMobile();
 
@@ -102,8 +105,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
 
-    setMostrarMensaje(false);
+    setMessages([]);
     setContinuarBoton(false);
+    setRetry(false)
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -151,7 +155,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const tomarFoto = (dataURL: string) => {
-    setMostrarMensaje(false);
+    setMessages([]);
     setContinuarBoton(false);
     setMostrarCamara(false);
 
@@ -210,7 +214,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-        console.log(res.data)
+        const adviceMessages = res.data.messages
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
@@ -226,14 +230,19 @@ export const FormularioDocumento: React.FC<Props> = ({
             setConteo(0);
             setContinuarBoton(true);
           } else {
-            setMostrarMensaje(true);
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              ...adviceMessages
+            ]);
             setConteo((prev) => prev + 1);
+            setRetry(true)
             // setMainCounter(prev => prev + 1)
           }
 
           if (conteo >= tries) {
-            setMostrarMensaje(false);
+            setMessages([]);
             setContinuarBoton(true);
+            setRetry(false)
           }
         }
 
@@ -248,14 +257,19 @@ export const FormularioDocumento: React.FC<Props> = ({
             setContinuarBoton(true);
           } 
           else {
-            setMostrarMensaje(true);
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              ...adviceMessages
+            ]);
+            setRetry(true)
             setConteo((prev) => prev + 1);
             setMainCounter(prev => prev + 1)
           }
 
           if (conteo >= tries && attendance !== 'AUTOMATICA') {
-            setMostrarMensaje(false);
+            setMessages([]);
             setContinuarBoton(true);
+            setRetry(false)
           }
         }
       })
@@ -281,10 +295,21 @@ export const FormularioDocumento: React.FC<Props> = ({
         </h2>
       )}
 
-      {mostrarMensaje && (
-        <Alert color="warning" style={{ textAlign: "center" }}>
-          Por favor, vuelva a intentarlo
-        </Alert>
+      {messages.length >= 1 && (
+        <Advertencia
+          titulo="Advertencia"
+          contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
+          elemento={
+          <div>
+            <ul className="text-left p-0">
+              {messages.map((message:string, index:number) => (
+                <li key={index} className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200">{message}</li>
+              ))}
+            </ul>
+            <button onClick={() => setMessages([])} className="stepper-btn">cerrar</button>
+          </div>}
+        />
+        
       )}
 
       {continuarBoton && (
@@ -349,7 +374,7 @@ export const FormularioDocumento: React.FC<Props> = ({
               />
               {preview.length <= 0 &&
                 `Subir foto del ${placeholder} de su ${tipoDocumento}`}
-              {mostrarMensaje && "Reintentar subir documento"}
+              {retry && "Reintentar subir documento"}
               {loading && <Spinner></Spinner>}
               {continuarBoton &&
                 ladoDocumento === "anverso" &&

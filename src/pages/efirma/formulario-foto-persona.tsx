@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { ValidacionVida } from "./validacion-vida";
 import { useSearchParams } from "react-router-dom";
+import { Advertencia } from "@components/ui/advertencia";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -31,8 +32,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setContinuarBoton(false);
   }, []);
 
-  const [mostrarMensaje, setMostrarMensaje] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
+  const [messages, setMessages] = useState<string[]>([])
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(
     iphone ? true : false
   );
@@ -45,52 +47,13 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setCapturarOtravez(false);
     setContinuarBoton(false);
     setError(false);
-    setMostrarMensaje(false);
+    setSuccess(false);
+    setMessages([])
   };
 
-  // const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
-  //   evento.preventDefault();
-  //   setMostrarMensaje(false);
-
-  //   const archivo = evento.target.files?.[0];
-  //   const lector = new FileReader();
-
-  //   if (archivo) lector.readAsDataURL(archivo);
-
-  //   lector.onload = () => {
-  //     const dataURL = lector.result;
-  //     const img = new Image();
-  //     if (typeof dataURL === "string") {
-  //       img.src = dataURL;
-
-  //       const imagen = new Image();
-
-  //       imagen.src = typeof dataURL === "string" ? dataURL : "";
-
-  //       imagen.onload = () => {
-  //         setMostrarMensaje(true);
-  //         setContinuarBoton(true);
-  //         setMostrarPreview(true);
-  //         const canvas = document.createElement("canvas");
-  //         const ctx = canvas.getContext("2d");
-
-  //         const nuevoWidth = Math.floor(imagen.width / 2);
-  //         const nuevoHeigth = Math.floor(imagen.height / 2);
-
-  //         canvas.width = nuevoWidth;
-  //         canvas.height = nuevoHeigth;
-
-  //         ctx?.drawImage(imagen, 0, 0, nuevoWidth, nuevoHeigth);
-
-  //         const imagenResized = canvas.toDataURL("image/jpeg");
-
-  //         dispatch(setFotos({ labelFoto: selfie, data: imagenResized }));
-  //       };
-  //     }
-  //   };
-
-  //   evento.target.value = "";
-  // };
+  useEffect(() => {
+    console.log(messages)
+  },[messages, setMessages])
 
   return (
     <>
@@ -113,7 +76,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         )}
       </div>
 
-      {mostrarMensaje && (
+      {success && (
         <Alert color="success" style={{ textAlign: "center" }}>
           Seleccione continuar
         </Alert>
@@ -124,12 +87,25 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         </Alert>
       )}
 
+      {messages.length >= 1  && (
+        <Advertencia
+          titulo="Advertencia"
+          contenido=""
+          elemento={
+          <div>
+            <ul className="p-0">
+              {messages.map((message:string) => (
+                <li className="bg-red-200 px-2 py-2 rounded-xl border-2 border-red-500 text-xl">{message}</li>
+              ))}
+            </ul>
+
+            <button onClick={() => setMessages([])} className="stepper-btn mt-2">cerrar</button>
+          </div>}
+        />
+      )}
+
       {preview.length >= 1 && mostrarPreview && (
         <Previsualizacion preview={preview} nombrePreview={selfie} />
-      )}
-      
-      {preview.length <= 0 && mostrarPreview && capturarOtraVez && (
-        <Alert color="danger">No se ha detectado ningún rostro, vuelva a intentarlo.</Alert>
       )}
 
       {capturarOtraVez && (
@@ -149,13 +125,14 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
       {mostrarCamara && !capturarOtraVez && (
         <ValidacionVida
-          setMostrarMensaje={setMostrarMensaje}
+          setSuccess={setSuccess}
           setContinuarBoton={setContinuarBoton}
           setMostrarPreview={setMostrarPreview}
           setCapturarOtraVez={setCapturarOtravez}
           setError={setError}
           label={selfie}
           idUsuarioFi={idUsuarioParam}
+          setMessages={setMessages}
         />
       )}
       {!mostrarCamara && (

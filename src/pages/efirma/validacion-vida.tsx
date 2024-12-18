@@ -14,9 +14,10 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   setMostrarPreview: Dispatch<SetStateAction<boolean>>;
   setCapturarOtraVez: Dispatch<SetStateAction<boolean>>;
-  setMostrarMensaje: Dispatch<SetStateAction<boolean>>;
+  setSuccess: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<boolean>>;
   idUsuarioFi: string | null;
+  setMessages: Dispatch<SetStateAction<string[]>>;
 }
 
 export const ValidacionVida: React.FC<Props> = ({
@@ -24,9 +25,10 @@ export const ValidacionVida: React.FC<Props> = ({
   setContinuarBoton,
   setMostrarPreview,
   setCapturarOtraVez,
-  setMostrarMensaje,
+  setSuccess,
   setError,
   idUsuarioFi,
+  setMessages
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -143,7 +145,6 @@ export const ValidacionVida: React.FC<Props> = ({
       },
     })
       .then((res) => {
-        console.log(res);
 
         const preview: string = res.data.photo;
 
@@ -153,12 +154,20 @@ export const ValidacionVida: React.FC<Props> = ({
           idCarpetaUsuario: res.data.idCarpetaUsuario,
         };
 
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          ...res.data.messages
+        ])
+
         if (res.status == 200) {
           if (preview.length >= 1) {
             dispatch(setFotos({ labelFoto: label, data: preview }));
             dispatch(setIdCarpetas(data));
+          }
+          if(preview.length >= 1 && res.data.messages.length <= 0){
             setContinuarBoton(true);
-            setMostrarMensaje(true);
+            setSuccess(true);
+            setMessages([])
           }
         }
       })

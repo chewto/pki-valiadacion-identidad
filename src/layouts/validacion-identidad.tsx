@@ -109,10 +109,6 @@ export const ValidacionIdentidad: React.FC = () => {
   });
 
   useEffect(() => {
-    console.log(validacionDocumento)
-  },[validacionDocumento])
-
-  useEffect(() => {
     if(mainCounter >= validationParams.documentsTries + 1){
       enviar(true)
     }
@@ -125,10 +121,10 @@ export const ValidacionIdentidad: React.FC = () => {
       .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
-
+        
         if (estadoValidacion.length >= 1) {
           const textList = ["se requiere nueva validación", "validación fallida"];
-          const  isIncluided = (text:string) => {
+          const isIncluided = (text:string) => {
             return estadoValidacion.includes(text)
           }
           const test = textList.some(isIncluided)
