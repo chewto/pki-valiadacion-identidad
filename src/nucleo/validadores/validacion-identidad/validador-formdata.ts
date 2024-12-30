@@ -54,12 +54,14 @@ export const formdataKeys = {
   frontCountryCheck: 'front_country_check',
   frontType: 'front_type',
   frontTypeCheck:'front_type_check',
+  frontIsExpired: 'front_isExpired',
   backCorrespondingSide: "back_corresponding",
   backCode: 'back_code',
   backCountry: 'back_country',
   backCountryCheck: 'back_country_check',
   backType: 'back_type',
   backTypeCheck:'back_type_check',
+  backIsExpired: 'back_isExpired',
   validationAttendance: "validation_attendance",
   validationPercent: "validation_percent"
 };

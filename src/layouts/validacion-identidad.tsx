@@ -115,7 +115,7 @@ export const ValidacionIdentidad: React.FC = () => {
   },[mainCounter])
 
   useEffect(() => {
-    document.title = "Validacion identidad";
+    document.title = "Validacion identidad - desarrollo 0.0.5";
 
     axios
       .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
@@ -329,6 +329,12 @@ export const ValidacionIdentidad: React.FC = () => {
 
     ValidadorFormdata(
       formulario,
+      formdataKeys.frontIsExpired,
+      validacionDocumento.sides.front.isExpired ? '!OK' : 'OK'
+    );
+
+    ValidadorFormdata(
+      formulario,
       formdataKeys.backCode,
       `${
         validacionDocumento.sides.back.code != undefined
@@ -374,6 +380,16 @@ export const ValidacionIdentidad: React.FC = () => {
         validacionDocumento.sides.back.typeCheck != undefined
           ? validacionDocumento.sides.back.typeCheck
           : ""
+      }`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.backIsExpired,
+      `${
+        validacionDocumento.sides.back.isExpired
+          ? '!OK'
+          : "OK"
       }`
     );
 

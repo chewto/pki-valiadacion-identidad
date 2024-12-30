@@ -45,6 +45,7 @@ export interface ValidacionDocumento {
   sides: CorrespondingSide;
 }
 
+
 export interface MRZ{
   code: {
     preprocessed: string;
@@ -70,6 +71,7 @@ export interface DocumentData{
   countryCheck: string;
   type: string;
   typeCheck: string;
+  isExpired: boolean;
 }
 
 interface CorrespondingSide{

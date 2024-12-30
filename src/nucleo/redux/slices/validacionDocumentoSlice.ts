@@ -39,16 +39,18 @@ const initialState: ValidacionDocumento = {
       country: '',
       countryCheck: '',
       type: '',
-      typeCheck: ''
+      typeCheck: '',
+      isExpired: true
     },
     back: {
       code:'',
       country: '',
       countryCheck: '',
       type: '',
-      typeCheck: ''
+      typeCheck: '',
+      isExpired: true
     },
-  },
+  }
 };
 
 export const validacionDocumentolice = createSlice({
@@ -114,23 +116,25 @@ export const validacionDocumentolice = createSlice({
       state.sideResult.front = sideResult
     },
     setFrontSide: (state, action: PayloadAction<DocumentData>) => {
-      const { code, country, countryCheck, type, typeCheck } = action.payload;
+      const { code, country, countryCheck, type, typeCheck, isExpired } = action.payload;
       state.sides.front = {
         code: code,
         country: country,
         countryCheck: countryCheck,
         type: type,
         typeCheck: typeCheck,
+        isExpired: isExpired
       }
     },
     setBackSide: (state, action: PayloadAction<DocumentData>) => {
-      const { code, country, countryCheck, type, typeCheck } = action.payload;
+      const { code, country, countryCheck, type, typeCheck, isExpired } = action.payload;
       state.sides.back = {
         code: code,
         country: country,
         countryCheck: countryCheck,
         type: type,
-        typeCheck: typeCheck
+        typeCheck: typeCheck,
+        isExpired: isExpired
       }
     }
   },
