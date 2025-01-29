@@ -31,11 +31,17 @@ export interface Dato {
   enlaceTemporal?: string;
   ordenFirma?: number;
   fechaCreacion?: string;
+  callback?: string;
+  redireccion?: string;
+  idUsuario?: number;
+  idValidacion?: number;
+  tipoValidacion?:number;
 }
 
 export interface ValidacionDocumento {
   ocr: OCR;
   face: boolean;
+  // confidence: number;
   mrz: MRZ;
   barcode: string;
   sideResult: {

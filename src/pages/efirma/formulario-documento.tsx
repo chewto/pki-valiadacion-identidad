@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import "@styles/styles.css";
+import "@styles/selfie-movil.component.css";
 import "@styles/formulario-style.component.css";
 import { Previsualizacion } from "@components/ui/previsualizacion";
 import { useMobile } from "../../nucleo/hooks/useMobile";
@@ -25,9 +26,10 @@ import { FACING_MODES } from "react-html5-camera-photo";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
+import documentIndicator from "@assets/img/indicador_documento.png";
 
 interface Props {
-  id: string | null;
+  id: string | number | null | undefined;
   tipoDocumento: string;
   preview: string;
   continuarBoton: boolean;
@@ -48,7 +50,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   ladoDocumento,
   tries,
   attendance,
-  setMainCounter
+  setMainCounter,
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -64,8 +66,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
-  const [retry, setRetry] = useState<boolean>(false)
+  const [retry, setRetry] = useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
+  const cameraRef = useRef<HTMLDivElement>(null);
 
 
   const mobile: boolean = useMobile();
@@ -73,15 +76,12 @@ export const FormularioDocumento: React.FC<Props> = ({
   const elementoScroll = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!mostrarPreview) {
-      setMostrarPreview(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     if (preview.length <= 0) {
       setContinuarBoton(false);
+    }
+
+    if (!mostrarPreview) {
+      setMostrarPreview(true);
     }
   }, [
     conteo,
@@ -89,6 +89,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     preview.length,
     tipoDocumento,
     validaiconDocumento.face,
+    mostrarPreview,
   ]);
 
   useEffect(() => {
@@ -99,7 +100,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
   useEffect(() => {
-    setConteo(0)
+    setConteo(0);
   }, [ladoDocumento]);
 
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +108,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     setMessages([]);
     setContinuarBoton(false);
-    setRetry(false)
+    setRetry(false);
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -159,7 +160,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     setContinuarBoton(false);
     setMostrarCamara(false);
 
-
     dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
 
     validarDocumento(
@@ -180,7 +180,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = (
-    id: string | null,
+    id: string | number | null | undefined,
     imagenDocumento: string | ArrayBuffer | null,
     nombre: string,
     apellido: string,
@@ -191,8 +191,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   ) => {
     setError(false);
     setLoading(true);
-    nombre = nombre.toUpperCase();
-    apellido = apellido.toUpperCase();
+
 
     const data = {
       id: id,
@@ -214,35 +213,29 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-        const adviceMessages = res.data.messages
+        const adviceMessages = res.data.messages;
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
           dispatch(setValidacionMRZ(res.data.mrz));
           dispatch(setValidacionRostro(res.data));
           dispatch(setFrontSide(res.data.document));
-          dispatch(setFrontResult({sideResult: res.data.validSide}))
+          dispatch(setFrontResult({ sideResult: res.data.validSide }));
 
-          if (
-            res.data.face &&
-            res.data.validSide == "OK"
-          ) {
+          if (res.data.face && res.data.validSide == "OK") {
             setConteo(0);
             setContinuarBoton(true);
           } else {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              ...adviceMessages
-            ]);
+            setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
-            setRetry(true)
+            setRetry(true);
             // setMainCounter(prev => prev + 1)
           }
 
           if (conteo >= tries) {
             setMessages([]);
             setContinuarBoton(true);
-            setRetry(false)
+            setRetry(false);
           }
         }
 
@@ -250,26 +243,22 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionCodigoBarras(res.data));
           dispatch(setValidacionMRZ(res.data.mrz));
           dispatch(setBackSide(res.data.document));
-          dispatch(setBackResult({sideResult: res.data.validSide}))
+          dispatch(setBackResult({ sideResult: res.data.validSide }));
 
           if (res.data.validSide === "OK") {
             setConteo(0);
             setContinuarBoton(true);
-          } 
-          else {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              ...adviceMessages
-            ]);
-            setRetry(true)
+          } else {
+            setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
+            setRetry(true);
             setConteo((prev) => prev + 1);
-            setMainCounter(prev => prev + 1)
+            setMainCounter((prev) => prev + 1);
           }
 
-          if (conteo >= tries && attendance !== 'AUTOMATICA') {
+          if (conteo >= tries && attendance !== "AUTOMATICA") {
             setMessages([]);
             setContinuarBoton(true);
-            setRetry(false)
+            setRetry(false);
           }
         }
       })
@@ -300,16 +289,23 @@ export const FormularioDocumento: React.FC<Props> = ({
           titulo="Advertencia"
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
-          <div>
-            <ul className="text-left p-0">
-              {messages.map((message:string, index:number) => (
-                <li key={index} className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200">{message}</li>
-              ))}
-            </ul>
-            <button onClick={() => setMessages([])} className="stepper-btn">cerrar</button>
-          </div>}
+            <div>
+              <ul className="text-left p-0">
+                {messages.map((message: string, index: number) => (
+                  <li
+                    key={index}
+                    className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
+                  >
+                    {message}
+                  </li>
+                ))}
+              </ul>
+              <button onClick={() => setMessages([])} className="stepper-btn">
+                cerrar
+              </button>
+            </div>
+          }
         />
-        
       )}
 
       {continuarBoton && (
@@ -331,7 +327,10 @@ export const FormularioDocumento: React.FC<Props> = ({
             margin: "20px 0",
           }}
         >
+          <div className="flex flex-col justify-center items-center">
+          <span>Procensando documento, espere un momento.</span>
           <Spinner></Spinner>
+          </div>
         </div>
       )}
 
@@ -343,10 +342,25 @@ export const FormularioDocumento: React.FC<Props> = ({
             <>
               {mostrarCamara && preview.length <= 0 && (
                 <>
-                  <Camera
-                    idealFacingMode={FACING_MODES.ENVIRONMENT}
-                    onTakePhoto={(dataURL) => tomarFoto(dataURL)}
-                  />
+                  <span className="text-center text-sm mb-2">Presione el boton al final de la pantalla para tomar la foto del documento</span>
+                  <div className="w-full h-full flex justify-center items-center">
+
+                    <img
+                      src={documentIndicator}
+                      alt=""
+                      className="absolute z-30 w-7/12 "
+                      // style={{transform: `${indicatorVertical ? 'rotate(90deg)' : 'rotate(0deg)'}`}}
+                    />
+                    <div
+                      className=""
+                      ref={cameraRef}
+                    >
+                      <Camera
+                        idealFacingMode={FACING_MODES.ENVIRONMENT}
+                        onTakePhoto={(dataURL) => tomarFoto(dataURL)}
+                      />
+                    </div>
+                  </div>
                   <div ref={elementoScroll}></div>
                 </>
               )}
@@ -371,6 +385,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                 accept="image/jpeg"
                 onChange={cambioArchivo}
                 style={{ display: "none" }}
+                disabled={loading}
               />
               {preview.length <= 0 &&
                 `Subir foto del ${placeholder} de su ${tipoDocumento}`}
@@ -388,7 +403,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         </>
       )}
 
-{preview.length >= 1 && !loading && tipoDocumento != "Pasaporte" && (
+      {preview.length >= 1 && !loading && tipoDocumento != "Pasaporte" && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
       )}
 
@@ -398,7 +413,6 @@ export const FormularioDocumento: React.FC<Props> = ({
         ladoDocumento == "anverso" && (
           <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
         )}
-
     </div>
   );
 };

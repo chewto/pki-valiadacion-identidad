@@ -16,7 +16,10 @@ import {
   setHoraFecha,
   setDispostivoNavegador,
 } from "@nucleo/redux/slices/informacionSlice";
-import { setFirmador } from "@nucleo/redux/slices/firmadorSlice";
+import {
+  setDirecciones,
+  setFirmador,
+} from "@nucleo/redux/slices/firmadorSlice";
 import { useIos } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 import { documentTypes } from "@nucleo/documents/documentsTypes";
@@ -29,15 +32,19 @@ import { PasosEnumerados } from "@components/ui/pasos-enumerados";
 import { Advertencia } from "@components/ui/advertencia";
 import { MensajeVerificacion } from "@components/ui/mensaje-verificacion";
 import Card from "@components/ui/card";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
 
+interface Props {
+  standalone: boolean;
+}
 
-export const ValidacionIdentidad: React.FC = () => {
+export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
+  const { hash } = useParams();
   const validationName = "EFIRMA";
 
   const [params] = useSearchParams();
@@ -53,14 +60,27 @@ export const ValidacionIdentidad: React.FC = () => {
   const validacionDocumento = useSelector(
     (state: RootState) => state.validacionDocumento
   );
-  // const validacionCB = useSelector((state: RootState) => state.cb);
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
-  const urlParams = `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
+  const urlParams = standalone
+    ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
+    : `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
 
-  const url = `${URLS.ValidacionIdentidadTipo3}?${urlParams}`;
+  const url = standalone
+    ? `${URLS.standaloneValidation}?${urlParams}`
+    : `${URLS.ValidacionIdentidadTipo3}?${urlParams}`;
 
-  const urlFirmador = `${URLS.obtenerFirmador}/${idUsuarioParam}`;
+  const userDataUrl = standalone
+    ? `${URLS.getUserData}?hash=${hash}`
+    : `${URLS.obtenerFirmador}/${idUsuarioParam}`;
+
+  const validationParamsUrl = standalone
+    ? `${URLS.validationParameters}?hash=${hash}`
+    : `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`;
+
+  // const lastValidationUrl = standalone
+  //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
+  //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
   const formulario = new FormData();
@@ -95,63 +115,85 @@ export const ValidacionIdentidad: React.FC = () => {
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
+  const [generated, setGenerated] = useState<boolean>(true)
+
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
-  const [mainCounter, setMainCounter] = useState<number>(0)
+  const [mainCounter, setMainCounter] = useState<number>(0);
 
   const [validationParams, setValidationParams] = useState({
     validationAttendance: "",
     validationPercent: "",
-    documentsTries: 0
+    documentsTries: 0,
   });
 
   useEffect(() => {
-    if(mainCounter >= validationParams.documentsTries + 1){
-      enviar(true)
+    if (mainCounter >= validationParams.documentsTries + 1) {
+      enviar(true);
     }
-  },[mainCounter])
+  }, [mainCounter]);
 
   useEffect(() => {
-    document.title = "Validacion identidad - desarrollo 0.0.5";
-
-    axios
-      .get(`${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`)
-      .then((res) => {
-        const estadoValidacion: string = res.data.results.estado;
-        
-        if (estadoValidacion.length >= 1) {
-          const textList = ["se requiere nueva validación", "validación fallida"];
-          const isIncluided = (text:string) => {
-            return estadoValidacion.includes(text)
-          }
-          const test = textList.some(isIncluided)
-          setRetry(test);
-          setEstadoValidacion(estadoValidacion);
-        }else {
-          setRetry(true);
-          setEstadoValidacion(estadoValidacion);
-        }
-  });
+    document.title = "Validacion identidad";
 
     axios({
       method: "get",
-      url: urlFirmador,
+      url: userDataUrl,
     })
       .then((res) => {
+
+        if(res.data.dato == null){
+          setGenerated(false)
+        }
+
         dispatch(setFirmador(res.data.dato));
+        if (standalone) {
+          dispatch(setDirecciones(res.data.dato));
+        }
       })
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+
+  useEffect(() => {
+    axios
+      .get(
+        standalone
+          ? `${URLS.comprobarValidacion}?hash=${hash}`
+          : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`
+      )
+      .then((res) => {
+        const estadoValidacion: string = res.data.results.estado;
+        if (estadoValidacion.length >= 1) {
+          const textList = [
+            "se requiere nueva validación",
+            "validación fallida",
+          ];
+          const isIncluided = (text: string) => {
+            return estadoValidacion.includes(text);
+          };
+          const test = textList.some(isIncluided);
+          setRetry(test);
+          setEstadoValidacion(estadoValidacion);
+        } else {
+          setRetry(true);
+          setEstadoValidacion(estadoValidacion);
+        }
+      });
 
     axios({
       method: "get",
-      url: `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`,
+      url: validationParamsUrl,
     })
       .then((res) => {
-        const { validationPercent, validationAttendance, documentsTries } = res.data;
+        const { validationPercent, validationAttendance, documentsTries } =
+          res.data;
 
         setValidationParams({
           validationAttendance:
@@ -160,20 +202,18 @@ export const ValidacionIdentidad: React.FC = () => {
               : `${validationAttendance}`,
           validationPercent:
             validationPercent === null ? "60" : `${validationPercent}`,
-          documentsTries: documentsTries
+          documentsTries: documentsTries,
         });
       })
       .catch(() => {
         setValidationParams({
           validationAttendance: "AUTOMATICA",
           validationPercent: "60",
-          documentsTries: 2
+          documentsTries: 2,
         });
       });
-
     geolocation();
     obtenerIp();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const obtenerIp = () => {
@@ -185,8 +225,8 @@ export const ValidacionIdentidad: React.FC = () => {
         dispatch(setIp(res.data));
       })
       .catch((error) => {
+      console.error(error)
         dispatch(setIp({ ip: "ip inaccesible" }));
-        console.log(error);
       });
   };
 
@@ -209,7 +249,7 @@ export const ValidacionIdentidad: React.FC = () => {
     }
   };
 
-  const enviar = (failed:boolean) => {
+  const enviar = async (failed: boolean) => {
     // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
     ValidadorFormdata(
@@ -284,18 +324,42 @@ export const ValidacionIdentidad: React.FC = () => {
       validacionDocumento.ocr.data.ID
     );
 
-    ValidadorFormdata(formulario, formdataKeys.mrz, validacionDocumento.mrz.code.raw);
-    ValidadorFormdata(formulario, formdataKeys.mrzPre, validacionDocumento.mrz.code.preprocessed);
-    ValidadorFormdata(formulario, formdataKeys.mrzName, validacionDocumento.mrz.data.name);
-    ValidadorFormdata(formulario, formdataKeys.mrzLastname, validacionDocumento.mrz.data.lastName);
-    ValidadorFormdata(formulario, formdataKeys.mrzNamePercent, validacionDocumento.mrz.percentages.name);
-    ValidadorFormdata(formulario, formdataKeys.mrzLastnamePercent, validacionDocumento.mrz.percentages.lastName);
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrz,
+      validacionDocumento.mrz.code.raw
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrzPre,
+      validacionDocumento.mrz.code.preprocessed
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrzName,
+      validacionDocumento.mrz.data.name
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrzLastname,
+      validacionDocumento.mrz.data.lastName
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrzNamePercent,
+      validacionDocumento.mrz.percentages.name
+    );
+    ValidadorFormdata(
+      formulario,
+      formdataKeys.mrzLastnamePercent,
+      validacionDocumento.mrz.percentages.lastName
+    );
 
     ValidadorFormdata(
       formulario,
       formdataKeys.codigoBarras,
       validacionDocumento.barcode
-    )
+    );
 
     ValidadorFormdata(
       formulario,
@@ -330,7 +394,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(
       formulario,
       formdataKeys.frontIsExpired,
-      validacionDocumento.sides.front.isExpired ? '!OK' : 'OK'
+      validacionDocumento.sides.front.isExpired ? "!OK" : "OK"
     );
 
     ValidadorFormdata(
@@ -386,11 +450,7 @@ export const ValidacionIdentidad: React.FC = () => {
     ValidadorFormdata(
       formulario,
       formdataKeys.backIsExpired,
-      `${
-        validacionDocumento.sides.back.isExpired
-          ? '!OK'
-          : "OK"
-      }`
+      `${validacionDocumento.sides.back.isExpired ? "!OK" : "OK"}`
     );
 
     ValidadorFormdata(
@@ -444,52 +504,97 @@ export const ValidacionIdentidad: React.FC = () => {
       validationParams.validationPercent
     );
 
+    ValidadorFormdata(
+      formulario,
+      "callback",
+      informacionFirmador.callback ?? ""
+    );
+
+    // ValidadorFormdata(
+    //   formulario,
+    //   'face',
+    //   validacionDocumento.face ? 'OK' : '!OK'
+    // );
+
+    // ValidadorFormdata(
+    //   formulario,
+    //   'confidence',
+    //   validacionDocumento.face ? 'OK
+    // );
+
+    // ValidadorFormdata(
+    //   formulario,
+    //   'confidence',
+    //   validacionDocumento.face ? 'OK' : '!OK'
+    // );
+
     if (!failed) {
       setMostrar(true);
       setLoading(true);
 
+      let state = "";
       let idValidacion = 0;
       let idUsuario = 0;
 
-      axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
+        await axios({
+          method: "post",
+          url: url,
+          data: formulario,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          setError(true);
+          .then((res) => {
+            idValidacion = res.data.idValidacion;
+            idUsuario = res.data.idUsuario;
+            state = res.data.estadoVerificacion;
+          })
+          .catch((err) => {
+            console.log(err);
+            setLoading(false);
+            setError(true);
+          })
+          .finally(() => {
+            if(!standalone){
+              const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+              window.location.href = newUrl;
+            }
+          });
+
+      if(standalone){
+        await axios({
+          method: "post",
+          url: `${informacionFirmador.redireccion}`,
+          data: JSON.stringify({
+            "idValidacion": informacionFirmador.idValidacion,
+            "idUsuario": informacionFirmador.idUsuario,
+            "estadoValidacion": state,
+            "tipo": informacionFirmador.tipoValidacion,
+            "reintentoURL": window.location.href
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         })
-        .finally(() => {
-          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-        });
+          .finally(() => {
+            const newUrl = `${informacionFirmador.redireccion}`;
+            window.location.href = newUrl;
+          });
+      }
     }
 
-    if(failed){
+    if (failed) {
+      ValidadorFormdata(formulario, "failed", "OK");
 
       ValidadorFormdata(
         formulario,
-        'failed',
-        'OK'
-      );
-
-      ValidadorFormdata(
-        formulario,
-        'failed_back',
+        "failed_back",
         validacionDocumento.sideResult.back
       );
 
       ValidadorFormdata(
         formulario,
-        'failed_front',
+        "failed_front",
         validacionDocumento.sideResult.front
       );
 
@@ -543,9 +648,10 @@ export const ValidacionIdentidad: React.FC = () => {
       setContinuarBoton={setContinuarBoton}
       preview={informacion.foto_persona}
       selfie={labelFoto.foto_persona}
+      id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
     />,
     <FormularioDocumento
-      id={idUsuarioParam}
+      id={standalone ? informacionFirmador.idValidacion : idUsuarioParam}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.anverso}
       continuarBoton={continuarBoton}
@@ -557,7 +663,7 @@ export const ValidacionIdentidad: React.FC = () => {
       setMainCounter={setMainCounter}
     />,
     <FormularioDocumento
-      id={idUsuarioParam}
+      id={standalone ? informacionFirmador.idValidacion : idUsuarioParam}
       tipoDocumento={informacion.tipoDocumento}
       preview={informacion.reverso}
       continuarBoton={continuarBoton}
@@ -572,7 +678,7 @@ export const ValidacionIdentidad: React.FC = () => {
 
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center xsm:px-1">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex md:items-center md:mt-0 xsm:items-start  justify-center  xsm:px-1 md:pt-0 xsm:pt-5">
         <Card>
           <Header titulo="Validación de identidad" />
           <div className="m-0">
@@ -605,6 +711,7 @@ export const ValidacionIdentidad: React.FC = () => {
               )}
             </div>
             {componentsSteps[activeSteps]}
+            {/* {componentsSteps[3]} */}
           </div>
           <>
             {mostrarMensaje && loading && (
@@ -637,6 +744,14 @@ export const ValidacionIdentidad: React.FC = () => {
             titulo="Su validación esta siendo procesada"
             contenido="Estado de la validación:"
             elemento={<b>{estadoValidacion}</b>}
+          />
+        )}
+
+        {!generated && (
+          <Advertencia
+            titulo="Su validación esta no ha sido generada"
+            contenido=""
+            elemento={<></>}
           />
         )}
 

@@ -13,6 +13,7 @@ export default defineConfig({
       '@components': path.resolve(__dirname, './src/components'),
       '@styles': path.resolve(__dirname, './src/styles'),
       '@nucleo': path.resolve(__dirname, './src/nucleo'),
+      '@assets': path.resolve(__dirname, './src/assets')
     }
   },
   plugins: [react(), mkcert()],

@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { ValidacionIdentidad } from "../../layouts/validacion-identidad";
+// import { ValidacionIdentidad } from "../../layouts/validacion-identidad";
 import App  from "../../App";
 
 export const router = createBrowserRouter([
@@ -11,7 +11,7 @@ export const router = createBrowserRouter([
       {
         index: true,
         path: "validacion-identidad/:idFirma",
-        element: <ValidacionIdentidad />,
+        // element: <ValidacionIdentidad />,
       },
     ],
   },

@@ -5,7 +5,6 @@ import { setVaciarFoto } from "@nucleo/redux/slices/informacionSlice";
 import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { ValidacionVida } from "./validacion-vida";
-import { useSearchParams } from "react-router-dom";
 import { Advertencia } from "@components/ui/advertencia";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
@@ -13,20 +12,18 @@ interface Props {
   preview: string;
   selfie: string;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  id: number|string | null | undefined;
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
   preview,
   selfie,
   setContinuarBoton,
+  id
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
   const dispatch = useDispatch();
-
-  const [params] = useSearchParams();
-
-  const idUsuarioParam = params.get("idUsuario");
 
   useEffect(() => {
     setContinuarBoton(false);
@@ -50,10 +47,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setSuccess(false);
     setMessages([])
   };
-
-  useEffect(() => {
-    console.log(messages)
-  },[messages, setMessages])
 
   return (
     <>
@@ -131,7 +124,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           setCapturarOtraVez={setCapturarOtravez}
           setError={setError}
           label={selfie}
-          idUsuarioFi={idUsuarioParam}
+          idUsuarioFi={id}
           setMessages={setMessages}
         />
       )}

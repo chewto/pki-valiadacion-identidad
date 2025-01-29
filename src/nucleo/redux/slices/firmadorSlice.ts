@@ -6,6 +6,7 @@ const initialState: Dato = {
   apellido: '',
   correo: '',
   documento: ''
+
 }
 
 export const firmadorSlice = createSlice({
@@ -18,10 +19,19 @@ export const firmadorSlice = createSlice({
       state.apellido = apellido
       state.correo = correo
       state.documento = documento
+    },
+    setDirecciones: (state, action:PayloadAction<Dato>) => {
+      const {callback, redireccion, idValidacion, idUsuario, tipoValidacion} = action.payload
+
+      state.callback = callback;
+      state.redireccion = redireccion;
+      state.idValidacion = idValidacion;
+      state.idUsuario = idUsuario;
+      state.tipoValidacion = tipoValidacion;
     }
   }
 })
 
-export const {setFirmador} = firmadorSlice.actions
+export const {setFirmador, setDirecciones} = firmadorSlice.actions
 
 export default firmadorSlice.reducer;

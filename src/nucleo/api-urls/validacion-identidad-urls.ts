@@ -1,13 +1,12 @@
-// const pais = 'honducert'
+const pais = 'honducert'
+const subdomain = 'honducert.firma'
 
-// const subdomain = 'honducert.firma'
-
-// const pais = 'desarrollo'
-
+// const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_desarrollo'
-const subdomain = 'desarrollo'
+// const pais = 'desarrollo'
+// const subdomain = 'desarrollo'
+
 const ekycSubdomain = 'honduras'
 
 const rutasURL = {
@@ -54,6 +53,7 @@ const rejected = rutasURL[pais]['rejected']
 
 export const URLS = {
   validationProvider: `${urlBase}/validation/validation-provider`,
+  standaloneValidation: `${urlBase}/validation/standalone`,
   ValidacionIdentidadTipo1: `${urlBase}/validacion-identidad-tipo-1`,
   ValidacionIdentidadTipo3: `${urlBase}/validation/type-3`,
   validarDocumentoAnverso: `${urlBase}/ocr/anverso`,
@@ -68,7 +68,9 @@ export const URLS = {
   comprobarValidacion: `${urlBase}/validation/check-validation`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: firmadorUrlBase,
+  getUserData: `${urlBase}/validation/get-user`,
   resultados: `${efirmaUrl}`,
+  // standaloneResults: `https://${subdomain}.e-custodia.com/resultado_validacion`,
   rejected:`${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
   lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`

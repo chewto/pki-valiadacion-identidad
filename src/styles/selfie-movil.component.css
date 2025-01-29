@@ -47,10 +47,15 @@
   z-index: 1200;
 }
 
-.video > .react-html5-camera-photo > video {
-  width: 60%;
-  display: flex;
-  justify-content: center;
+.react-html5-camera-photo  > #container-circles{
+
+  position: fixed;
+  bottom: 12%;
+  z-index: 1000;
+}
+
+.react-html5-camera-photo  > #container-circles > #outer-circle{
+  background: #2b2b2b;
 }
 
 .preview{

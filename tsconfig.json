@@ -14,7 +14,8 @@
       "@components/*": ["components/*"],
       "@layouts/*": ["layouts/*"],
       "@styles/*": ["styles/*"],
-      "@nucleo/*": ["nucleo/*"]
+      "@nucleo/*": ["nucleo/*"],
+      "@assets/*":["assets/*"]
     },
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -28,6 +29,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "src/layouts/.tsx"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
