@@ -41,7 +41,7 @@ export interface Dato {
 export interface ValidacionDocumento {
   ocr: OCR;
   face: boolean;
-  // confidence: number;
+  confidence: number;
   mrz: MRZ;
   barcode: string;
   sideResult: {

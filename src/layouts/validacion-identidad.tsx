@@ -510,22 +510,22 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       informacionFirmador.callback ?? ""
     );
 
-    // ValidadorFormdata(
-    //   formulario,
-    //   'face',
-    //   validacionDocumento.face ? 'OK' : '!OK'
-    // );
+    ValidadorFormdata(
+      formulario,
+      'face',
+      validacionDocumento.face ? 'OK' : '!OK'
+    );
+
+    ValidadorFormdata(
+      formulario,
+      'confidence',
+      `${validacionDocumento.confidence}`
+    );
 
     // ValidadorFormdata(
     //   formulario,
-    //   'confidence',
-    //   validacionDocumento.face ? 'OK
-    // );
-
-    // ValidadorFormdata(
-    //   formulario,
-    //   'confidence',
-    //   validacionDocumento.face ? 'OK' : '!OK'
+    //   'landmarks',
+    //   validacionDocumento.landmarks 
     // );
 
     if (!failed) {
@@ -557,7 +557,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           .finally(() => {
             if(!standalone){
               const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-              window.location.href = newUrl;
+              // window.location.href = newUrl;
             }
           });
 
@@ -578,7 +578,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         })
           .finally(() => {
             const newUrl = `${informacionFirmador.redireccion}`;
-            window.location.href = newUrl;
+            // window.location.href = newUrl;
           });
       }
     }

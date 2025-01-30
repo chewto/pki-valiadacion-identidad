@@ -65,11 +65,12 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [fileSizeError, setFileSizeError] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
   const cameraRef = useRef<HTMLDivElement>(null);
-
+  const [reqMessage, setReqMessage] = useState<string>("");
 
   const mobile: boolean = useMobile();
 
@@ -106,11 +107,16 @@ export const FormularioDocumento: React.FC<Props> = ({
   const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
 
+    const sizeLimit = 2000;
+
+    setFileSizeError(false);
     setMessages([]);
     setContinuarBoton(false);
     setRetry(false);
 
     const archivo = evento.target.files?.[0];
+    const fileSize = archivo?.size ? archivo.size / 1024 : 0;
+    console.log(fileSize);
     const lector = new FileReader();
 
     if (archivo) lector.readAsDataURL(archivo);
@@ -129,8 +135,19 @@ export const FormularioDocumento: React.FC<Props> = ({
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          canvas.width = imagen.width;
-          canvas.height = imagen.height;
+          if (fileSize >= 350) {
+            console.log("imagen pesada");
+            const nuevoWidth = Math.floor(imagen.width / 2);
+            const nuevoHeigth = Math.floor(imagen.height / 2);
+
+            canvas.width = nuevoWidth;
+            canvas.height = nuevoHeigth;
+          } else {
+            console.log("imagen liviana");
+            canvas.width = imagen.width;
+            canvas.height = imagen.height;
+          }
+          console.log(canvas);
 
           ctx?.drawImage(imagen, 0, 0, imagen.width, imagen.height);
 
@@ -138,16 +155,20 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
 
-          validarDocumento(
-            id,
-            dataURLImage,
-            informacionFirmador.nombre,
-            informacionFirmador.apellido,
-            informacionFirmador.documento,
-            ladoDocumento,
-            tipoDocumento,
-            informacion.foto_persona
-          );
+          if (fileSize <= sizeLimit) {
+            validarDocumento(
+              id,
+              dataURLImage,
+              informacionFirmador.nombre,
+              informacionFirmador.apellido,
+              informacionFirmador.documento,
+              ladoDocumento,
+              tipoDocumento,
+              informacion.foto_persona
+            );
+          } else {
+            setFileSizeError(true);
+          }
         };
       }
     };
@@ -191,7 +212,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   ) => {
     setError(false);
     setLoading(true);
-
+    if(ladoDocumento === 'anverso'){
+      setReqMessage("validando el rostro en el documento, espere un momento.");
+    } else {
+      setReqMessage("validando el documento, espere un momento.");
+    }
 
     const data = {
       id: id,
@@ -270,6 +295,16 @@ export const FormularioDocumento: React.FC<Props> = ({
       .finally(() => setLoading(false));
   };
 
+  useEffect(() => {
+    if (loading) {
+      const timer = setTimeout(() => {
+        setReqMessage("Extrayendo información...");
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
   return (
     <div className="documento-container">
       {tipoDocumento === "Pasaporte" && ladoDocumento === "anverso" && (
@@ -318,6 +353,12 @@ export const FormularioDocumento: React.FC<Props> = ({
         <Alert color="danger">ha ocurrido un error con el servidor</Alert>
       )}
 
+      {fileSizeError && (
+        <Alert color="danger">
+          La imagen es muy pesada, la imagen debe ser menor a 2 megabytes.
+        </Alert>
+      )}
+
       {loading && (
         <div
           style={{
@@ -328,8 +369,8 @@ export const FormularioDocumento: React.FC<Props> = ({
           }}
         >
           <div className="flex flex-col justify-center items-center">
-          <span>Procensando documento, espere un momento.</span>
-          <Spinner></Spinner>
+            <span>{reqMessage}</span>
+            <Spinner></Spinner>
           </div>
         </div>
       )}
@@ -342,19 +383,18 @@ export const FormularioDocumento: React.FC<Props> = ({
             <>
               {mostrarCamara && preview.length <= 0 && (
                 <>
-                  <span className="text-center text-sm mb-2">Presione el boton al final de la pantalla para tomar la foto del documento</span>
+                  <span className="text-center text-sm mb-2">
+                    Presione el boton al final de la pantalla para tomar la foto
+                    del documento
+                  </span>
                   <div className="w-full h-full flex justify-center items-center">
-
                     <img
                       src={documentIndicator}
                       alt=""
                       className="absolute z-30 w-7/12 "
                       // style={{transform: `${indicatorVertical ? 'rotate(90deg)' : 'rotate(0deg)'}`}}
                     />
-                    <div
-                      className=""
-                      ref={cameraRef}
-                    >
+                    <div className="" ref={cameraRef}>
                       <Camera
                         idealFacingMode={FACING_MODES.ENVIRONMENT}
                         onTakePhoto={(dataURL) => tomarFoto(dataURL)}
