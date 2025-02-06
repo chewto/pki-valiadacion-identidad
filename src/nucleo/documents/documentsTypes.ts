@@ -10,21 +10,21 @@ export const documentTypes = {
       value: "Cédula de extranjería",
       label: "Cédula de extranjería",
     },
-    {
-      id: 2,
-      value: "Permiso por protección temporal",
-      label: "Permiso por protección temporal",
-    },
-    {
-      id: 3,
-      value: "Tarjeta de identidad",
-      label: "Tarjeta de identidad",
-    },
-    {
-      id: 4,
-      value: "Pasaporte",
-      label: "Pasaporte",
-    }
+    // {
+    //   id: 2,
+    //   value: "Permiso por protección temporal",
+    //   label: "Permiso por protección temporal",
+    // },
+    // {
+    //   id: 3,
+    //   value: "Tarjeta de identidad",
+    //   label: "Tarjeta de identidad",
+    // },
+    // {
+    //   id: 4,
+    //   value: "Pasaporte",
+    //   label: "Pasaporte",
+    // }
   ],
   pty: [],
   hnd: [

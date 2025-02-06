@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ValidadorFormdata,
   formdataKeys,
@@ -115,7 +115,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
-  const [generated, setGenerated] = useState<boolean>(true)
+  const [generated, setGenerated] = useState<boolean>(true);
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
@@ -129,6 +129,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationPercent: "",
     documentsTries: 0,
   });
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (mainCounter >= validationParams.documentsTries + 1) {
@@ -144,9 +146,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
-
-        if(res.data.dato == null){
-          setGenerated(false)
+        if (res.data.dato == null) {
+          setGenerated(false);
         }
 
         dispatch(setFirmador(res.data.dato));
@@ -158,8 +159,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-
 
   useEffect(() => {
     axios
@@ -225,7 +224,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         dispatch(setIp(res.data));
       })
       .catch((error) => {
-      console.error(error)
+        console.error(error);
         dispatch(setIp({ ip: "ip inaccesible" }));
       });
   };
@@ -247,6 +246,18 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         setCoordenadas({ latitud: "no disponible", longitud: "no disponible" })
       );
     }
+  };
+
+  const appendHiddenInput = (
+    formElement: HTMLFormElement,
+    name: string,
+    value: string
+  ) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    formElement.appendChild(input);
   };
 
   const enviar = async (failed: boolean) => {
@@ -512,20 +523,20 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     ValidadorFormdata(
       formulario,
-      'face',
-      validacionDocumento.face ? 'OK' : '!OK'
+      "face",
+      validacionDocumento.face ? "OK" : "!OK"
     );
 
     ValidadorFormdata(
       formulario,
-      'confidence',
+      "confidence",
       `${validacionDocumento.confidence}`
     );
 
     // ValidadorFormdata(
     //   formulario,
     //   'landmarks',
-    //   validacionDocumento.landmarks 
+    //   validacionDocumento.landmarks
     // );
 
     if (!failed) {
@@ -536,51 +547,78 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       let idValidacion = 0;
       let idUsuario = 0;
 
-        await axios({
-          method: "post",
-          url: url,
-          data: formulario,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      await axios({
+        method: "post",
+        url: url,
+        data: formulario,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((res) => {
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
+          state = res.data.estadoVerificacion;
         })
-          .then((res) => {
-            idValidacion = res.data.idValidacion;
-            idUsuario = res.data.idUsuario;
-            state = res.data.estadoVerificacion;
-          })
-          .catch((err) => {
-            console.log(err);
-            setLoading(false);
-            setError(true);
-          })
-          .finally(() => {
-            if(!standalone){
-              const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-              // window.location.href = newUrl;
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+          setError(true);
+        })
+        .finally(() => {
+          if (standalone) {
+            if (formRef.current) {
+              const formElement = formRef.current;
+              appendHiddenInput(
+                formElement,
+                "idValidacion",
+                idValidacion.toString()
+              );
+              appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
+              appendHiddenInput(formElement, "estadoValidacion", state);
+              appendHiddenInput(
+                formElement,
+                "tipo",
+                informacionFirmador.tipoValidacion?.toString() ?? ""
+              );
+              appendHiddenInput(
+                formElement,
+                "reintentoURL",
+                window.location.href
+              );
+              formElement.submit();
             }
-          });
+          }
+          if (!standalone) {
+            const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+            window.location.href = newUrl;
+          }
+        });
 
-      if(standalone){
-        await axios({
-          method: "post",
-          url: `${informacionFirmador.redireccion}`,
-          data: JSON.stringify({
-            "idValidacion": informacionFirmador.idValidacion,
-            "idUsuario": informacionFirmador.idUsuario,
-            "estadoValidacion": state,
-            "tipo": informacionFirmador.tipoValidacion,
-            "reintentoURL": window.location.href
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-          .finally(() => {
-            const newUrl = `${informacionFirmador.redireccion}`;
-            // window.location.href = newUrl;
-          });
-      }
+      // if(standalone){
+
+      //   const redirectForm = new FormData();
+      //   redirectForm.append("idValidacion", idValidacion.toString());
+      //   redirectForm.append("idUsuario", idUsuario.toString());
+      //   redirectForm.append("estadoValidacion", state);
+      //   redirectForm.append("tipo", informacionFirmador.tipoValidacion?.toString() ?? "");
+      //   redirectForm.append("reintentoURL", window.location.href);
+
+      //   console.log(redirectForm.values())
+
+      //   await axios({
+      //     method: "post",
+      //     url: `${informacionFirmador.redireccion}`,
+      //     data: redirectForm,
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     }
+      //   }).then(res => console.log(res))
+      //   // .finally(() => {
+      //   //     const newUrl = `${informacionFirmador.redireccion}`;
+      //   //     window.location.href = newUrl;
+      //   //   });
+      // }
     }
 
     if (failed) {
@@ -639,7 +677,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["hnd"]}
+      documentList={documentTypes["col"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
@@ -756,6 +794,15 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         )}
 
         {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
+
+        <form
+          ref={formRef}
+          action={informacionFirmador.redireccion}
+          method="POST"
+          className="hidden"
+        >
+          <input type="submit" value="Submit" />
+        </form>
       </main>
     </>
   );
