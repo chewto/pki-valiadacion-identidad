@@ -21,12 +21,9 @@ import {
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
-import Camera from "react-html5-camera-photo";
-import { FACING_MODES } from "react-html5-camera-photo";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
-import documentIndicator from "@assets/img/indicador_documento.png";
 
 interface Props {
   id: string | number | null | undefined;
@@ -69,7 +66,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
-  const cameraRef = useRef<HTMLDivElement>(null);
   const [reqMessage, setReqMessage] = useState<string>("");
 
   const mobile: boolean = useMobile();
@@ -104,10 +100,10 @@ export const FormularioDocumento: React.FC<Props> = ({
     setConteo(0);
   }, [ladoDocumento]);
 
-  const cambioArchivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
 
-    const sizeLimit = 2000;
+    // const sizeLimit = 5120;
 
     setFileSizeError(false);
     setMessages([]);
@@ -115,9 +111,10 @@ export const FormularioDocumento: React.FC<Props> = ({
     setRetry(false);
 
     const archivo = evento.target.files?.[0];
-    const fileSize = archivo?.size ? archivo.size / 1024 : 0;
-    console.log(fileSize);
+    const fileSizeKB = archivo?.size ? archivo.size / 1024 : 0;
     const lector = new FileReader();
+
+    console.log(fileSizeKB)
 
     if (archivo) lector.readAsDataURL(archivo);
 
@@ -135,40 +132,39 @@ export const FormularioDocumento: React.FC<Props> = ({
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          if (fileSize >= 350) {
-            console.log("imagen pesada");
-            const nuevoWidth = Math.floor(imagen.width / 2);
-            const nuevoHeigth = Math.floor(imagen.height / 2);
+          // if (fileSizeKB >= 350) {
+          //   console.log("imagen pesada");
+          //   const nuevoWidth = Math.floor(imagen.width / 2);
+          //   const nuevoHeigth = Math.floor(imagen.height / 2);
 
-            canvas.width = nuevoWidth;
-            canvas.height = nuevoHeigth;
-          } else {
-            console.log("imagen liviana");
-            canvas.width = imagen.width;
-            canvas.height = imagen.height;
-          }
-          console.log(canvas);
+          //   canvas.width = nuevoWidth;
+          //   canvas.height = nuevoHeigth;
+          // } else {
+          // }
+          // console.log("imagen liviana");
+          canvas.width = imagen.width;
+          canvas.height = imagen.height;
 
           ctx?.drawImage(imagen, 0, 0, imagen.width, imagen.height);
 
-          const dataURLImage = canvas.toDataURL("image/jpeg");
+          const dataURLImage = canvas.toDataURL("image/jpeg", 0.9);
 
           dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
 
-          if (fileSize <= sizeLimit) {
-            validarDocumento(
-              id,
-              dataURLImage,
-              informacionFirmador.nombre,
-              informacionFirmador.apellido,
-              informacionFirmador.documento,
-              ladoDocumento,
-              tipoDocumento,
-              informacion.foto_persona
-            );
-          } else {
-            setFileSizeError(true);
-          }
+          validarDocumento(
+            id,
+            dataURLImage,
+            informacionFirmador.nombre,
+            informacionFirmador.apellido,
+            informacionFirmador.documento,
+            ladoDocumento,
+            tipoDocumento,
+            informacion.foto_persona
+          );
+          // if (fileSizeKB<= sizeLimit) {
+          // } else {
+          //   setFileSizeError(true);
+          // }
         };
       }
     };
@@ -176,24 +172,24 @@ export const FormularioDocumento: React.FC<Props> = ({
     evento.target.value = "";
   };
 
-  const tomarFoto = (dataURL: string) => {
-    setMessages([]);
-    setContinuarBoton(false);
-    setMostrarCamara(false);
+  // const tomarFoto = (dataURL: string) => {
+  //   setMessages([]);
+  //   setContinuarBoton(false);
+  //   setMostrarCamara(false);
 
-    dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
+  //   dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
 
-    validarDocumento(
-      id,
-      dataURL,
-      informacionFirmador.nombre,
-      informacionFirmador.apellido,
-      informacionFirmador.documento,
-      ladoDocumento,
-      tipoDocumento,
-      informacion.foto_persona
-    );
-  };
+  //   validarDocumento(
+  //     id,
+  //     dataURL,
+  //     informacionFirmador.nombre,
+  //     informacionFirmador.apellido,
+  //     informacionFirmador.documento,
+  //     ladoDocumento,
+  //     tipoDocumento,
+  //     informacion.foto_persona
+  //   );
+  // };
 
   const retomar = () => {
     setMostrarCamara(true);
@@ -212,7 +208,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   ) => {
     setError(false);
     setLoading(true);
-    if(ladoDocumento === 'anverso'){
+    if (ladoDocumento === "anverso") {
       setReqMessage("validando el rostro en el documento, espere un momento.");
     } else {
       setReqMessage("validando el documento, espere un momento.");
@@ -246,6 +242,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionRostro(res.data));
           dispatch(setFrontSide(res.data.document));
           dispatch(setFrontResult({ sideResult: res.data.validSide }));
+          // dispatch(setFotos({ labelFoto: ladoDocumento, data: res.data.image }));
 
           if (res.data.face && res.data.validSide == "OK") {
             setConteo(0);
@@ -388,18 +385,26 @@ export const FormularioDocumento: React.FC<Props> = ({
                     del documento
                   </span>
                   <div className="w-full h-full flex justify-center items-center">
+                    {/* 
                     <img
                       src={documentIndicator}
                       alt=""
                       className="absolute z-30 w-7/12 "
                       // style={{transform: `${indicatorVertical ? 'rotate(90deg)' : 'rotate(0deg)'}`}}
-                    />
                     <div className="" ref={cameraRef}>
                       <Camera
                         idealFacingMode={FACING_MODES.ENVIRONMENT}
                         onTakePhoto={(dataURL) => tomarFoto(dataURL)}
-                      />
-                    </div>
+                      /> *
+                    </div> 
+                     */}
+
+                    <label className="file-input">
+                      <span>Tomar foto del {placeholder} de su documento</span>
+                      <input type="file" accept="image/jpeg" capture="environment" className='hidden' onChange={handleCapture}/>
+                    </label>
+
+
                   </div>
                   <div ref={elementoScroll}></div>
                 </>
@@ -423,7 +428,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                 name={ladoDocumento}
                 type="file"
                 accept="image/jpeg"
-                onChange={cambioArchivo}
+                onChange={handleCapture}
                 style={{ display: "none" }}
                 disabled={loading}
               />

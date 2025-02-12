@@ -207,7 +207,7 @@ export const ValidacionVida: React.FC<Props> = ({
 
             <video
               ref={videoRef}
-              className="rounded-lg w-12/12 h-full aspect-auto"
+              className="rounded-lg w-12/12 h-full aspect-auto transform scale-x-[-1] "
               autoPlay
               muted
               controls={false}

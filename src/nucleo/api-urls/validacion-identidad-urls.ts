@@ -11,8 +11,8 @@ const ekycSubdomain = 'honduras'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://127.0.0.1:4000",
-    fe: "http://127.0.0.1:4000/obtener-firmador",
+    validacion: "http://192.168.1.110:4000",
+    fe: "http://192.168.1.110:4000/obtener-firmador",
     resultados: "",
     rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
   }
