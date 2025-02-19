@@ -133,8 +133,14 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
+    console.log(informacion)
+  },[])
+
+  useEffect(() => {
     if (mainCounter >= validationParams.documentsTries + 1) {
-      enviar(true);
+      // enviar(true);
+      setContinuarBoton(true)
+      console.log('validacion fallida')
     }
   }, [mainCounter]);
 
@@ -677,7 +683,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["hnd"]}
+      documentList={documentTypes["col"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
@@ -787,7 +793,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
         {!generated && (
           <Advertencia
-            titulo="Su validación esta no ha sido generada"
+            titulo="Su validación no ha sido generada"
             contenido=""
             elemento={<></>}
           />

@@ -1,0 +1,73 @@
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 9 / 16; /* Mantiene la relación vertical */
+  overflow: hidden;
+  margin-top: 20px;
+  z-index: 0;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.mask {
+  opacity: 0;
+  position: absolute;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+  z-index: 0;
+}
+
+/* 🎯 Rectángulo Rojo más cerca de la parte superior */
+.rectangle-mask {
+  position: absolute;
+  top: 20%; /* Alinea más arriba */
+  left: 2%;
+  width: 95%; /* Más ancho */
+  height: 35%; /* Más bajo */
+  border: 3px solid red;
+  border-radius: 12px;
+  box-sizing: border-box;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#captura {
+  max-width: 90%;
+  display: none;
+  margin-top: 10px;
+}
+
+.buttons {
+  z-index: 100;
+  position: absolute;
+  bottom: 20px; /* Fija el botón al final de la pantalla */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  background: white;
+  color: black;
+  font-weight: bold;
+  border-radius: 5px;
+}

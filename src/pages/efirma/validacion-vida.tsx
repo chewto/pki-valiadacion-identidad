@@ -196,7 +196,7 @@ export const ValidacionVida: React.FC<Props> = ({
               <img src={faceTemplate} className="md:w-6/12 xsm:w-10/12" alt="" />
             </div>
 
-            <div className="absolute top-0 xsm:left-3 md:left-7 flex justify-center items-center gap-1 mx-2 my-2 px-2 py-1 bg-white rounded-lg">
+            <div className="absolute top-0 xsm:left-3 md:left-7 flex justify-center items-center gap-1 mx-2 my-2 px-2 py-1 bg-white rounded-lg z-50 ">
               {counter} s
               <div
                 className={`w-4 h-4 transition-colors duration-300 rounded-lg ${
@@ -207,7 +207,7 @@ export const ValidacionVida: React.FC<Props> = ({
 
             <video
               ref={videoRef}
-              className="rounded-lg w-12/12 h-full aspect-auto transform scale-x-[-1] "
+              className="rounded-lg w-12/12 h-full aspect-auto  transform scale-x-[-1] z-0"
               autoPlay
               muted
               controls={false}

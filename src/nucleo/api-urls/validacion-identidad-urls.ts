@@ -1,20 +1,24 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-const pais = 'honducert_desarrollo'
+const pais = 'efirmaPlus'
 const subdomain = 'desarrollo'
+
+// const pais = 'honducert_desarrollo'
+// const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
 // const subdomain = 'desarrollo'
 
-const ekycSubdomain = 'honduras'
+const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
     validacion: "http://192.168.1.110:4000",
     fe: "http://192.168.1.110:4000/obtener-firmador",
     resultados: "",
-    rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
+    // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
+    rejected: ``
   }
   ,
   honducert_desarrollo:{
@@ -28,6 +32,12 @@ const rutasURL = {
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
+    },
+    efirmaPlus:{
+      validacion: `https://cavipetrol.efirmaplus.com/validacion-back`,
+      fe: `https://cavipetrol.efirmaplus.com/fe-back/api/Firmador`,
+      resultados: `https://cavipetrol.efirmaplus.com/efirma.php/`,
+      rejected: `https://cavipetrol.efirmaplus.com/resultado_validacion_fallida`
     }
   // libertador:{
   //   validacion: "https://libertador.pkiservices.co/validacion-back",

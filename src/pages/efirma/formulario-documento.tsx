@@ -19,11 +19,12 @@ import {
   setFrontResult,
   setBackResult,
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
-import { Alert, Spinner } from "reactstrap";
+import { Alert, Button, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
+import "@styles/camara.css";
 
 interface Props {
   id: string | number | null | undefined;
@@ -65,12 +66,27 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [fileSizeError, setFileSizeError] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
-  const [mostrarCamara, setMostrarCamara] = useState<boolean>(true);
+  // const [mostrarCamara, setMostrarCamara] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
+  // const [init, setInit] = useState<boolean>(true)
   const [reqMessage, setReqMessage] = useState<string>("");
 
   const mobile: boolean = useMobile();
 
   const elementoScroll = useRef<HTMLDivElement>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  // let imgCaptura = document.getElementById('captura');
+  // let tomarFotoBtn = document.getElementById('tomarFoto');
+  // let descargarFotoBtn = document.getElementById('descargarFoto');
+  const [streamActivo, setStreamActivo] = useState<MediaStream>();
+
+  const rectangulo = {
+    x: 0.02, // 10% desde el lado izquierdo
+    y: 0.2, // 20% desde la parte superior
+    width: 0.95, // 80% del ancho
+    height: 0.35, // 30% de la altura
+  };
 
   useEffect(() => {
     if (preview.length <= 0) {
@@ -100,6 +116,86 @@ export const FormularioDocumento: React.FC<Props> = ({
     setConteo(0);
   }, [ladoDocumento]);
 
+  const capturarFoto = () => {
+    setMessages([]);
+    setContinuarBoton(false);
+    setOpen(false);
+    // setMostrarCamara(false)
+
+    setRetry(false);
+
+    const canvas = document.createElement("canvas");
+    if (videoRef.current && !videoRef.current.paused && !videoRef.current.ended) {
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
+
+      // Dibuja la imagen completa del video en el canvas
+      if (ctx) {
+        const x = rectangulo.x * canvas.width;
+        const y = rectangulo.y * canvas.height;
+        const width = rectangulo.width * canvas.width;
+        const height = rectangulo.height * canvas.height;
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(x, y, width, height);
+        const canvasRecortada = document.createElement("canvas");
+        canvasRecortada.width = width;
+        canvasRecortada.height = height;
+        const ctxRecortado = canvasRecortada.getContext("2d");
+
+        if (ctxRecortado) {
+          ctxRecortado.putImageData(imageData, 0, 0);
+          const dataUrl = canvasRecortada.toDataURL("image/jpeg", 1.0);
+
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataUrl }));
+
+          // setMostrarCamara(false);
+
+          validarDocumento(
+            id,
+            dataUrl,
+            informacionFirmador.nombre,
+            informacionFirmador.apellido,
+            informacionFirmador.documento,
+            ladoDocumento,
+            tipoDocumento,
+            informacion.foto_persona
+          );
+        }
+      }
+    }
+  };
+
+  async function iniciarCamara() {
+    // console.log('funcionando')
+    // setMostrarCamara(true);
+    // setInit(false)
+
+    if (streamActivo) {
+      streamActivo.getTracks().forEach((track) => track.stop());
+    }
+
+    try {
+      const constraints = {
+        video: {
+          facingMode: "environment", // 📌 Cámara trasera por defecto
+          width: { ideal: 4096 },
+          height: { ideal: 2160 },
+        },
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStreamActivo(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+    } catch (err) {
+      console.error("Error al acceder a la cámara:", err);
+      alert("No se puede acceder a la cámara.");
+    }
+  }
+
   const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
 
@@ -111,10 +207,8 @@ export const FormularioDocumento: React.FC<Props> = ({
     setRetry(false);
 
     const archivo = evento.target.files?.[0];
-    const fileSizeKB = archivo?.size ? archivo.size / 1024 : 0;
+    // const fileSizeKB = archivo?.size ? archivo.size / 1024 : 0;
     const lector = new FileReader();
-
-    console.log(fileSizeKB)
 
     if (archivo) lector.readAsDataURL(archivo);
 
@@ -191,10 +285,12 @@ export const FormularioDocumento: React.FC<Props> = ({
   //   );
   // };
 
-  const retomar = () => {
-    setMostrarCamara(true);
-    dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
-  };
+  // const retomar = () => {
+  //   if (mobile) {
+  //     iniciarCamara();
+  //   }
+  //   dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
+  // };
 
   const validarDocumento = (
     id: string | number | null | undefined,
@@ -223,6 +319,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       ladoDocumento: ladoDocumento,
       tipoDocumento: tipoDocumento,
       imagenPersona: imagenPersona,
+      test: false,
     };
 
     axios({
@@ -234,6 +331,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
+        console.log(res.data);
         const adviceMessages = res.data.messages;
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
@@ -242,7 +340,9 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionRostro(res.data));
           dispatch(setFrontSide(res.data.document));
           dispatch(setFrontResult({ sideResult: res.data.validSide }));
-          // dispatch(setFotos({ labelFoto: ladoDocumento, data: res.data.image }));
+          dispatch(
+            setFotos({ labelFoto: ladoDocumento, data: res.data.image })
+          );
 
           if (res.data.face && res.data.validSide == "OK") {
             setConteo(0);
@@ -266,6 +366,9 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setValidacionMRZ(res.data.mrz));
           dispatch(setBackSide(res.data.document));
           dispatch(setBackResult({ sideResult: res.data.validSide }));
+          dispatch(
+            setFotos({ labelFoto: ladoDocumento, data: res.data.image })
+          );
 
           if (res.data.validSide === "OK") {
             setConteo(0);
@@ -287,9 +390,12 @@ export const FormularioDocumento: React.FC<Props> = ({
       .catch((error) => {
         setError(true);
         setLoading(false);
+        setRetry(true);
         console.log(error);
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -378,7 +484,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         <>
           {mobile && (
             <>
-              {mostrarCamara && preview.length <= 0 && (
+              {open && (
                 <>
                   <span className="text-center text-sm mb-2">
                     Presione el boton al final de la pantalla para tomar la foto
@@ -399,21 +505,75 @@ export const FormularioDocumento: React.FC<Props> = ({
                     </div> 
                      */}
 
-                    <label className="file-input">
+                    {/* <label className="file-input">
                       <span>Tomar foto del {placeholder} de su documento</span>
-                      <input type="file" accept="image/jpeg" capture="environment" className='hidden' onChange={handleCapture}/>
-                    </label>
+                      <input type="file" accept="image/jpeg" capture="environment" className='hidden' onChange={handleCapture} disabled={loading}/>
+                    </label> */}
+                    {/* 
+                    <h1>capturar foto</h1>
+                    <div>
+                      <video ref={videoRef}></video>
+                    </div> */}
+                    <>
+                      <div
+                        className={`fixed inset-0 flex items-center justify-center z-50`}
+                      >
+                        <div className="bg-white p-6 w-screen h-screen">
+                          <div className="video-container">
+                            <div className="mask">
+                              📸 ¡Alinea dentro del rectángulo!
+                            </div>
+                            <video ref={videoRef} autoPlay playsInline></video>
+                            <div className="rectangle-mask"></div>
+                          </div>
+                          <div className="buttons">
+                            <button
+                              id="tomarFoto"
+                              className="file-input"
+                              onClick={capturarFoto}
+                            >
+                              📷 Capturar
+                            </button>
 
-
+                            <Button
+                              color="danger"
+                              onClick={() => setOpen(false)}
+                            >
+                              cerrar
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   </div>
+
                   <div ref={elementoScroll}></div>
                 </>
               )}
-              {!mostrarCamara && !loading && (
+
+              {!loading && (
+                <button
+                  className="file-input"
+                  onClick={() => {
+                    setOpen(true);
+                    iniciarCamara();
+                  }}
+                >
+                  Tomar foto
+                </button>
+              )}
+
+              {retry && !continuarBoton && (
+                <Alert color="warning" className="text-center z-0">
+                  vuelva a intentarlo
+                </Alert>
+              )}
+
+              {/* {!mostrarCamara && retry && (
                 <button className="file-input" onClick={retomar}>
                   tomar foto de nuevo
                 </button>
-              )}
+              )} */}
             </>
           )}
 
