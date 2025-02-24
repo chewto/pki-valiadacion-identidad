@@ -1,14 +1,14 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-const pais = 'efirmaPlus'
-const subdomain = 'desarrollo'
+// const pais = 'efirmaPlus'
+// const subdomain = 'desarrollo'
 
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
-// const pais = 'desarrollo'
-// const subdomain = 'desarrollo'
+const pais = 'desarrollo'
+const subdomain = 'desarrollo'
 
 const ekycSubdomain = 'hon'
 

@@ -113,6 +113,10 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
   useEffect(() => {
+    console.log(messages)
+  }, [messages])
+
+  useEffect(() => {
     setConteo(0);
   }, [ladoDocumento]);
 
@@ -520,20 +524,22 @@ export const FormularioDocumento: React.FC<Props> = ({
                       >
                         <div className="bg-white p-6 w-screen h-screen">
                           <div className="video-container">
-                            <div className="mask">
-                              📸 ¡Alinea dentro del rectángulo!
+                            <div className="mask-above">
+                            Una vez alineado correctamente, presione el botón para tomar la foto
+                            </div>
+                            <div className="mask-below">
+                            Por favor, coloque su documento dentro del recuadro rojo en pantalla y asegúrese de que quede completamente visible y enfocado
                             </div>
                             <video ref={videoRef} autoPlay playsInline></video>
                             <div className="rectangle-mask"></div>
                           </div>
                           <div className="buttons">
-                            <button
-                              id="tomarFoto"
-                              className="file-input"
+                            <Button
+                              color="primary"
                               onClick={capturarFoto}
                             >
                               📷 Capturar
-                            </button>
+                            </Button>
 
                             <Button
                               color="danger"
@@ -594,7 +600,7 @@ export const FormularioDocumento: React.FC<Props> = ({
               />
               {preview.length <= 0 &&
                 `Subir foto del ${placeholder} de su ${tipoDocumento}`}
-              {retry && "Reintentar subir documento"}
+              {retry && !continuarBoton && "Reintentar subir documento"}
               {loading && <Spinner></Spinner>}
               {continuarBoton &&
                 ladoDocumento === "anverso" &&

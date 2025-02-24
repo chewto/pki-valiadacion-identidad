@@ -15,20 +15,57 @@ video {
   border-radius: 6px;
 }
 
-.mask {
-  opacity: 0;
+.mask-above {
+  opacity: 1;
   position: absolute;
-  top: 10%;
+  top: 5%;
   left: 50%;
+  width: 80%;
   transform: translateX(-50%);
   color: white;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(210, 210, 210, 0.5);
   padding: 5px 10px;
   border-radius: 5px;
   text-align: center;
   z-index: 0;
+}
+
+.mask-below {
+  opacity: 1;
+  position: absolute;
+  top: 58%;
+  left: 50%;
+  width: 90%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  background: rgba(210, 210, 210, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+  z-index: 0;
+}
+
+@media (max-width: 320px) {
+
+  .mask-above {
+    top: 1%;
+    left: 50%;
+    width: 80%;
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+  
+  .mask-below {
+    top: 58%;
+    left: 50%;
+    width: 90%;
+    font-size: 14px;
+    padding: 5px 10px;
+  }
 }
 
 /* 🎯 Rectángulo Rojo más cerca de la parte superior */
@@ -38,7 +75,7 @@ video {
   left: 2%;
   width: 95%; /* Más ancho */
   height: 35%; /* Más bajo */
-  border: 3px solid red;
+  border: 4px solid red;
   border-radius: 12px;
   box-sizing: border-box;
   pointer-events: none;

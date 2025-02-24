@@ -1,4 +1,4 @@
-import logo from '../../assets/img/logo-pki.png'
+import logo from '../../assets/img/logo-honducert.png'
 
 interface Props{
   titulo: string;
