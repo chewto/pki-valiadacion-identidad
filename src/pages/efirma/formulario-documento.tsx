@@ -113,10 +113,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
   useEffect(() => {
-    console.log(messages)
-  }, [messages])
-
-  useEffect(() => {
     setConteo(0);
   }, [ladoDocumento]);
 

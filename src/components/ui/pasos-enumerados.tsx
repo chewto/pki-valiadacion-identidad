@@ -5,7 +5,7 @@ interface Props {
 
 export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const pasosTipo1 = [1, 2, 3, 4, 5];
-  const pasosTipo2 = [4, 5, 6, 7, 8];
+  const pasosTipo2 = [4, 5, 6, 7];
 
   return (
     <div className="flex sm:justify-evenly xsm:justify-between my-4 ">

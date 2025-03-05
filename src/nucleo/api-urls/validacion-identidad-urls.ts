@@ -14,8 +14,8 @@ const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://192.168.1.110:4000",
-    fe: "http://192.168.1.110:4000/obtener-firmador",
+    validacion: "http://127.0.0.1:4000",
+    fe: "http://127.0.0.1:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``
@@ -80,6 +80,7 @@ export const URLS = {
   obtenerFirmador: firmadorUrlBase,
   getUserData: `${urlBase}/validation/get-user`,
   resultados: `${efirmaUrl}`,
+  getMedia: `${urlBase}/get-media`,
   // standaloneResults: `https://${subdomain}.e-custodia.com/resultado_validacion`,
   rejected:`${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,

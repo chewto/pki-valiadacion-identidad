@@ -4,8 +4,6 @@ import EKYCLleida from "@layouts/ekyc-lleida";
 
 function App() {
 
-
-
   return (
     <Router>
       <Routes>
