@@ -10,14 +10,14 @@ export const CodigoQR: React.FC = () => {
     setDireccion(window.location.href)
   },[])
 
-  // useEffect(()=> {
-  //   console.log(direccion)
-  // }, [direccion])
+  useEffect(()=> {
+    console.log(direccion)
+  }, [direccion])
 
   return (
-    <div className="qr-container">
-      <p>Si desea continuar en su dispositivo movil, escanee el siguiente <a href="#codigo-qr">codigo QR</a></p>
-      <QRCode value={direccion} className="qr" id="codigo-qr"/>
+    <div className="absolute left-0 top-3/4 flex flex-col items-center justify-center border-2 py-2 px-2 bg-white">
+      <p className='text-center text-sm'>Si desea continuar en su dispositivo movil, escanee el siguiente codigo QR</p>
+      <QRCode value={direccion} className="" id="codigo-qr"/>
     </div>
   );
 };

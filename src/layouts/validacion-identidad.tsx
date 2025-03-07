@@ -38,6 +38,7 @@ import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
+// import { CodigoQR } from "@components/ui/codigo-qr";
 
 interface Props {
   standalone: boolean;
@@ -132,9 +133,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    console.log(informacion)
-  },[])
 
   useEffect(() => {
     if (mainCounter >= validationParams.documentsTries + 1) {
@@ -344,13 +342,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ValidadorFormdata(
       formulario,
       formdataKeys.mrz,
-      validacionDocumento.mrz.code.raw
+      validacionDocumento.mrz.code
     );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrzPre,
-      validacionDocumento.mrz.code.preprocessed
-    );
+  
     ValidadorFormdata(
       formulario,
       formdataKeys.mrzName,
@@ -683,7 +677,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["hnd"]}
+      documentList={documentTypes["col"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
@@ -799,7 +793,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )}
 
-        {/* <>{esMobile ? <></> : <CodigoQR />}</> */}
+        {/* <>{!esMobile &&  <CodigoQR />}</> */}
 
         <form
           ref={formRef}

@@ -16,10 +16,7 @@ const initialState: ValidacionDocumento = {
   face: false,
   confidence: 1,
   mrz: {
-    code: {
-      raw: '',
-      preprocessed:''
-    },
+    code: '',
     data: {
       name: '',
       lastName: ''
@@ -75,10 +72,7 @@ export const validacionDocumentolice = createSlice({
     },
     setValidacionMRZ: (state, action: PayloadAction<MRZ>) => {
       const { code, data, percentages } = action.payload;
-      state.mrz.code = {
-        raw: code.raw,
-        preprocessed: code.preprocessed
-      };
+      state.mrz.code = code;
       state.mrz.data = {
         name: data.name,
         lastName: data.lastName

@@ -47,7 +47,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   setContinuarBoton,
   ladoDocumento,
   tries,
-  attendance,
   setMainCounter,
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
@@ -59,7 +58,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [conteo, setConteo] = useState<number>(0);
+  const [conteo, setConteo] = useState<number>(1);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -245,7 +244,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           ctx?.drawImage(imagen, 0, 0, imagen.width, imagen.height);
 
-          const dataURLImage = canvas.toDataURL("image/jpeg", 0.9);
+          const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
 
           dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
 
@@ -295,6 +294,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   //   }
   //   dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
   // };
+
+
 
   const validarDocumento = (
     id: string | number | null | undefined,
@@ -351,7 +352,9 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (res.data.face && res.data.validSide == "OK") {
             setConteo(0);
             setContinuarBoton(true);
-          } else {
+          } 
+          
+          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
             setRetry(true);
@@ -377,14 +380,17 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (res.data.validSide === "OK") {
             setConteo(0);
             setContinuarBoton(true);
-          } else {
+          } 
+          
+          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setRetry(true);
             setConteo((prev) => prev + 1);
             setMainCounter((prev) => prev + 1);
           }
 
-          if (conteo >= tries && attendance !== "AUTOMATICA") {
+          if (conteo >= tries) {
+            console.log(conteo, tries)
             setMessages([]);
             setContinuarBoton(true);
             setRetry(false);
@@ -438,7 +444,8 @@ export const FormularioDocumento: React.FC<Props> = ({
                     key={index}
                     className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
                   >
-                    {message}
+                    {/* {message} */}
+                    Por favor, se requiere una foto del documento con mejor resolución, inténtelo nuevamente.
                   </li>
                 ))}
               </ul>

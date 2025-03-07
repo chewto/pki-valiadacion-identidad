@@ -53,10 +53,7 @@ export interface ValidacionDocumento {
 
 
 export interface MRZ{
-  code: {
-    preprocessed: string;
-    raw: string;
-  };
+  code: string;
   data: MRZData;
   percentages: MRZPercentages;
 }
