@@ -1,11 +1,11 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-const pais = 'efirmaPlus'
-const subdomain = 'desarrollo'
-
-// const pais = 'honducert_desarrollo'
+// const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
+
+const pais = 'honducert_desarrollo'
+const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
 // const subdomain = 'desarrollo'
@@ -14,8 +14,8 @@ const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://192.168.1.110:4000",
-    fe: "http://192.168.1.110:4000/obtener-firmador",
+    validacion: "http://192.168.1.116:4000",
+    fe: "http://127.0.0.1:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``
@@ -80,10 +80,12 @@ export const URLS = {
   obtenerFirmador: firmadorUrlBase,
   getUserData: `${urlBase}/validation/get-user`,
   resultados: `${efirmaUrl}`,
+  getMedia: `${urlBase}/get-media`,
   // standaloneResults: `https://${subdomain}.e-custodia.com/resultado_validacion`,
   rejected:`${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
-  lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`
+  lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`,
+  testBarcode: `${urlBase}/ocr/barcode-reader`
 }
 
 export const validationRedirects = {

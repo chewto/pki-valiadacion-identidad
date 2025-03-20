@@ -1,20 +1,29 @@
 .qr-container {
-  position: absolute;
-  left: 0;
-  top: 100%;
+  width: 16%;
 }
 
-.qr-container > p {
-  font-size: 19px;
-  margin: 0 0 50px 0;
+@media (max-width: 1024px) {
+  .qr-container {
+    width: 14%;
+  }
+
+  .qr-container > p {
+    font-size: 9px;
+    line-height: 12px;
+  }
 }
 
-.qr {
-  width: 180px;
-  height: 180px;
-  background: #fff;
-  border: 1px solid #000;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 20px;
+@media (max-width: 768px) {
+  .qr-container {
+    width: 17%;
+  }
+
+  .qr-container > p {
+    font-size: 9px;
+    line-height: 11px;
+  }
 }
+
+
+
+

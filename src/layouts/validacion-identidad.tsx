@@ -15,15 +15,16 @@ import {
   setCoordenadas,
   setHoraFecha,
   setDispostivoNavegador,
+  setFotos,
 } from "@nucleo/redux/slices/informacionSlice";
 import {
   setDirecciones,
   setFirmador,
 } from "@nucleo/redux/slices/firmadorSlice";
-import { useIos } from "@nucleo/hooks/useMobile";
+import { useIos, useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 import { documentTypes } from "@nucleo/documents/documentsTypes";
-import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
+
 import { FormularioDocumento } from "@pages/efirma/formulario-documento";
 import { DocumentSelector } from "@pages/shared/document-selector";
 import { AccesoCamara } from "@pages/efirma/acceso-camara";
@@ -35,10 +36,12 @@ import Card from "@components/ui/card";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import safari from "../assets/img/safari.png";
-// import { useMobile } from "../nucleo/hooks/useMobile";
-// import { CodigoQR } from "@components/shared/codigo-qr";
+
 import Button from "@mui/material/Button";
-// import { CodigoQR } from "@components/ui/codigo-qr";
+import { CodigoQR } from "@components/ui/codigo-qr";
+import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
+
 
 interface Props {
   standalone: boolean;
@@ -79,6 +82,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ? `${URLS.validationParameters}?hash=${hash}`
     : `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`;
 
+    const getMediaUrl = standalone ?
+  `${URLS.getMedia}?hash=${hash}` : 
+  `${URLS.getMedia}?id=${idUsuarioParam}`
+
   // const lastValidationUrl = standalone
   //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
@@ -92,7 +99,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     foto_persona: "foto_persona",
   };
 
-  // const esMobile = useMobile();
+  const esMobile = useMobile();
 
   useValidationRedirect(
     validationName,
@@ -161,6 +168,25 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       })
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
+
+
+        axios.get(getMediaUrl)
+        .then(res => {
+      console.log(res)
+      dispatch(setFotos({ labelFoto: "foto_persona", data: res.data.photo }));
+
+
+
+      const prueba: PruebaVida = {
+                movimiento: res.data.lifeTest,
+                idCarpetaEntidad: res.data.idCarpetaEntidad,
+                idCarpetaUsuario: res.data.idCarpetaUsuario,
+                videoHash: res.data.videoHash
+      };
+
+      dispatch(setIdCarpetas(prueba));
+    }).finally(() => setLoading(false));
+      
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -502,6 +528,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       formdataKeys.idCarpetaUsuario,
       pruebaVida.idCarpetaUsuario
     );
+    
+        ValidadorFormdata(
+          formulario,
+          'video_hash',
+          pruebaVida.videoHash
+        );
 
     ValidadorFormdata(
       formulario,
@@ -662,7 +694,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
-  const steps = ["1", "2", "3", "4", "5"];
+  const steps = ["1", "2", "3", "4"];
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
@@ -677,17 +709,17 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["col"]}
+      documentList={documentTypes["hnd"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
     <AccesoCamara setContinuarBoton={setContinuarBoton} />,
-    <FormularioFotoPersona
-      setContinuarBoton={setContinuarBoton}
-      preview={informacion.foto_persona}
-      selfie={labelFoto.foto_persona}
-      id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-    />,
+    // <FormularioFotoPersona
+    //   setContinuarBoton={setContinuarBoton}
+    //   preview={informacion.foto_persona}
+    //   selfie={labelFoto.foto_persona}
+    //   id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+    // />,
     <FormularioDocumento
       id={standalone ? informacionFirmador.idValidacion : idUsuarioParam}
       tipoDocumento={informacion.tipoDocumento}
@@ -793,7 +825,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )}
 
-        {/* <>{!esMobile &&  <CodigoQR />}</> */}
+        <>{!esMobile &&  <CodigoQR />}</>
+
+
 
         <form
           ref={formRef}

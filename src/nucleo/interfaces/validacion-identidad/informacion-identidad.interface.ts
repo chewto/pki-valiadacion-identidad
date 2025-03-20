@@ -2,6 +2,7 @@ export interface PruebaVida{
   movimiento: string;
   idCarpetaEntidad: string;
   idCarpetaUsuario: string;
+  videoHash: string;
   // isReal: boolean;
 }
 
@@ -74,7 +75,7 @@ export interface DocumentData{
   countryCheck: string;
   type: string;
   typeCheck: string;
-  isExpired: boolean;
+  isExpired: boolean | null;
 }
 
 interface CorrespondingSide{

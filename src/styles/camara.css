@@ -71,16 +71,16 @@ video {
 /* 🎯 Rectángulo Rojo más cerca de la parte superior */
 .rectangle-mask {
   position: absolute;
-  top: 20%; /* Alinea más arriba */
-  left: 2%;
-  width: 95%; /* Más ancho */
-  height: 35%; /* Más bajo */
-  border: 4px solid red;
+  border: 4px solid #ff0000;
   border-radius: 12px;
   box-sizing: border-box;
   pointer-events: none;
   z-index: 0;
 }
+/* top: 20%;  */
+/* left: 2%; */
+/* width: 95%;  */
+/* height: 35%;  */
 
 #captura {
   max-width: 90%;

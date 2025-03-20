@@ -38,7 +38,7 @@ const initialState: ValidacionDocumento = {
       countryCheck: '',
       type: '',
       typeCheck: '',
-      isExpired: true
+      isExpired: null
     },
     back: {
       code:'',
@@ -46,7 +46,7 @@ const initialState: ValidacionDocumento = {
       countryCheck: '',
       type: '',
       typeCheck: '',
-      isExpired: true
+      isExpired: null
     },
   }
 };

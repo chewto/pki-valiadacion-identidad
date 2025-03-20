@@ -87,6 +87,8 @@ export const FormularioDocumento: React.FC<Props> = ({
     height: 0.35, // 30% de la altura
   };
 
+  
+
   useEffect(() => {
     if (preview.length <= 0) {
       setContinuarBoton(false);
@@ -112,11 +114,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
   useEffect(() => {
-    console.log(messages)
-  }, [messages])
+    console.log(messages);
+  }, [messages]);
 
   useEffect(() => {
-    setConteo(0);
+    setConteo(1);
   }, [ladoDocumento]);
 
   const capturarFoto = () => {
@@ -128,7 +130,11 @@ export const FormularioDocumento: React.FC<Props> = ({
     setRetry(false);
 
     const canvas = document.createElement("canvas");
-    if (videoRef.current && !videoRef.current.paused && !videoRef.current.ended) {
+    if (
+      videoRef.current &&
+      !videoRef.current.paused &&
+      !videoRef.current.ended
+    ) {
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext("2d");
@@ -295,8 +301,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   //   dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
   // };
 
-
-
   const validarDocumento = (
     id: string | number | null | undefined,
     imagenDocumento: string | ArrayBuffer | null,
@@ -350,18 +354,19 @@ export const FormularioDocumento: React.FC<Props> = ({
           );
 
           if (res.data.face && res.data.validSide == "OK") {
-            setConteo(0);
+            console.log('valido')
             setContinuarBoton(true);
-          } 
-          
-          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
+          }
+
+          if (res.data.validSide != "OK" && conteo < tries) {
+            console.log('invalido')
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
             setRetry(true);
-            // setMainCounter(prev => prev + 1)
           }
 
           if (conteo >= tries) {
+            console.log('valido por intentos')
             setMessages([]);
             setContinuarBoton(true);
             setRetry(false);
@@ -378,11 +383,12 @@ export const FormularioDocumento: React.FC<Props> = ({
           );
 
           if (res.data.validSide === "OK") {
-            setConteo(0);
+            console.log('valido')
             setContinuarBoton(true);
-          } 
-          
-          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
+          }
+
+          if (res.data.validSide != "OK" && conteo < tries) {
+            console.log('invalido')
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setRetry(true);
             setConteo((prev) => prev + 1);
@@ -390,7 +396,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           }
 
           if (conteo >= tries) {
-            console.log(conteo, tries)
+            console.log('valido por intentos')
             setMessages([]);
             setContinuarBoton(true);
             setRetry(false);
@@ -444,10 +450,15 @@ export const FormularioDocumento: React.FC<Props> = ({
                     key={index}
                     className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
                   >
-                    {/* {message} */}
-                    Por favor, se requiere una foto del documento con mejor resolución, inténtelo nuevamente.
+                    {message}
+                    
                   </li>
                 ))}
+
+                {/* <li className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200">
+                  Por favor, se requiere una foto del documento con mejor
+                  resolución, inténtelo nuevamente.
+                </li> */}
               </ul>
               <button onClick={() => setMessages([])} className="stepper-btn">
                 cerrar
@@ -532,19 +543,19 @@ export const FormularioDocumento: React.FC<Props> = ({
                         <div className="bg-white p-6 w-screen h-screen">
                           <div className="video-container">
                             <div className="mask-above">
-                            Una vez alineado correctamente, presione el botón para tomar la foto
+                              Una vez alineado correctamente, presione el botón
+                              para tomar la foto
                             </div>
                             <div className="mask-below">
-                            Por favor, coloque su documento dentro del recuadro rojo en pantalla y asegúrese de que quede completamente visible y enfocado
+                              Por favor, coloque su documento dentro del
+                              recuadro rojo en pantalla y asegúrese de que quede
+                              completamente visible y enfocado
                             </div>
                             <video ref={videoRef} autoPlay playsInline></video>
-                            <div className="rectangle-mask"></div>
+                            <div className="rectangle-mask" style={{left: `${rectangulo.x * 100}%`, top: `${rectangulo.y * 100}%`, width: `${rectangulo.width * 100}%`, height: `${rectangulo.height * 100}%`}}></div>
                           </div>
                           <div className="buttons">
-                            <Button
-                              color="primary"
-                              onClick={capturarFoto}
-                            >
+                            <Button color="primary" onClick={capturarFoto}>
                               📷 Capturar
                             </Button>
 

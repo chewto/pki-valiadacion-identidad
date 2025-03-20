@@ -155,6 +155,7 @@ export const ValidacionVida: React.FC<Props> = ({
           movimiento: res.data.movimientoDetectado,
           idCarpetaEntidad: res.data.idCarpetaEntidad,
           idCarpetaUsuario: res.data.idCarpetaUsuario,
+          videoHash: res.data.videoHash
         };
 
         setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);
