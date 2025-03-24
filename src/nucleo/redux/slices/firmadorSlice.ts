@@ -5,8 +5,8 @@ const initialState: Dato = {
   nombre: '',
   apellido: '',
   correo: '',
-  documento: ''
-
+  documento: '',
+  validacionVida: false
 }
 
 export const firmadorSlice = createSlice({
@@ -14,11 +14,12 @@ export const firmadorSlice = createSlice({
   initialState,
   reducers: {
     setFirmador: (state, action:PayloadAction<Dato>) => {
-      const {nombre, apellido, correo, documento} = action.payload
+      const {nombre, apellido, correo, documento, validacionVida} = action.payload
       state.nombre = nombre
       state.apellido = apellido
       state.correo = correo
       state.documento = documento
+      state.validacionVida = validacionVida
     },
     setDirecciones: (state, action:PayloadAction<Dato>) => {
       const {callback, redireccion, idValidacion, idUsuario, tipoValidacion} = action.payload

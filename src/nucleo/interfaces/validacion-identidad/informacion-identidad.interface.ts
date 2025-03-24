@@ -37,6 +37,7 @@ export interface Dato {
   idUsuario?: number;
   idValidacion?: number;
   tipoValidacion?:number;
+  validacionVida?: boolean;
 }
 
 export interface ValidacionDocumento {

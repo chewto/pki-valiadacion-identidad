@@ -41,7 +41,7 @@ import Button from "@mui/material/Button";
 import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
-
+import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 
 interface Props {
   standalone: boolean;
@@ -82,9 +82,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ? `${URLS.validationParameters}?hash=${hash}`
     : `${URLS.validationParameters}?efirmaId=${idUsuarioParam}`;
 
-    const getMediaUrl = standalone ?
-  `${URLS.getMedia}?hash=${hash}` : 
-  `${URLS.getMedia}?id=${idUsuarioParam}`
+  const getMediaUrl = standalone
+    ? `${URLS.getMedia}?hash=${hash}`
+    : `${URLS.getMedia}?id=${idUsuarioParam}`;
 
   // const lastValidationUrl = standalone
   //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
@@ -140,12 +140,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-
   useEffect(() => {
     if (mainCounter >= validationParams.documentsTries + 1) {
       // enviar(true);
-      setContinuarBoton(true)
-      console.log('validacion fallida')
+      setContinuarBoton(true);
+      console.log("validacion fallida");
     }
   }, [mainCounter]);
 
@@ -157,6 +156,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
+        console.log(res.data.dato);
         if (res.data.dato == null) {
           setGenerated(false);
         }
@@ -169,26 +169,32 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
 
-
-        axios.get(getMediaUrl)
-        .then(res => {
-      console.log(res)
-      dispatch(setFotos({ labelFoto: "foto_persona", data: res.data.photo }));
-
-
-
-      const prueba: PruebaVida = {
-                movimiento: res.data.lifeTest,
-                idCarpetaEntidad: res.data.idCarpetaEntidad,
-                idCarpetaUsuario: res.data.idCarpetaUsuario,
-                videoHash: res.data.videoHash
-      };
-
-      dispatch(setIdCarpetas(prueba));
-    }).finally(() => setLoading(false));
-      
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (informacionFirmador.validacionVida) {
+      console.log("buscando info");
+      axios
+        .get(getMediaUrl)
+        .then((res) => {
+          console.log(res);
+          dispatch(
+            setFotos({ labelFoto: "foto_persona", data: res.data.photo })
+          );
+
+          const prueba: PruebaVida = {
+            movimiento: res.data.lifeTest,
+            idCarpetaEntidad: res.data.idCarpetaEntidad,
+            idCarpetaUsuario: res.data.idCarpetaUsuario,
+            videoHash: res.data.videoHash,
+          };
+
+          dispatch(setIdCarpetas(prueba));
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [informacionFirmador.validacionVida]);
 
   useEffect(() => {
     axios
@@ -231,7 +237,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
               : `${validationAttendance}`,
           validationPercent:
             validationPercent === null ? "60" : `${validationPercent}`,
-          documentsTries: documentsTries,
+          documentsTries: documentsTries === null ? 2 : documentsTries,
         });
       })
       .catch(() => {
@@ -370,7 +376,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       formdataKeys.mrz,
       validacionDocumento.mrz.code
     );
-  
+
     ValidadorFormdata(
       formulario,
       formdataKeys.mrzName,
@@ -528,12 +534,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       formdataKeys.idCarpetaUsuario,
       pruebaVida.idCarpetaUsuario
     );
-    
-        ValidadorFormdata(
-          formulario,
-          'video_hash',
-          pruebaVida.videoHash
-        );
+
+    ValidadorFormdata(
+      formulario,
+      "video_hash",
+      pruebaVida.videoHash != undefined ? pruebaVida.videoHash : "no hash"
+    );
 
     ValidadorFormdata(
       formulario,
@@ -694,7 +700,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
-  const steps = ["1", "2", "3", "4"];
+  const steps = informacionFirmador.validacionVida
+    ? ["1", "2", "3", "4"]
+    : ["1", "2", "3", "4", "5"];
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
@@ -706,45 +714,79 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setActiveSteps((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const componentsSteps = [
-    <DocumentSelector
-      tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["hnd"]}
-      continuarBoton={continuarBoton}
-      setContinuarBoton={setContinuarBoton}
-    />,
-    <AccesoCamara setContinuarBoton={setContinuarBoton} />,
-    // <FormularioFotoPersona
-    //   setContinuarBoton={setContinuarBoton}
-    //   preview={informacion.foto_persona}
-    //   selfie={labelFoto.foto_persona}
-    //   id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-    // />,
-    <FormularioDocumento
-      id={standalone ? informacionFirmador.idValidacion : idUsuarioParam}
-      tipoDocumento={informacion.tipoDocumento}
-      preview={informacion.anverso}
-      continuarBoton={continuarBoton}
-      setContinuarBoton={setContinuarBoton}
-      ladoDocumento={labelFoto.anverso}
-      urlOCR={URLS.validarDocumentoAnverso}
-      tries={validationParams.documentsTries}
-      attendance={validationParams.validationAttendance}
-      setMainCounter={setMainCounter}
-    />,
-    <FormularioDocumento
-      id={standalone ? informacionFirmador.idValidacion : idUsuarioParam}
-      tipoDocumento={informacion.tipoDocumento}
-      preview={informacion.reverso}
-      continuarBoton={continuarBoton}
-      setContinuarBoton={setContinuarBoton}
-      ladoDocumento={labelFoto.reverso}
-      urlOCR={URLS.validarDocumentoReverso}
-      tries={validationParams.documentsTries}
-      attendance={validationParams.validationAttendance}
-      setMainCounter={setMainCounter}
-    />,
-  ];
+  const componentsSteps = informacionFirmador.validacionVida
+    ? [
+        <DocumentSelector
+          tipoDocumento={informacion.tipoDocumento}
+          documentList={documentTypes["hnd"]}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+        />,
+        <AccesoCamara setContinuarBoton={setContinuarBoton} />,
+        <FormularioDocumento
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.anverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.anverso}
+          urlOCR={URLS.validarDocumentoAnverso}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+        />,
+        <FormularioDocumento
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.reverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.reverso}
+          urlOCR={URLS.validarDocumentoReverso}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+        />,
+      ]
+    : [
+        <DocumentSelector
+          tipoDocumento={informacion.tipoDocumento}
+          documentList={documentTypes["hnd"]}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+        />,
+        <AccesoCamara setContinuarBoton={setContinuarBoton} />,
+        <FormularioFotoPersona
+          setContinuarBoton={setContinuarBoton}
+          preview={informacion.foto_persona}
+          selfie={labelFoto.foto_persona}
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        />,
+        <FormularioDocumento
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.anverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.anverso}
+          urlOCR={URLS.validarDocumentoAnverso}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+        />,
+        <FormularioDocumento
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.reverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.reverso}
+          urlOCR={URLS.validarDocumentoReverso}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+        />,
+      ];
 
   return (
     <>
@@ -825,9 +867,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )}
 
-        <>{!esMobile &&  <CodigoQR />}</>
-
-
+        <>{!esMobile && <CodigoQR />}</>
 
         <form
           ref={formRef}

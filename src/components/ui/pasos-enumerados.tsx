@@ -1,11 +1,16 @@
+import { RootState } from "@nucleo/redux/store";
+import { useSelector } from "react-redux";
+
 interface Props {
   tipo: string | null;
   paso: number;
 }
 
 export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
+  const informacionFirmador = useSelector((state:RootState) => state.firmador)
+  
   const pasosTipo1 = [1, 2, 3, 4, 5];
-  const pasosTipo2 = [4, 5, 6, 7];
+  const pasosTipo2 = informacionFirmador.validacionVida ? [4, 5, 6, 7] : [4, 5, 6, 7,8];
 
   return (
     <div className="flex sm:justify-evenly xsm:justify-between my-4 ">

@@ -58,7 +58,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [conteo, setConteo] = useState<number>(1);
+  const [conteo, setConteo] = useState<number>(0);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
