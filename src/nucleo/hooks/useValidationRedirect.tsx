@@ -16,7 +16,7 @@ export const useValidationRedirect = (
   useEffect(() => {
     axios.get(`${URLS.validationProvider}?entityId=${idUser}`).then((res) => {
       const provider = res.data.provider;
-      console.log(provider);
+      console.log(res);
       if (provider !== validationName) {
         const pageNav =
           validationRedirects[provider as keyof typeof validationRedirects];

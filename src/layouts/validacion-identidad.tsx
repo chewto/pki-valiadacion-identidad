@@ -20,8 +20,9 @@ import {
 import {
   setDirecciones,
   setFirmador,
+  setLivenessTest,
 } from "@nucleo/redux/slices/firmadorSlice";
-import { useIos, useMobile } from "@nucleo/hooks/useMobile";
+import { useAndroid, useIos, useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 import { documentTypes } from "@nucleo/documents/documentsTypes";
 
@@ -36,6 +37,7 @@ import Card from "@components/ui/card";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import safari from "../assets/img/safari.png";
+import chrome from "../assets/img/chrome.png"
 
 import Button from "@mui/material/Button";
 import { CodigoQR } from "@components/ui/codigo-qr";
@@ -100,6 +102,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
+  const esIOS = useIos();
+  const isAndroid = useAndroid()
 
   useValidationRedirect(
     validationName,
@@ -116,8 +120,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   dispatch(
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
-
-  const esIOS = useIos();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -169,6 +171,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
 
+    if(!standalone){
+      axios({
+        method: 'get',
+        url: `${URLS.getLivenessTest}?id=${idUsuarioParam}`
+      }).then(res => dispatch(setLivenessTest({data: res.data.validacionVida})))
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -178,7 +187,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       axios
         .get(getMediaUrl)
         .then((res) => {
-          console.log(res);
+          console.log(res)
+          if(res.data.evidencias === false){
+            window.location.href = standalone ? `${URLS.livenesstest}?hash=${hash}` : `${URLS.livenesstest}?id=${idUsuarioParam}`
+          }
           dispatch(
             setFotos({ labelFoto: "foto_persona", data: res.data.photo })
           );
@@ -846,8 +858,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         {esIOS && navegador !== "Safari" && (
           <Advertencia
             titulo="Advertencia"
-            contenido="Esta usando un dispositivo IOS, para realizar la validacion, use el navegador Safari"
+            contenido="Está usando un dispositivo IOS, para realizar la validación, use el navegador Safari"
             elemento={<img src={safari} className="w-1/4" />}
+          />
+        )}
+
+        {isAndroid && navegador !== "Google Chrome" && (
+          <Advertencia
+            titulo="Advertencia"
+            contenido="Está usando un dispositivo Android, para realizar la validación, use el navegador Google Chrome"
+            elemento={<img src={chrome} className="w-1/4" />}
           />
         )}
 

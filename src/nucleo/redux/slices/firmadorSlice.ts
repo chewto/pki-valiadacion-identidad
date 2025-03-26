@@ -21,6 +21,10 @@ export const firmadorSlice = createSlice({
       state.documento = documento
       state.validacionVida = validacionVida
     },
+    setLivenessTest: (state, action:PayloadAction<{data: boolean}>) => {
+      const {data} = action.payload
+      state.validacionVida = data
+    },
     setDirecciones: (state, action:PayloadAction<Dato>) => {
       const {callback, redireccion, idValidacion, idUsuario, tipoValidacion} = action.payload
 
@@ -33,6 +37,6 @@ export const firmadorSlice = createSlice({
   }
 })
 
-export const {setFirmador, setDirecciones} = firmadorSlice.actions
+export const {setFirmador, setDirecciones, setLivenessTest} = firmadorSlice.actions
 
 export default firmadorSlice.reducer;
