@@ -5,9 +5,10 @@ import { useMobile } from "@nucleo/hooks/useMobile";
 
 interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  nextStep: () => void;
 }
 
-export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
+export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton, nextStep }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [desplegarCamara, setDesplegarCamara] = useState<number>(0);
 
@@ -41,10 +42,16 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton }) => {
   useEffect(() => {
 
     console.log(esMobile)
-    setContinuarBoton(false)
+    // setContinuarBoton(false)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if(desplegarCamara === 1){
+      setTimeout(nextStep, 2500)
+    }
+  },[desplegarCamara, setDesplegarCamara,nextStep])
 
   return (
     <div className="flex flex-col items-center my-3">

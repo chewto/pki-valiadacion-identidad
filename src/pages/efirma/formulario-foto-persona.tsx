@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { ValidacionVida } from "./validacion-vida";
 import { Advertencia } from "@components/ui/advertencia";
+import SuccessStep from "@components/ui/success-step";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -13,13 +14,15 @@ interface Props {
   selfie: string;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   id: number|string | null | undefined;
+  nextStep: () => void;
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
   preview,
   selfie,
   setContinuarBoton,
-  id
+  id,
+  nextStep
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -38,6 +41,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   const [error, setError] = useState<boolean>(false);
 
   const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
+  const [cameraOpens, setCameraOpens] = useState<number>(0)
 
   const capturarOtra = () => {
     dispatch(setVaciarFoto());
@@ -48,8 +52,17 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setMessages([])
   };
 
+  useEffect(() => {
+    if(success){
+      setTimeout(() => {
+        nextStep()
+      }, 3000)
+    }
+  }, [success,setSuccess])
+
   return (
     <>
+    <SuccessStep show={success}/>
       <div
         style={{
           textAlign: "center",
@@ -57,7 +70,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         }}
       >
         <p style={{ margin: "0" }}>Realice un selfie para la verificación </p>
-        {!mostrarCamara && (
+        {!mostrarCamara && cameraOpens <= 0 && (
           <>
             <span className="advertencia">
               Por favor, quítese la gafas o gorra para realizar la verificación.
@@ -69,11 +82,11 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         )}
       </div>
 
-      {success && (
-        <Alert color="success" style={{ textAlign: "center" }}>
-          Seleccione continuar
-        </Alert>
-      )}
+      {/* {success && (
+        // <Alert color="success" style={{ textAlign: "center" }}>
+        //   Seleccione continuar
+        // </Alert>
+      )} */}
       {error && (
         <Alert color="danger" style={{ textAlign: "center" }}>
           Ha ocurrido un error en el servidor
@@ -101,7 +114,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         <Previsualizacion preview={preview} nombrePreview={selfie} />
       )}
 
-      {capturarOtraVez && (
+      {capturarOtraVez && !success && (
         <div
           style={{
             display: "flex",
@@ -134,6 +147,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           style={{ width: "100%", margin: "10px 0 0 0" }}
           onClick={() => {
             setMostrarCamara(true);
+            setCameraOpens((state)=> state+1)
           }}
         >
           Abrir camara

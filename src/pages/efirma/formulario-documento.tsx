@@ -25,6 +25,7 @@ import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
 import "@styles/camara.css";
+import SuccessStep from "@components/ui/success-step";
 
 interface Props {
   id: string | number | null | undefined;
@@ -37,6 +38,7 @@ interface Props {
   tries: number;
   attendance: string;
   setMainCounter: Dispatch<SetStateAction<number>>;
+  nextStep: () => void;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -48,10 +50,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   ladoDocumento,
   tries,
   setMainCounter,
+  nextStep
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
-  const validaiconDocumento = useSelector(
+  const validacionDocumento = useSelector(
     (state: RootState) => state.validacionDocumento
   );
   const dispatch = useDispatch();
@@ -69,6 +72,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [open, setOpen] = useState<boolean>(false);
   // const [init, setInit] = useState<boolean>(true)
   const [reqMessage, setReqMessage] = useState<string>("");
+  const [success, setSuccess] = useState<boolean>(false)
 
   const mobile: boolean = useMobile();
 
@@ -102,7 +106,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     setContinuarBoton,
     preview.length,
     tipoDocumento,
-    validaiconDocumento.face,
+    validacionDocumento.face,
     mostrarPreview,
   ]);
 
@@ -113,13 +117,16 @@ export const FormularioDocumento: React.FC<Props> = ({
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
-  useEffect(() => {
-    console.log(messages);
-  }, [messages]);
 
   useEffect(() => {
     setConteo(1);
+    setSuccess(false)
   }, [ladoDocumento]);
+
+  useEffect(() => {
+    console.log(validacionDocumento.sides.front)
+    console.log(validacionDocumento.sides.back)
+  }, [validacionDocumento.sides.front, validacionDocumento.sides.back])
 
   const capturarFoto = () => {
     setMessages([]);
@@ -355,7 +362,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           if (res.data.face && res.data.validSide == "OK") {
             console.log('valido')
-            setContinuarBoton(true);
+            setSuccess(true)
+            setTimeout(() => {
+              nextStep()
+            }, 3000)
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
@@ -368,8 +378,12 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (conteo >= tries) {
             console.log('valido por intentos')
             setMessages([]);
-            setContinuarBoton(true);
+            // setContinuarBoton(true);
             setRetry(false);
+            setSuccess(true)
+            setTimeout(() => {
+              nextStep()
+            }, 3000)
           }
         }
 
@@ -384,7 +398,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           if (res.data.validSide === "OK") {
             console.log('valido')
-            setContinuarBoton(true);
+            setSuccess(true)
+            setTimeout(() => {
+              nextStep()
+            }, 3000)
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
@@ -398,8 +415,12 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (conteo >= tries) {
             console.log('valido por intentos')
             setMessages([]);
-            setContinuarBoton(true);
+            // setContinuarBoton(true);
             setRetry(false);
+            setSuccess(true)
+            setTimeout(() => {
+              nextStep()
+            }, 3000)
           }
         }
       })
@@ -426,6 +447,8 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   return (
     <div className="documento-container">
+      <SuccessStep show={success}/>
+
       {tipoDocumento === "Pasaporte" && ladoDocumento === "anverso" && (
         <h2 className="documento-title">
           Subir foto del {placeholder} de su {tipoDocumento}
@@ -575,7 +598,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                 </>
               )}
 
-              {!loading && (
+              {!loading && !success && (
                 <button
                   className="file-input"
                   onClick={() => {

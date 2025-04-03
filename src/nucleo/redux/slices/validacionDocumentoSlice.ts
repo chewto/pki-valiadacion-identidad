@@ -38,7 +38,8 @@ const initialState: ValidacionDocumento = {
       countryCheck: '',
       type: '',
       typeCheck: '',
-      isExpired: null
+      isExpired: null,
+      tries: 0
     },
     back: {
       code:'',
@@ -46,7 +47,8 @@ const initialState: ValidacionDocumento = {
       countryCheck: '',
       type: '',
       typeCheck: '',
-      isExpired: null
+      isExpired: null,
+      tries: 0
     },
   }
 };
@@ -119,7 +121,8 @@ export const validacionDocumentolice = createSlice({
         countryCheck: countryCheck,
         type: type,
         typeCheck: typeCheck,
-        isExpired: isExpired
+        isExpired: isExpired,
+        tries: state.sides.front.tries + 1
       }
     },
     setBackSide: (state, action: PayloadAction<DocumentData>) => {
@@ -130,7 +133,8 @@ export const validacionDocumentolice = createSlice({
         countryCheck: countryCheck,
         type: type,
         typeCheck: typeCheck,
-        isExpired: isExpired
+        isExpired: isExpired,
+        tries: state.sides.back.tries + 1
       }
     }
   },

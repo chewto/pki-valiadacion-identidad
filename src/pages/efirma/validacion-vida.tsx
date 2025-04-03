@@ -220,7 +220,8 @@ export const ValidacionVida: React.FC<Props> = ({
               color="primary"
               disabled={recording}
               onClick={handleStartRecording}
-              className={`my-2 gap-2 ${isMobile ? 'fixed bottom-4 left-1/2 transform -translate-x-1/2 ': 'flex'}`}
+              // className={`my-2 gap-2 ${isMobile ? 'fixed bottom-4 left-1/2 transform -translate-x-1/2 ': 'flex'}`}
+              className={`my-2 mt-5`}
               // className={`my-2 gap-2`}
               style={{ display: "flex" }}
             >

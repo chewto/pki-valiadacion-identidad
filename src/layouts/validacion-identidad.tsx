@@ -150,6 +150,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   }, [mainCounter]);
 
+  
+
   useEffect(() => {
     document.title = "Validacion identidad";
 
@@ -189,7 +191,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         .then((res) => {
           console.log(res)
           if(res.data.evidencias === false){
-            window.location.href = standalone ? `${URLS.livenesstest}?hash=${hash}` : `${URLS.livenesstest}?id=${idUsuarioParam}`
+            window.location.href = standalone ? `${URLS.livenesstest}?hash=${hash}` : `${URLS.livenesstest}?id=${idUsuarioParam}&tipo=${tipoParam}`
           }
           dispatch(
             setFotos({ labelFoto: "foto_persona", data: res.data.photo })
@@ -454,6 +456,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     ValidadorFormdata(
       formulario,
+      'front_tries',
+      `${validacionDocumento.sides.front.tries}`
+    );
+
+    ValidadorFormdata(
+      formulario,
       formdataKeys.backCode,
       `${
         validacionDocumento.sides.back.code != undefined
@@ -506,6 +514,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       formulario,
       formdataKeys.backIsExpired,
       `${validacionDocumento.sides.back.isExpired ? "!OK" : "OK"}`
+    );
+
+    ValidadorFormdata(
+      formulario,
+      'back_tries',
+      `${validacionDocumento.sides.back.tries}`
     );
 
     ValidadorFormdata(
@@ -616,6 +630,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           setError(true);
         })
         .finally(() => {
+
+          console.log(state, idValidacion, idUsuario)
+
           if (standalone) {
             if (formRef.current) {
               const formElement = formRef.current;
@@ -636,6 +653,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 "reintentoURL",
                 window.location.href
               );
+
+              console.log(formRef)
               formElement.submit();
             }
           }
@@ -722,9 +741,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
   };
 
-  const handleBack = () => {
-    setActiveSteps((prevActiveStep) => prevActiveStep - 1);
-  };
+  // const handleBack = () => {
+  //   setActiveSteps((prevActiveStep) => prevActiveStep - 1);
+  // };
 
   const componentsSteps = informacionFirmador.validacionVida
     ? [
@@ -733,8 +752,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           documentList={documentTypes["hnd"]}
           continuarBoton={continuarBoton}
           setContinuarBoton={setContinuarBoton}
+          nextStep={handleNext}
         />,
-        <AccesoCamara setContinuarBoton={setContinuarBoton} />,
+        <AccesoCamara setContinuarBoton={setContinuarBoton} 
+          nextStep={handleNext}
+        />,
         <FormularioDocumento
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
           tipoDocumento={informacion.tipoDocumento}
@@ -746,6 +768,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           tries={validationParams.documentsTries}
           attendance={validationParams.validationAttendance}
           setMainCounter={setMainCounter}
+          nextStep={handleNext}
         />,
         <FormularioDocumento
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -758,6 +781,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           tries={validationParams.documentsTries}
           attendance={validationParams.validationAttendance}
           setMainCounter={setMainCounter}
+          nextStep={handleNext}
         />,
       ]
     : [
@@ -766,13 +790,15 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           documentList={documentTypes["hnd"]}
           continuarBoton={continuarBoton}
           setContinuarBoton={setContinuarBoton}
+          nextStep={handleNext}
         />,
-        <AccesoCamara setContinuarBoton={setContinuarBoton} />,
+        <AccesoCamara setContinuarBoton={setContinuarBoton} nextStep={handleNext}/>,
         <FormularioFotoPersona
           setContinuarBoton={setContinuarBoton}
           preview={informacion.foto_persona}
           selfie={labelFoto.foto_persona}
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          nextStep={handleNext}
         />,
         <FormularioDocumento
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -785,6 +811,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           tries={validationParams.documentsTries}
           attendance={validationParams.validationAttendance}
           setMainCounter={setMainCounter}
+          nextStep={handleNext}
         />,
         <FormularioDocumento
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -797,8 +824,15 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           tries={validationParams.documentsTries}
           attendance={validationParams.validationAttendance}
           setMainCounter={setMainCounter}
+          nextStep={handleNext}
         />,
       ];
+
+      useEffect(() => {
+        if(activeSteps === steps.length){
+          // enviar(false)
+        }
+      },[activeSteps, steps])
 
   return (
     <>
@@ -808,11 +842,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           <div className="m-0">
             <PasosEnumerados tipo="3" paso={activeSteps} />
             <div className="content-buttons">
-              <Button disabled={activeSteps === 0} onClick={handleBack}>
+              {/* <Button disabled={activeSteps === 0} onClick={handleBack}>
                 Volver
-              </Button>
+              </Button> */}
 
-              {activeSteps <= steps.length - 2 && (
+              {/* {activeSteps <= steps.length - 2 && (
                 <Button
                   disabled={!continuarBoton}
                   variant="contained"
@@ -821,9 +855,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 >
                   {continuarBoton ? "Continuar" : "Esperando"}
                 </Button>
-              )}
+              )} */}
 
-              {activeSteps === steps.length - 1 && (
+              {/* {activeSteps === steps.length - 1 && (
                 <Button
                   disabled={!continuarBoton}
                   variant="contained"
@@ -832,7 +866,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 >
                   {continuarBoton ? "Finalizar" : "Esperando"}
                 </Button>
-              )}
+              )} */}
             </div>
             {componentsSteps[activeSteps]}
             {/* {componentsSteps[3]} */}

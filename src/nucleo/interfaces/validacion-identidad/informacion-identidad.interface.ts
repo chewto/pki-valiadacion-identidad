@@ -77,6 +77,7 @@ export interface DocumentData{
   type: string;
   typeCheck: string;
   isExpired: boolean | null;
+  tries: number;
 }
 
 interface CorrespondingSide{

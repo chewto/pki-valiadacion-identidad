@@ -1,6 +1,7 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setTipoDocumento } from "@nucleo/redux/slices/informacionSlice";
+import SuccessStep from "@components/ui/success-step";
 
 interface DocumentList{
   id: number;
@@ -13,29 +14,35 @@ interface Props {
   documentList: DocumentList[];
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  nextStep: () => void;
 }
 
 export const DocumentSelector: React.FC<Props> = ({
   tipoDocumento,
   documentList,
-  continuarBoton,
-  setContinuarBoton,
+  nextStep
 }) => {
 
   const dispatch = useDispatch()
+  const [successStep, setSuccessStep] = useState<boolean>(false)
 
   useEffect(()=> {
-    if(continuarBoton === true){
-      setContinuarBoton(false)
-    }
+    // if(continuarBoton === true){
+    //   setContinuarBoton(false)
+    // }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
   useEffect(() => {
     if (tipoDocumento.length >= 1) {
-      setContinuarBoton(true);
+      // setContinuarBoton(true);
+      setSuccessStep(true)
+
+      setTimeout(() => {
+        nextStep()
+      },3000)
     }
-  }, [tipoDocumento.length, setContinuarBoton]);
+  }, [tipoDocumento.length]);
 
   const onChange = (evento: React.ChangeEvent<HTMLInputElement>) => {
     const valor = evento.target.value;
@@ -44,6 +51,7 @@ export const DocumentSelector: React.FC<Props> = ({
 
   return (
     <div className="flex flex-col">
+      <SuccessStep show={successStep}/>
       <p className="text-left text-slate-800  sm:text-2xl text-lg font-semibold mb-0">
         Seleccione un documento para la verificación
       </p>
