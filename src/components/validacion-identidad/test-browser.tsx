@@ -1,19 +1,16 @@
-import { useAndroid, useChrome, useIos, useSafari } from "@nucleo/hooks/useMobile";
+import { useDetectBrowser, useDetectOs } from "@nucleo/hooks/useMobile";
 import { useEffect } from "react";
 
 export default function TestBrowser() {
-  const isAndroid = useAndroid();
-  const isIos = useIos();
-  const isChrome = useChrome()
-  const isSafari = useSafari()
 
-  console.log(navigator.userAgent)
+  const isIOS = useDetectOs("IOS");
+  const isSafari = useDetectBrowser("MOBILE SAFARI");
+  const isAndroid = useDetectOs("ANDROID");
+  const isChrome = useDetectBrowser("CHROME");
 
   useEffect(() => {
-    console.log(isAndroid, isIos);
-
-    console.log(isChrome)
-    console.log(isSafari)
+    console.log(isSafari, isIOS);
+    console.log(isChrome, isAndroid);
   }, []);
 
   return (
@@ -31,12 +28,12 @@ export default function TestBrowser() {
               </ul>
             </div>
           )}
-          {isIos && (
+          {isIOS && (
             <div>
               <h5>Deteccion en Iphone</h5>
               <ul>
-              {isChrome && <li>estas usando chrome</li>}
-              {isSafari && <li>estas usando safari</li>}
+                {isChrome && <li>estas usando chrome</li>}
+                {isSafari && <li>estas usando safari</li>}
               </ul>
             </div>
           )}

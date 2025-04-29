@@ -4,9 +4,8 @@ import { setTipoDocumento } from "@nucleo/redux/slices/informacionSlice";
 import SuccessStep from "@components/ui/success-step";
 
 interface DocumentList{
-  id: number;
-  label: string;
-  value: string;
+  barcode: string;
+  type: string;
 }
 
 interface Props {
@@ -57,13 +56,13 @@ export const DocumentSelector: React.FC<Props> = ({
       </p>
       <div className="mb-1 mt-2">
 
-      {documentList.map((opcion) => (
-        <label className="my-1 flex gap-1 hover:cursor-pointer" key={opcion.id}>
-          {tipoDocumento.length >= 1 && opcion.value === tipoDocumento ? (
+      {documentList.map((opcion, index) => (
+        <label className="my-1 flex gap-1 hover:cursor-pointer" key={index}>
+          {tipoDocumento.length >= 1 && opcion.type === tipoDocumento ? (
             <input
             type="radio"
               name="tipo_documento"
-              value={opcion.value}
+              value={opcion.type}
               onChange={onChange}
               className=" text-slate-800 font-semibold "
               checked
@@ -72,12 +71,12 @@ export const DocumentSelector: React.FC<Props> = ({
               <input
               type="radio"
               name="tipo_documento"
-              value={opcion.value}
+              value={opcion.type}
               onChange={onChange}
               className=" text-slate-800 font-semibold"
               />
             )}
-          {opcion.label}
+          {opcion.type}
         </label>
       ))}
       </div>

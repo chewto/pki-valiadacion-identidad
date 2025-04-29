@@ -92,7 +92,9 @@ export const URLS = {
   lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`,
   testBarcode: `${urlBase}/ocr/barcode-reader`,
   getLivenessTest: `${urlBase}/validation/get-livenesstest`,
-  livenesstest: livenesstest
+  livenesstest: livenesstest,
+  getCountry: `${urlBase}/country/get`,
+  frontValidation: `${urlBase}/document/front`
 }
 
 export const validationRedirects = {

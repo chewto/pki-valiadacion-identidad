@@ -38,6 +38,7 @@ export interface Dato {
   idValidacion?: number;
   tipoValidacion?:number;
   validacionVida?: boolean;
+  pais?: string;
 }
 
 export interface ValidacionDocumento {

@@ -33,10 +33,14 @@ export const firmadorSlice = createSlice({
       state.idValidacion = idValidacion;
       state.idUsuario = idUsuario;
       state.tipoValidacion = tipoValidacion;
+    },
+    setCountry: (state, action:PayloadAction<{country: string}>) => {
+      const {country} = action.payload
+      state.pais = country
     }
   }
 })
 
-export const {setFirmador, setDirecciones, setLivenessTest} = firmadorSlice.actions
+export const {setFirmador, setDirecciones, setLivenessTest, setCountry} = firmadorSlice.actions
 
 export default firmadorSlice.reducer;

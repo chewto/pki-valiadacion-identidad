@@ -18,13 +18,13 @@ import {
   setFotos,
 } from "@nucleo/redux/slices/informacionSlice";
 import {
+  setCountry,
   setDirecciones,
   setFirmador,
   setLivenessTest,
 } from "@nucleo/redux/slices/firmadorSlice";
-import { useAndroid, useIos, useMobile } from "@nucleo/hooks/useMobile";
+import { useDetectBrowser, useDetectOs, useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
-import { documentTypes } from "@nucleo/documents/documentsTypes";
 
 import { FormularioDocumento } from "@pages/efirma/formulario-documento";
 import { DocumentSelector } from "@pages/shared/document-selector";
@@ -38,12 +38,11 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import safari from "../assets/img/safari.png";
 import chrome from "../assets/img/chrome.png"
-
-import Button from "@mui/material/Button";
 import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
+
 
 interface Props {
   standalone: boolean;
@@ -88,6 +87,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ? `${URLS.getMedia}?hash=${hash}`
     : `${URLS.getMedia}?id=${idUsuarioParam}`;
 
+  const getCountry = standalone 
+  ? `${URLS.getCountry}?hash=${hash}`
+  : `${URLS.getCountry}?id=${idUsuarioParam}`
+
   // const lastValidationUrl = standalone
   //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
@@ -102,8 +105,15 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
-  const esIOS = useIos();
-  const isAndroid = useAndroid()
+  const isIOS = useDetectOs('IOS');
+  const isSafari = useDetectBrowser('MOBILE SAFARI')
+  const isAndroid = useDetectOs('ANDROID')
+  const isChrome = useDetectBrowser('CHROME')
+
+  useEffect(() => {
+    console.log(isSafari, isIOS)
+    console.log(isChrome, isAndroid)
+  }, [])
 
   useValidationRedirect(
     validationName,
@@ -140,17 +150,24 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     documentsTries: 0,
   });
 
+  const [documentList, setDocumentList] = useState<any[]>([])
+
+  const [hasSent, setHasSent] = useState(false)
+
+  const [useModel, setUseModel] = useState<boolean>(false)
+
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
+    console.log(informacionFirmador)
+  }, [informacionFirmador])
+
+  useEffect(() => {
     if (mainCounter >= validationParams.documentsTries + 1) {
-      // enviar(true);
-      setContinuarBoton(true);
+      enviar(true);
       console.log("validacion fallida");
     }
   }, [mainCounter]);
-
-  
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -168,6 +185,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         dispatch(setFirmador(res.data.dato));
         if (standalone) {
           dispatch(setDirecciones(res.data.dato));
+          setUseModel(res.data.dato.usoModelo)
         }
       })
       .catch((err) => console.log(err))
@@ -182,6 +200,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    axios.get(getCountry)
+    .then((res) => {
+      const country = res.data.country
+      const documents = res.data.documentList
+      setDocumentList(state => [...state, ...documents])
+      dispatch(setCountry({country: country}))
+    })
+  }, [])
 
   useEffect(() => {
     if (informacionFirmador.validacionVida) {
@@ -312,6 +340,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const enviar = async (failed: boolean) => {
     // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
+
+    console.log('finalizando validacion')
 
     ValidadorFormdata(
       formulario,
@@ -597,6 +627,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       `${validacionDocumento.confidence}`
     );
 
+    ValidadorFormdata(
+      formulario,
+      "country",
+      informacionFirmador.pais ?? ''
+    );
+
     // ValidadorFormdata(
     //   formulario,
     //   'landmarks',
@@ -612,227 +648,203 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       let idUsuario = 0;
 
       await axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      method: "post",
+      url: url,
+      data: formulario,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
       })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-          state = res.data.estadoVerificacion;
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          setError(true);
-        })
-        .finally(() => {
+      .then((res) => {
+        idValidacion = res.data.idValidacion;
+        idUsuario = res.data.idUsuario;
+        state = res.data.estadoVerificacion;
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+        setError(true);
+      })
+      .finally(() => {
+        console.log(state, idValidacion, idUsuario);
 
-          console.log(state, idValidacion, idUsuario)
+        if (standalone) {
+        if (formRef.current) {
+          const formElement = formRef.current;
+          appendHiddenInput(
+          formElement,
+          "idValidacion",
+          idValidacion.toString()
+          );
+          appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
+          appendHiddenInput(formElement, "estadoValidacion", state);
+          appendHiddenInput(
+          formElement,
+          "tipo",
+          informacionFirmador.tipoValidacion?.toString() ?? ""
+          );
+          appendHiddenInput(
+          formElement,
+          "reintentoURL",
+          window.location.href
+          );
 
-          if (standalone) {
-            if (formRef.current) {
-              const formElement = formRef.current;
-              appendHiddenInput(
-                formElement,
-                "idValidacion",
-                idValidacion.toString()
-              );
-              appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
-              appendHiddenInput(formElement, "estadoValidacion", state);
-              appendHiddenInput(
-                formElement,
-                "tipo",
-                informacionFirmador.tipoValidacion?.toString() ?? ""
-              );
-              appendHiddenInput(
-                formElement,
-                "reintentoURL",
-                window.location.href
-              );
-
-              console.log(formRef)
-              formElement.submit();
-            }
-          }
-          if (!standalone) {
-            const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-            window.location.href = newUrl;
-          }
-        });
-
-      // if(standalone){
-
-      //   const redirectForm = new FormData();
-      //   redirectForm.append("idValidacion", idValidacion.toString());
-      //   redirectForm.append("idUsuario", idUsuario.toString());
-      //   redirectForm.append("estadoValidacion", state);
-      //   redirectForm.append("tipo", informacionFirmador.tipoValidacion?.toString() ?? "");
-      //   redirectForm.append("reintentoURL", window.location.href);
-
-      //   console.log(redirectForm.values())
-
-      //   await axios({
-      //     method: "post",
-      //     url: `${informacionFirmador.redireccion}`,
-      //     data: redirectForm,
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     }
-      //   }).then(res => console.log(res))
-      //   // .finally(() => {
-      //   //     const newUrl = `${informacionFirmador.redireccion}`;
-      //   //     window.location.href = newUrl;
-      //   //   });
-      // }
+          console.log(formRef);
+          formElement.submit();
+        }
+        }
+        if (!standalone) {
+        const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+        window.location.href = newUrl;
+        }
+      });
     }
 
     if (failed) {
       ValidadorFormdata(formulario, "failed", "OK");
 
       ValidadorFormdata(
-        formulario,
-        "failed_back",
-        validacionDocumento.sideResult.back
+      formulario,
+      "failed_back",
+      validacionDocumento.sideResult.back
       );
 
       ValidadorFormdata(
-        formulario,
-        "failed_front",
-        validacionDocumento.sideResult.front
+      formulario,
+      "failed_front",
+      validacionDocumento.sideResult.front
       );
 
       let idValidacion = 0;
       let idUsuario = 0;
 
       axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      method: "post",
+      url: url,
+      data: formulario,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
       })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          setError(true);
-        })
-        .finally(() => {
-          window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-        });
+      .then((res) => {
+        idValidacion = res.data.idValidacion;
+        idUsuario = res.data.idUsuario;
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+        setError(true);
+      })
+      .finally(() => {
+        window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+      });
     }
-  };
+    };
 
-  const steps = informacionFirmador.validacionVida
+    const steps = informacionFirmador.validacionVida
     ? ["1", "2", "3", "4"]
     : ["1", "2", "3", "4", "5"];
 
-  const [activeSteps, setActiveSteps] = useState<number>(0);
+    const [activeSteps, setActiveSteps] = useState<number>(0);
 
-  const handleNext = () => {
+    const handleNext = () => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
-  };
+    };
 
-  // const handleBack = () => {
-  //   setActiveSteps((prevActiveStep) => prevActiveStep - 1);
-  // };
-
-  const componentsSteps = informacionFirmador.validacionVida
+    const componentsSteps = informacionFirmador.validacionVida
     ? [
-        <DocumentSelector
-          tipoDocumento={informacion.tipoDocumento}
-          documentList={documentTypes["hnd"]}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          nextStep={handleNext}
-        />,
-        <AccesoCamara setContinuarBoton={setContinuarBoton} 
-          nextStep={handleNext}
-        />,
-        <FormularioDocumento
-          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-          tipoDocumento={informacion.tipoDocumento}
-          preview={informacion.anverso}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          ladoDocumento={labelFoto.anverso}
-          urlOCR={URLS.validarDocumentoAnverso}
-          tries={validationParams.documentsTries}
-          attendance={validationParams.validationAttendance}
-          setMainCounter={setMainCounter}
-          nextStep={handleNext}
-        />,
-        <FormularioDocumento
-          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-          tipoDocumento={informacion.tipoDocumento}
-          preview={informacion.reverso}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          ladoDocumento={labelFoto.reverso}
-          urlOCR={URLS.validarDocumentoReverso}
-          tries={validationParams.documentsTries}
-          attendance={validationParams.validationAttendance}
-          setMainCounter={setMainCounter}
-          nextStep={handleNext}
-        />,
+      <DocumentSelector
+        tipoDocumento={informacion.tipoDocumento}
+        documentList={documentList}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        nextStep={handleNext}
+      />,
+      <AccesoCamara
+        setContinuarBoton={setContinuarBoton}
+        nextStep={handleNext}
+      />,
+      <FormularioDocumento
+        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        tipoDocumento={informacion.tipoDocumento}
+        preview={informacion.anverso}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        ladoDocumento={labelFoto.anverso}
+        useModel={useModel}
+        tries={validationParams.documentsTries}
+        attendance={validationParams.validationAttendance}
+        setMainCounter={setMainCounter}
+        nextStep={handleNext}
+      />,
+      <FormularioDocumento
+        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        tipoDocumento={informacion.tipoDocumento}
+        preview={informacion.reverso}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        ladoDocumento={labelFoto.reverso}
+        useModel={useModel}
+        tries={validationParams.documentsTries}
+        attendance={validationParams.validationAttendance}
+        setMainCounter={setMainCounter}
+        nextStep={handleNext}
+      />,
       ]
     : [
-        <DocumentSelector
-          tipoDocumento={informacion.tipoDocumento}
-          documentList={documentTypes["hnd"]}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          nextStep={handleNext}
-        />,
-        <AccesoCamara setContinuarBoton={setContinuarBoton} nextStep={handleNext}/>,
-        <FormularioFotoPersona
-          setContinuarBoton={setContinuarBoton}
-          preview={informacion.foto_persona}
-          selfie={labelFoto.foto_persona}
-          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-          nextStep={handleNext}
-        />,
-        <FormularioDocumento
-          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-          tipoDocumento={informacion.tipoDocumento}
-          preview={informacion.anverso}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          ladoDocumento={labelFoto.anverso}
-          urlOCR={URLS.validarDocumentoAnverso}
-          tries={validationParams.documentsTries}
-          attendance={validationParams.validationAttendance}
-          setMainCounter={setMainCounter}
-          nextStep={handleNext}
-        />,
-        <FormularioDocumento
-          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-          tipoDocumento={informacion.tipoDocumento}
-          preview={informacion.reverso}
-          continuarBoton={continuarBoton}
-          setContinuarBoton={setContinuarBoton}
-          ladoDocumento={labelFoto.reverso}
-          urlOCR={URLS.validarDocumentoReverso}
-          tries={validationParams.documentsTries}
-          attendance={validationParams.validationAttendance}
-          setMainCounter={setMainCounter}
-          nextStep={handleNext}
-        />,
+      <DocumentSelector
+        tipoDocumento={informacion.tipoDocumento}
+        documentList={documentList}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        nextStep={handleNext}
+      />,
+      <AccesoCamara
+        setContinuarBoton={setContinuarBoton}
+        nextStep={handleNext}
+      />,
+      <FormularioFotoPersona
+        setContinuarBoton={setContinuarBoton}
+        preview={informacion.foto_persona}
+        selfie={labelFoto.foto_persona}
+        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        nextStep={handleNext}
+      />,
+      <FormularioDocumento
+        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        tipoDocumento={informacion.tipoDocumento}
+        preview={informacion.anverso}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        ladoDocumento={labelFoto.anverso}
+        useModel={useModel}
+        tries={validationParams.documentsTries}
+        attendance={validationParams.validationAttendance}
+        setMainCounter={setMainCounter}
+        nextStep={handleNext}
+      />,
+      <FormularioDocumento
+        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+        tipoDocumento={informacion.tipoDocumento}
+        preview={informacion.reverso}
+        continuarBoton={continuarBoton}
+        setContinuarBoton={setContinuarBoton}
+        ladoDocumento={labelFoto.reverso}
+        useModel={useModel}
+        tries={validationParams.documentsTries}
+        attendance={validationParams.validationAttendance}
+        setMainCounter={setMainCounter}
+        nextStep={handleNext}
+      />,
       ];
 
-      useEffect(() => {
-        if(activeSteps === steps.length){
-          // enviar(false)
-        }
-      },[activeSteps, steps])
+    useEffect(() => {
+    if (activeSteps === steps.length && !hasSent) {
+      console.log("final de la validacion");
+      enviar(false);
+      setHasSent(true)
+    }
+    }, [activeSteps, steps, hasSent]);
 
   return (
     <>
@@ -857,9 +869,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 </Button>
               )} */}
 
-              {/* {activeSteps === steps.length - 1 && (
+              {/* {activeSteps === steps.length  && (
                 <Button
-                  disabled={!continuarBoton}
+                  // disabled={!continuarBoton}
                   variant="contained"
                   color="primary"
                   onClick={() => enviar(false)}
@@ -889,7 +901,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           </>
         </Card>
 
-        {esIOS && navegador !== "Safari" && (
+        {isIOS && !isSafari && (
           <Advertencia
             titulo="Advertencia"
             contenido="Está usando un dispositivo IOS, para realizar la validación, use el navegador Safari"
@@ -897,13 +909,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )}
 
-        {isAndroid && navegador !== "Google Chrome" && (
+        {isAndroid && !isChrome && (
           <Advertencia
             titulo="Advertencia"
             contenido="Está usando un dispositivo Android, para realizar la validación, use el navegador Google Chrome"
             elemento={<img src={chrome} className="w-1/4" />}
           />
-        )}
+        )} 
 
         {!retry && (
           <Advertencia

@@ -34,9 +34,9 @@ interface Props {
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
-  urlOCR: string;
   tries: number;
   attendance: string;
+  useModel: boolean;
   setMainCounter: Dispatch<SetStateAction<number>>;
   nextStep: () => void;
 }
@@ -48,6 +48,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   continuarBoton,
   setContinuarBoton,
   ladoDocumento,
+  useModel,
   tries,
   setMainCounter,
   nextStep
@@ -68,9 +69,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [fileSizeError, setFileSizeError] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
-  // const [mostrarCamara, setMostrarCamara] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
-  // const [init, setInit] = useState<boolean>(true)
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false)
 
@@ -79,10 +78,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const elementoScroll = useRef<HTMLDivElement>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  // let imgCaptura = document.getElementById('captura');
-  // let tomarFotoBtn = document.getElementById('tomarFoto');
-  // let descargarFotoBtn = document.getElementById('descargarFoto');
-  const [streamActivo, setStreamActivo] = useState<MediaStream>();
+  const [streamActivo, setStreamActivo] = useState<MediaStream | null>(null);
 
   const rectangulo = {
     x: 0.02, // 10% desde el lado izquierdo
@@ -113,7 +109,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     if (ladoDocumento === "reverso" && tipoDocumento === "Pasaporte") {
       dispatch(setFotos({ labelFoto: ladoDocumento, data: imagePlaceholder }));
-      setContinuarBoton(true);
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
@@ -121,18 +116,14 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     setConteo(1);
     setSuccess(false)
+    stopStreaming()
   }, [ladoDocumento]);
 
-  useEffect(() => {
-    console.log(validacionDocumento.sides.front)
-    console.log(validacionDocumento.sides.back)
-  }, [validacionDocumento.sides.front, validacionDocumento.sides.back])
 
   const capturarFoto = () => {
     setMessages([]);
     setContinuarBoton(false);
     setOpen(false);
-    // setMostrarCamara(false)
 
     setRetry(false);
 
@@ -146,7 +137,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       canvas.height = videoRef.current.videoHeight;
       const ctx = canvas.getContext("2d");
 
-      // Dibuja la imagen completa del video en el canvas
       if (ctx) {
         const x = rectangulo.x * canvas.width;
         const y = rectangulo.y * canvas.height;
@@ -165,57 +155,111 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           dispatch(setFotos({ labelFoto: ladoDocumento, data: dataUrl }));
 
-          // setMostrarCamara(false);
-
           validarDocumento(
             id,
             dataUrl,
-            informacionFirmador.nombre,
-            informacionFirmador.apellido,
-            informacionFirmador.documento,
+            informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
+            informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
+            informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
             ladoDocumento,
             tipoDocumento,
-            informacion.foto_persona
+            informacion.foto_persona,
+            informacionFirmador.pais
           );
         }
       }
     }
   };
 
-  async function iniciarCamara() {
-    // console.log('funcionando')
-    // setMostrarCamara(true);
-    // setInit(false)
-
+  function stopStreaming() {
+    console.log('detenido al mostrar')
     if (streamActivo) {
       streamActivo.getTracks().forEach((track) => track.stop());
+      setStreamActivo(null)
     }
+  }
 
-    try {
-      const constraints = {
-        video: {
-          facingMode: "environment", // 📌 Cámara trasera por defecto
-          width: { ideal: 4096 },
-          height: { ideal: 2160 },
-        },
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStreamActivo(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+  async function openBackByDeviceId(){
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    const backs = devs.filter(d=>d.kind==='videoinput' && /back|rear/i.test(d.label));
+    for(const d of backs){
+      try{
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video:{deviceId:{exact:d.deviceId}}, audio:false
+        })
+        return stream;
+      } catch(e){
+        return null
       }
-    } catch (err) {
-      console.error("Error al acceder a la cámara:", err);
-      alert("No se puede acceder a la cámara.");
+    }
+    return null;
+  }
+
+  async function iniciarCamara() {
+
+    stopStreaming()
+
+    const stream = await openBackByDeviceId()
+
+    if(stream){
+      console.log('usando device id')
+      if (videoRef.current) {
+            setStreamActivo(stream);
+            videoRef.current.srcObject = stream;
+            videoRef.current.autoplay = true;
+            videoRef.current.muted = true;
+            videoRef.current.playsInline = true;
+            videoRef.current.controls = false;
+            videoRef.current.play()
+          }
+    } else{
+      console.log('usando constraints (metodo normal)')
+      try {
+  
+        let stream;
+
+        try{
+
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              facingMode: { exact: "environment" },
+              width: { ideal: 4096 },
+              height: { ideal: 2160 },
+            }
+          })
+
+        } catch (err){
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { 
+              facingMode:"environment" ,
+              width: { ideal: 4096 },
+              height: { ideal: 2160 },
+            }
+          })
+        } 
+
+        const settings = stream.getVideoTracks()[0].getSettings();
+        if (settings.facingMode !== "environment") {
+          throw new Error("No se obtuvo la camara trasera");
+        }
+
+        if (videoRef.current) {
+          setStreamActivo(stream);
+          videoRef.current.srcObject = stream;
+          videoRef.current.autoplay = true;
+          videoRef.current.muted = true;
+          videoRef.current.playsInline = true;
+          videoRef.current.controls = false;
+          videoRef.current.play()
+        }
+      } catch (err) {
+        alert(`No se puede acceder a la cámara. ${err}`);
+      }
     }
   }
 
   const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
-
-    // const sizeLimit = 5120;
 
     setFileSizeError(false);
     setMessages([]);
@@ -223,7 +267,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     setRetry(false);
 
     const archivo = evento.target.files?.[0];
-    // const fileSizeKB = archivo?.size ? archivo.size / 1024 : 0;
     const lector = new FileReader();
 
     if (archivo) lector.readAsDataURL(archivo);
@@ -242,16 +285,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
 
-          // if (fileSizeKB >= 350) {
-          //   console.log("imagen pesada");
-          //   const nuevoWidth = Math.floor(imagen.width / 2);
-          //   const nuevoHeigth = Math.floor(imagen.height / 2);
-
-          //   canvas.width = nuevoWidth;
-          //   canvas.height = nuevoHeigth;
-          // } else {
-          // }
-          // console.log("imagen liviana");
           canvas.width = imagen.width;
           canvas.height = imagen.height;
 
@@ -264,12 +297,13 @@ export const FormularioDocumento: React.FC<Props> = ({
           validarDocumento(
             id,
             dataURLImage,
-            informacionFirmador.nombre,
-            informacionFirmador.apellido,
-            informacionFirmador.documento,
+            informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
+            informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
+            informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
             ladoDocumento,
             tipoDocumento,
-            informacion.foto_persona
+            informacion.foto_persona,
+            informacionFirmador.pais
           );
           // if (fileSizeKB<= sizeLimit) {
           // } else {
@@ -282,32 +316,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     evento.target.value = "";
   };
 
-  // const tomarFoto = (dataURL: string) => {
-  //   setMessages([]);
-  //   setContinuarBoton(false);
-  //   setMostrarCamara(false);
-
-  //   dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURL }));
-
-  //   validarDocumento(
-  //     id,
-  //     dataURL,
-  //     informacionFirmador.nombre,
-  //     informacionFirmador.apellido,
-  //     informacionFirmador.documento,
-  //     ladoDocumento,
-  //     tipoDocumento,
-  //     informacion.foto_persona
-  //   );
-  // };
-
-  // const retomar = () => {
-  //   if (mobile) {
-  //     iniciarCamara();
-  //   }
-  //   dispatch(setFotos({ labelFoto: ladoDocumento, data: "" }));
-  // };
-
   const validarDocumento = (
     id: string | number | null | undefined,
     imagenDocumento: string | ArrayBuffer | null,
@@ -316,7 +324,8 @@ export const FormularioDocumento: React.FC<Props> = ({
     documento: string,
     ladoDocumento: string,
     tipoDocumento: string,
-    imagenPersona: string
+    imagenPersona: string,
+    country: string | undefined
   ) => {
     setError(false);
     setLoading(true);
@@ -335,20 +344,20 @@ export const FormularioDocumento: React.FC<Props> = ({
       ladoDocumento: ladoDocumento,
       tipoDocumento: tipoDocumento,
       imagenPersona: imagenPersona,
-      test: false,
+      country: country
     };
 
     axios({
       method: "post",
       url:
         ladoDocumento == "anverso"
-          ? URLS.validarDocumentoAnverso
+          ? useModel ? URLS.frontValidation :URLS.validarDocumentoAnverso
           : URLS.validarDocumentoReverso,
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
-        console.log(res.data);
         const adviceMessages = res.data.messages;
+        console.log(res.data)
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
@@ -378,7 +387,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (conteo >= tries) {
             console.log('valido por intentos')
             setMessages([]);
-            // setContinuarBoton(true);
             setRetry(false);
             setSuccess(true)
             setTimeout(() => {
@@ -415,7 +423,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (conteo >= tries) {
             console.log('valido por intentos')
             setMessages([]);
-            // setContinuarBoton(true);
             setRetry(false);
             setSuccess(true)
             setTimeout(() => {
@@ -536,34 +543,10 @@ export const FormularioDocumento: React.FC<Props> = ({
                     del documento
                   </span>
                   <div className="w-full h-full flex justify-center items-center">
-                    {/* 
-                    <img
-                      src={documentIndicator}
-                      alt=""
-                      className="absolute z-30 w-7/12 "
-                      // style={{transform: `${indicatorVertical ? 'rotate(90deg)' : 'rotate(0deg)'}`}}
-                    <div className="" ref={cameraRef}>
-                      <Camera
-                        idealFacingMode={FACING_MODES.ENVIRONMENT}
-                        onTakePhoto={(dataURL) => tomarFoto(dataURL)}
-                      /> *
-                    </div> 
-                     */}
-
-                    {/* <label className="file-input">
-                      <span>Tomar foto del {placeholder} de su documento</span>
-                      <input type="file" accept="image/jpeg" capture="environment" className='hidden' onChange={handleCapture} disabled={loading}/>
-                    </label> */}
-                    {/* 
-                    <h1>capturar foto</h1>
-                    <div>
-                      <video ref={videoRef}></video>
-                    </div> */}
-                    <>
                       <div
-                        className={`fixed inset-0 flex items-center justify-center z-50`}
+                        className={`fixed inset-0 flex items-center justify-center z-40`}
                       >
-                        <div className="bg-white p-6 w-screen h-screen">
+                        <div className="bg-white p-6 w-screen h-screen z-40">
                           <div className="video-container">
                             <div className="mask-above">
                               Una vez alineado correctamente, presione el botón
@@ -574,7 +557,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                               recuadro rojo en pantalla y asegúrese de que quede
                               completamente visible y enfocado
                             </div>
-                            <video ref={videoRef} autoPlay playsInline></video>
+                            <video ref={videoRef} autoPlay playsInline muted controls={false} className="z-50"></video>
                             <div className="rectangle-mask" style={{left: `${rectangulo.x * 100}%`, top: `${rectangulo.y * 100}%`, width: `${rectangulo.width * 100}%`, height: `${rectangulo.height * 100}%`}}></div>
                           </div>
                           <div className="buttons">
@@ -591,7 +574,6 @@ export const FormularioDocumento: React.FC<Props> = ({
                           </div>
                         </div>
                       </div>
-                    </>
                   </div>
 
                   <div ref={elementoScroll}></div>
@@ -624,7 +606,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             </>
           )}
 
-          {!mobile && (
+          {!mobile && !success  && (
             <label
               className="file-input"
               style={{
