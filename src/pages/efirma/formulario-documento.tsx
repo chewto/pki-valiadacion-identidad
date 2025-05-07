@@ -352,7 +352,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       url:
         ladoDocumento == "anverso"
           ? useModel ? URLS.frontValidation :URLS.validarDocumentoAnverso
-          : URLS.validarDocumentoReverso,
+          : useModel ?URLS.backValidation :  URLS.validarDocumentoReverso,
       data: data,
     })
       .then((res: AxiosResponse<any>) => {

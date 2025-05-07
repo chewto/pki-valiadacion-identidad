@@ -14,12 +14,14 @@ interface Props {
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   nextStep: () => void;
+  useModel: boolean;
 }
 
 export const DocumentSelector: React.FC<Props> = ({
   tipoDocumento,
   documentList,
-  nextStep
+  nextStep, 
+  useModel
 }) => {
 
   const dispatch = useDispatch()
@@ -64,8 +66,9 @@ export const DocumentSelector: React.FC<Props> = ({
               name="tipo_documento"
               value={opcion.type}
               onChange={onChange}
-              className=" text-slate-800 font-semibold "
+              className={`${opcion.type == 'PASAPORTE' && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
               checked
+              disabled={opcion.type == 'PASAPORTE' && useModel}
               />
             ) : (
               <input
@@ -73,10 +76,11 @@ export const DocumentSelector: React.FC<Props> = ({
               name="tipo_documento"
               value={opcion.type}
               onChange={onChange}
-              className=" text-slate-800 font-semibold"
+              className={`${opcion.type == 'PASAPORTE'  && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
+              disabled={opcion.type == 'PASAPORTE' && useModel}
               />
             )}
-          {opcion.type}
+          <span className={`${opcion.type == 'PASAPORTE'  && useModel ? 'hidden' : ''}`}>{opcion.type}</span>
         </label>
       ))}
       </div>

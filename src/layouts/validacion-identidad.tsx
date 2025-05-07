@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   ValidadorFormdata,
   formdataKeys,
@@ -110,11 +110,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const isAndroid = useDetectOs('ANDROID')
   const isChrome = useDetectBrowser('CHROME')
 
-  useEffect(() => {
-    console.log(isSafari, isIOS)
-    console.log(isChrome, isAndroid)
-  }, [])
-
   useValidationRedirect(
     validationName,
     idUsuarioParam,
@@ -163,6 +158,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, [informacionFirmador])
 
   useEffect(() => {
+    // pila con esto
     if (mainCounter >= validationParams.documentsTries + 1) {
       enviar(true);
       console.log("validacion fallida");
@@ -177,7 +173,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
-        console.log(res.data.dato);
         if (res.data.dato == null) {
           setGenerated(false);
         }
@@ -185,7 +180,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         dispatch(setFirmador(res.data.dato));
         if (standalone) {
           dispatch(setDirecciones(res.data.dato));
-          setUseModel(res.data.dato.usoModelo)
+          setUseModel(res.data.dato.usoModelo == null ? false : true)
         }
       })
       .catch((err) => console.log(err))
@@ -195,7 +190,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       axios({
         method: 'get',
         url: `${URLS.getLivenessTest}?id=${idUsuarioParam}`
-      }).then(res => dispatch(setLivenessTest({data: res.data.validacionVida})))
+      }).then(res => {
+        dispatch(setLivenessTest({data: res.data.validacionVida}))
+      })
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,7 +233,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         })
         .finally(() => setLoading(false));
     }
-  }, [informacionFirmador.validacionVida]);
+  }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
 
   useEffect(() => {
     axios
@@ -741,23 +738,27 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
     };
 
-    const steps = informacionFirmador.validacionVida
-    ? ["1", "2", "3", "4"]
-    : ["1", "2", "3", "4", "5"];
-
+    
     const [activeSteps, setActiveSteps] = useState<number>(0);
-
+    
     const handleNext = () => {
-    setActiveSteps((prevActiveStep) => prevActiveStep + 1);
+      setActiveSteps((prevActiveStep) => prevActiveStep + 1);
     };
 
-    const componentsSteps = informacionFirmador.validacionVida
+    const steps = useMemo(() => {
+      return informacionFirmador.validacionVida
+      ? ["1", "2", "3", "4"]
+      : ["1", "2", "3", "4", "5"];
+    }, [informacionFirmador.validacionVida]);
+
+    const componentsSteps = useMemo(() => {return informacionFirmador.validacionVida
     ? [
       <DocumentSelector
         tipoDocumento={informacion.tipoDocumento}
         documentList={documentList}
         continuarBoton={continuarBoton}
         setContinuarBoton={setContinuarBoton}
+        useModel={standalone ? useModel : false}
         nextStep={handleNext}
       />,
       <AccesoCamara
@@ -797,6 +798,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         documentList={documentList}
         continuarBoton={continuarBoton}
         setContinuarBoton={setContinuarBoton}
+        useModel={standalone ? useModel : false}
         nextStep={handleNext}
       />,
       <AccesoCamara
@@ -836,7 +838,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         setMainCounter={setMainCounter}
         nextStep={handleNext}
       />,
-      ];
+      ]}, [continuarBoton, documentList, idUsuarioParam, informacion.anverso, informacion.foto_persona, informacion.reverso, informacion.tipoDocumento, informacionFirmador.idUsuario, informacionFirmador.validacionVida, labelFoto.anverso, labelFoto.foto_persona, labelFoto.reverso, standalone, useModel, validationParams.documentsTries, validationParams.validationAttendance]);
 
     useEffect(() => {
     if (activeSteps === steps.length && !hasSent) {
@@ -844,7 +846,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       enviar(false);
       setHasSent(true)
     }
-    }, [activeSteps, steps, hasSent]);
+    }, [activeSteps, steps, hasSent, handleNext]);
 
   return (
     <>

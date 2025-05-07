@@ -17,7 +17,7 @@ interface Props {
   setCapturarOtraVez: Dispatch<SetStateAction<boolean>>;
   setSuccess: Dispatch<SetStateAction<boolean>>;
   setError: Dispatch<SetStateAction<boolean>>;
-  idUsuarioFi: number|string | null | undefined;
+  idUsuarioFi: number | string | null | undefined;
   setMessages: Dispatch<SetStateAction<string[]>>;
 }
 
@@ -33,7 +33,7 @@ export const ValidacionVida: React.FC<Props> = ({
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
-  const isMobile = useMobile()
+  const isMobile = useMobile();
 
   const dispatch = useDispatch();
 
@@ -49,25 +49,51 @@ export const ValidacionVida: React.FC<Props> = ({
   let mediaRecorder: MediaRecorder | null = null;
 
   useEffect(() => {
-    console.log(isMobile)
+    console.log(isMobile);
     // handleStartRecording();
     handleOpenCamera();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function stopStreaming() {
+    console.log("detenido al mostrar");
+    if (streaming) {
+      streaming.getTracks().forEach((track) => track.stop());
+      setStreaming(null);
+    }
+  }
+
+  const openFrontCamera = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoInputs = isMobile
+      ? devices.filter(
+          (data) => data.kind == "videoinput" && /front/i.test(data.label)
+        )
+      : devices.filter((data) => data.kind == "videoinput");
+
+    for (const input of videoInputs) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { deviceId: { exact: input.deviceId } },
+          audio: false,
+        });
+
+        console.log(stream)
+        return stream;
+      } catch (e) {
+        return null;
+      }
+    }
+  };
+
   const handleOpenCamera = async () => {
     const video = videoRef.current;
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: {
-            exact: "user",
-          },
-        },
-        audio: true,
-      });
+    stopStreaming();
 
+    const stream = await openFrontCamera();
+
+    if (stream) {
       if (video) {
         setStreaming(stream);
         video.srcObject = stream;
@@ -76,8 +102,48 @@ export const ValidacionVida: React.FC<Props> = ({
         video.playsInline = true;
         video.controls = false;
       }
-    } catch (e) {
-      console.error(e);
+    } else {
+      try {
+        let stream;
+
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: {
+                exact: "user",
+              },
+              width: { ideal: 4096 },
+              height: { ideal: 2160 },
+            },
+            audio: true,
+          });
+        } catch (e) {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: "user",
+              width: { ideal: 4096 },
+              height: { ideal: 2160 },
+            },
+            audio: true,
+          });
+        }
+        const settings = stream.getVideoTracks()[0].getSettings();
+        if (settings.facingMode !== "user") {
+          throw new Error("No se obtuvo la camara delantera");
+        }
+
+        if (video) {
+          setStreaming(stream);
+          video.srcObject = stream;
+          video.autoplay = true;
+          video.muted = true;
+          video.playsInline = true;
+          video.controls = false;
+        }
+      } catch (e) {
+        console.error(e);
+        alert(`No se puede acceder a la cámara. ${e}`);
+      }
     }
   };
 
@@ -155,7 +221,7 @@ export const ValidacionVida: React.FC<Props> = ({
           movimiento: res.data.movimientoDetectado,
           idCarpetaEntidad: res.data.idCarpetaEntidad,
           idCarpetaUsuario: res.data.idCarpetaUsuario,
-          videoHash: res.data.videoHash
+          videoHash: res.data.videoHash,
         };
 
         setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);
@@ -194,7 +260,11 @@ export const ValidacionVida: React.FC<Props> = ({
               className="absolute w-full h-5/6 flex justify-center items-center"
               style={{ zIndex: "500" }}
             >
-              <img src={faceTemplate} className="md:w-6/12 xsm:w-10/12" alt="" />
+              <img
+                src={faceTemplate}
+                className="md:w-6/12 xsm:w-10/12"
+                alt=""
+              />
             </div>
 
             <div className="absolute top-0 xsm:left-3 md:left-7 flex justify-center items-center gap-1 mx-2 my-2 px-2 py-1 bg-white rounded-lg z-50 ">

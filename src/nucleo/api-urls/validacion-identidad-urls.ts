@@ -4,11 +4,11 @@
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
 
-// const pais = 'honducert_desarrollo'
-// const subdomain = 'desarrollo'
-
-const pais = 'desarrollo'
+const pais = 'honducert_desarrollo'
 const subdomain = 'desarrollo'
+
+// const pais = 'desarrollo'
+// const subdomain = 'desarrollo'
 
 const ekycSubdomain = 'hon'
 
@@ -94,7 +94,8 @@ export const URLS = {
   getLivenessTest: `${urlBase}/validation/get-livenesstest`,
   livenesstest: livenesstest,
   getCountry: `${urlBase}/country/get`,
-  frontValidation: `${urlBase}/document/front`
+  frontValidation: `${urlBase}/document/front`,
+  backValidation: `${urlBase}/document/back`
 }
 
 export const validationRedirects = {
