@@ -354,7 +354,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setContinuarBoton(true);
           } 
           
-          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
+          if(res.data.validSide != "OK" && conteo < tries){
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
             setRetry(true);
@@ -382,7 +382,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setContinuarBoton(true);
           } 
           
-          if(!res.data.face && res.data.validSide != "OK" && conteo < tries){
+          if(res.data.validSide != "OK" && conteo < tries){
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setRetry(true);
             setConteo((prev) => prev + 1);
