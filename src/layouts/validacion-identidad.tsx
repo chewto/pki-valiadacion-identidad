@@ -201,6 +201,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     axios.get(getCountry)
     .then((res) => {
+      console.log(res)
       const country = res.data.country
       const documents = res.data.documentList
       setDocumentList(state => [...state, ...documents])

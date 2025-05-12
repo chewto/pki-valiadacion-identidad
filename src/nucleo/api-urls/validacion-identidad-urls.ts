@@ -4,7 +4,10 @@
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_desarrollo'
+// const pais = 'honducert_desarrollo'
+// const subdomain = 'desarrollo'
+
+const pais = 'honducert_pruebas'
 const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
@@ -35,6 +38,13 @@ const rutasURL = {
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
       validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+    },
+    honducert_pruebas:{
+      validacion: `https://desarrollo.web.honducert.com/validacion-back`,
+      fe: `https://desarrollo.web.honducert.com/fe-back/api/Firmador`,
+      resultados: `https://desarrollo.web.honducert.com/efirma.php/`,
+      rejected: `https://desarrollo.web.honducert.com/resultado_validacion_fallida`,
+      validacionVida: 'https://desarrollo.web.honducert.com/validacion-vida'
     },
     efirmaPlus:{
       validacion: `https://cavipetrol.efirmaplus.com/validacion-back`,

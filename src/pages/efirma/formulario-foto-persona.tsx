@@ -101,7 +101,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           <div>
             <ul className="p-0">
               {messages.map((message:string) => (
-                <li className="bg-red-200 px-2 py-2 rounded-xl border-2 border-red-500 text-xl">{message}</li>
+                <li className="bg-yellow-200 px-2 py-2 rounded-xl border-2 border-yellow-500 text-xl">{message}</li>
               ))}
             </ul>
 

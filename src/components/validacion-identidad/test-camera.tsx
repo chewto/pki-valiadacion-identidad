@@ -1,5 +1,3 @@
-import { useMobile } from "@nucleo/hooks/useMobile";
-import { useRef, useEffect, useState } from "react";
 
 const CameraTest: React.FC = () => {
   return (

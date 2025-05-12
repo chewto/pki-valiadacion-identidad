@@ -43,6 +43,7 @@ export const ValidacionVida: React.FC<Props> = ({
   const [streaming, setStreaming] = useState<MediaStream | null>(null);
   const [recordingIndicator, setRecordingIndicator] = useState<boolean>(false);
   const [recording, setRecording] = useState<boolean>(false);
+  // const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
 
   const [counter, setCounter] = useState<number>(4);
 
@@ -78,7 +79,7 @@ export const ValidacionVida: React.FC<Props> = ({
           audio: false,
         });
 
-        console.log(stream)
+        console.log(stream);
         return stream;
       } catch (e) {
         return null;
@@ -215,6 +216,7 @@ export const ValidacionVida: React.FC<Props> = ({
       },
     })
       .then((res) => {
+        console.log(res)
         const preview: string = res.data.photo;
 
         const data: PruebaVida = {
@@ -237,6 +239,10 @@ export const ValidacionVida: React.FC<Props> = ({
             setMessages([]);
           }
         }
+
+        // if (res.status == 201) {
+        //   setIsCorrupted(true);
+        // }
       })
       .finally(() => {
         setMostrarPreview(true);
@@ -253,6 +259,7 @@ export const ValidacionVida: React.FC<Props> = ({
       <div className="border-1 border-yellow-400 rounded-lg px-2 py-1 my-1 text-center bg-yellow-200 text-sm">
         Consejo: mantengase quieto en el indicador
       </div>
+
       {!loading ? (
         <div className=" flex flex-col items-center relative mt-1">
           <div className="flex justify-center">

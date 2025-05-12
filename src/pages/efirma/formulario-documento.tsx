@@ -66,7 +66,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
-  const [fileSizeError, setFileSizeError] = useState<boolean>(false);
+  const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
@@ -151,21 +151,25 @@ export const FormularioDocumento: React.FC<Props> = ({
 
         if (ctxRecortado) {
           ctxRecortado.putImageData(imageData, 0, 0);
-          const dataUrl = canvasRecortada.toDataURL("image/jpeg", 1.0);
+          const dataURLImage = canvasRecortada.toDataURL("image/jpeg", 1.0);
 
-          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataUrl }));
+          if(dataURLImage.length >= 1){
+            dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
 
-          validarDocumento(
-            id,
-            dataUrl,
-            informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
-            informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
-            informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
-            ladoDocumento,
-            tipoDocumento,
-            informacion.foto_persona,
-            informacionFirmador.pais
-          );
+            validarDocumento(
+              id,
+              dataURLImage,
+              informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
+              informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
+              informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
+              ladoDocumento,
+              tipoDocumento,
+              informacion.foto_persona,
+              informacionFirmador.pais
+            );
+          } else {
+            setIsCorrupted(true)
+          }
         }
       }
     }
@@ -261,10 +265,10 @@ export const FormularioDocumento: React.FC<Props> = ({
   const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
 
-    setFileSizeError(false);
     setMessages([]);
     setContinuarBoton(false);
     setRetry(false);
+    setIsCorrupted(false)
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -292,19 +296,25 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
 
-          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
+          
+          if(dataURLImage.length >= 1){
+            
+            dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
+            validarDocumento(
+              id,
+              dataURLImage,
+              informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
+              informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
+              informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
+              ladoDocumento,
+              tipoDocumento,
+              informacion.foto_persona,
+              informacionFirmador.pais
+            );
+          } else {
+            setIsCorrupted(true)
+          }
 
-          validarDocumento(
-            id,
-            dataURLImage,
-            informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
-            informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
-            informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
-            ladoDocumento,
-            tipoDocumento,
-            informacion.foto_persona,
-            informacionFirmador.pais
-          );
           // if (fileSizeKB<= sizeLimit) {
           // } else {
           //   setFileSizeError(true);
@@ -508,9 +518,9 @@ export const FormularioDocumento: React.FC<Props> = ({
         <Alert color="danger">ha ocurrido un error con el servidor</Alert>
       )}
 
-      {fileSizeError && (
-        <Alert color="danger">
-          La imagen es muy pesada, la imagen debe ser menor a 2 megabytes.
+      {isCorrupted && (
+        <Alert color="warning" style={{ textAlign: "center" }}> 
+          intente subir de nuevo la foto del documento
         </Alert>
       )}
 
