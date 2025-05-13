@@ -20,7 +20,7 @@ import {
   setDirecciones,
   setFirmador,
 } from "@nucleo/redux/slices/firmadorSlice";
-import { useIos } from "@nucleo/hooks/useMobile";
+import { useIos, useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 import { documentTypes } from "@nucleo/documents/documentsTypes";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
@@ -38,6 +38,7 @@ import safari from "../assets/img/safari.png";
 // import { useMobile } from "../nucleo/hooks/useMobile";
 // import { CodigoQR } from "@components/shared/codigo-qr";
 import Button from "@mui/material/Button";
+import { CodigoQR } from "@components/ui/codigo-qr";
 // import { CodigoQR } from "@components/ui/codigo-qr";
 
 interface Props {
@@ -92,7 +93,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     foto_persona: "foto_persona",
   };
 
-  // const esMobile = useMobile();
+  const esMobile = useMobile();
 
   useValidationRedirect(
     validationName,
@@ -793,7 +794,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )}
 
-        {/* <>{!esMobile &&  <CodigoQR />}</> */}
+        <>{!esMobile &&  <CodigoQR />}</>
 
         <form
           ref={formRef}

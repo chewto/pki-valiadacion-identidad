@@ -2,22 +2,22 @@ export const documentTypes = {
   col: [
     {
       id: 0,
-      value: "Cédula de ciudadanía",
+      value: "CEDULA DE CIUDADANIA",
       label: "Cédula de ciudadanía",
     },
     {
       id: 1,
-      value: "Cédula de extranjería",
+      value: "CEDULA DE EXTRANJERIA",
       label: "Cédula de extranjería",
     },
     {
       id: 2,
-      value: "Cédula digital",
+      value: "CEDULA DIGITAL",
       label: "Cédula digital",
     },
     {
       id: 3,
-      value: "Pasaporte",
+      value: "PASAPORTE",
       label: "Pasaporte",
     }
     // {
