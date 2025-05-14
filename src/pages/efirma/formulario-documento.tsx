@@ -439,20 +439,15 @@ export const FormularioDocumento: React.FC<Props> = ({
           elemento={
             <div>
               <ul className="text-left p-0">
-                <li
-                    className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
-                  >
-                    Por favor, se requiere una foto del documento con mejor resolución, inténtelo nuevamente.
-                  </li>
-                {/* {messages.map((_: string, index: number) => (
+
+                {messages.map((message: string, index: number) => (
                   <li
                     key={index}
                     className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
                   >
                     {message} 
-                    Por favor, se requiere una foto del documento con mejor resolución, inténtelo nuevamente.
                   </li>
-                ))} */}
+                ))}
               </ul>
               <button onClick={() => setMessages([])} className="stepper-btn">
                 cerrar
