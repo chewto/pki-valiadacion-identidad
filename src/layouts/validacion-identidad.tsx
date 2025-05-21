@@ -145,7 +145,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     documentsTries: 0,
   });
 
-  const [documentList, setDocumentList] = useState<any[]>([])
+  const [documentList, setDocumentList] = useState<string[]>([])
 
   const [hasSent, setHasSent] = useState(false)
 
@@ -160,7 +160,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     // pila con esto
     if (mainCounter >= validationParams.documentsTries + 1) {
-      enviar(true);
+      // enviar(true);
       console.log("validacion fallida");
     }
   }, [mainCounter]);
@@ -884,7 +884,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
               )} */}
             </div>
             {componentsSteps[activeSteps]}
-            {/* {componentsSteps[3]} */}
+             {/* {componentsSteps[3]}  */}
           </div>
           <>
             {mostrarMensaje && loading && (
@@ -918,7 +918,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             contenido="Está usando un dispositivo Android, para realizar la validación, use el navegador Google Chrome"
             elemento={<img src={chrome} className="w-1/4" />}
           />
-        )} 
+        )}
 
         {!retry && (
           <Advertencia

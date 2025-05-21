@@ -7,7 +7,10 @@
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_pruebas'
+// const pais = 'honducert_pruebas'
+// const subdomain = 'desarrollo'
+
+const pais = 'honducert_temp'
 const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
@@ -27,6 +30,13 @@ const rutasURL = {
   ,
   honducert_desarrollo:{
       validacion: `https://${subdomain}.e-custodia.com/validacion-back`,
+      fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
+      resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
+      rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
+      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+    },
+    honducert_temp:{
+      validacion: `https://desarrollo.web.honducert.com/validacion-back`,
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,

@@ -7,8 +7,6 @@ import CameraTest from "@components/validacion-identidad/test-camera";
 
 function App() {
 
-
-
   return (
     <Router>
       <Routes>

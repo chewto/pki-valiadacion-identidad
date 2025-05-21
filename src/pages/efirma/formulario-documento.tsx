@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import "@styles/styles.css";
 import "@styles/selfie-movil.component.css";
 import "@styles/formulario-style.component.css";
@@ -19,13 +19,14 @@ import {
   setFrontResult,
   setBackResult,
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
-import { Alert, Button, Spinner } from "reactstrap";
+import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
 import "@styles/camara.css";
 import SuccessStep from "@components/ui/success-step";
+// import Camera from '@pages/efirma/nueva-camara'
 
 interface Props {
   id: string | number | null | undefined;
@@ -51,7 +52,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   useModel,
   tries,
   setMainCounter,
-  nextStep
+  nextStep,
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -69,25 +70,31 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
-  const [open, setOpen] = useState<boolean>(false);
   const [reqMessage, setReqMessage] = useState<string>("");
-  const [success, setSuccess] = useState<boolean>(false)
+  const [success, setSuccess] = useState<boolean>(false);
 
   const mobile: boolean = useMobile();
 
-  const elementoScroll = useRef<HTMLDivElement>(null);
+  const [horizontal, setHorizontal] = useState<boolean>(false);
+  const [takePhoto, setTakePhoto] = useState<boolean>(false);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [streamActivo, setStreamActivo] = useState<MediaStream | null>(null);
-
-  const rectangulo = {
-    x: 0.02, // 10% desde el lado izquierdo
-    y: 0.2, // 20% desde la parte superior
-    width: 0.95, // 80% del ancho
-    height: 0.35, // 30% de la altura
+  const verificarOrientacion = () => {
+    if (window.matchMedia("(orientation: landscape)").matches) {
+      setHorizontal(true);
+    } else {
+      setHorizontal(false);
+    }
   };
 
-  
+  useEffect(() => {
+    window.addEventListener("orientationchange", verificarOrientacion);
+    window.addEventListener("resize", verificarOrientacion);
+    verificarOrientacion();
+    return () => {
+      window.removeEventListener("orientationchange", verificarOrientacion);
+      window.removeEventListener("resize", verificarOrientacion);
+    };
+  }, []);
 
   useEffect(() => {
     if (preview.length <= 0) {
@@ -112,155 +119,10 @@ export const FormularioDocumento: React.FC<Props> = ({
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
-
   useEffect(() => {
     setConteo(1);
-    setSuccess(false)
-    stopStreaming()
+    setSuccess(false);
   }, [ladoDocumento]);
-
-
-  const capturarFoto = () => {
-    setMessages([]);
-    setContinuarBoton(false);
-    setOpen(false);
-
-    setRetry(false);
-
-    const canvas = document.createElement("canvas");
-    if (
-      videoRef.current &&
-      !videoRef.current.paused &&
-      !videoRef.current.ended
-    ) {
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext("2d");
-
-      if (ctx) {
-        const x = rectangulo.x * canvas.width;
-        const y = rectangulo.y * canvas.height;
-        const width = rectangulo.width * canvas.width;
-        const height = rectangulo.height * canvas.height;
-        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-        const imageData = ctx.getImageData(x, y, width, height);
-        const canvasRecortada = document.createElement("canvas");
-        canvasRecortada.width = width;
-        canvasRecortada.height = height;
-        const ctxRecortado = canvasRecortada.getContext("2d");
-
-        if (ctxRecortado) {
-          ctxRecortado.putImageData(imageData, 0, 0);
-          const dataURLImage = canvasRecortada.toDataURL("image/jpeg", 1.0);
-
-          if(dataURLImage.length >= 1){
-            dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
-
-            validarDocumento(
-              id,
-              dataURLImage,
-              informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
-              informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
-              informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
-              ladoDocumento,
-              tipoDocumento,
-              informacion.foto_persona,
-              informacionFirmador.pais
-            );
-          } else {
-            setIsCorrupted(true)
-          }
-        }
-      }
-    }
-  };
-
-  function stopStreaming() {
-    console.log('detenido al mostrar')
-    if (streamActivo) {
-      streamActivo.getTracks().forEach((track) => track.stop());
-      setStreamActivo(null)
-    }
-  }
-
-  async function openBackByDeviceId(){
-    const devs = await navigator.mediaDevices.enumerateDevices();
-    const backs = devs.filter(d=>d.kind==='videoinput' && /back|rear/i.test(d.label));
-    for(const d of backs){
-      try{
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video:{deviceId:{exact:d.deviceId}}, audio:false
-        })
-        return stream;
-      } catch(e){
-        return null
-      }
-    }
-    return null;
-  }
-
-  async function iniciarCamara() {
-
-    stopStreaming()
-
-    const stream = await openBackByDeviceId()
-
-    if(stream){
-      console.log('usando device id')
-      if (videoRef.current) {
-            setStreamActivo(stream);
-            videoRef.current.srcObject = stream;
-            videoRef.current.autoplay = true;
-            videoRef.current.muted = true;
-            videoRef.current.playsInline = true;
-            videoRef.current.controls = false;
-            videoRef.current.play()
-          }
-    } else{
-      console.log('usando constraints (metodo normal)')
-      try {
-  
-        let stream;
-
-        try{
-
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { 
-              facingMode: { exact: "environment" },
-              width: { ideal: 4096 },
-              height: { ideal: 2160 },
-            }
-          })
-
-        } catch (err){
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: { 
-              facingMode:"environment" ,
-              width: { ideal: 4096 },
-              height: { ideal: 2160 },
-            }
-          })
-        } 
-
-        const settings = stream.getVideoTracks()[0].getSettings();
-        if (settings.facingMode !== "environment") {
-          throw new Error("No se obtuvo la camara trasera");
-        }
-
-        if (videoRef.current) {
-          setStreamActivo(stream);
-          videoRef.current.srcObject = stream;
-          videoRef.current.autoplay = true;
-          videoRef.current.muted = true;
-          videoRef.current.playsInline = true;
-          videoRef.current.controls = false;
-          videoRef.current.play()
-        }
-      } catch (err) {
-        alert(`No se puede acceder a la cámara. ${err}`);
-      }
-    }
-  }
 
   const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
     evento.preventDefault();
@@ -268,7 +130,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     setMessages([]);
     setContinuarBoton(false);
     setRetry(false);
-    setIsCorrupted(false)
+    setIsCorrupted(false);
 
     const archivo = evento.target.files?.[0];
     const lector = new FileReader();
@@ -296,23 +158,35 @@ export const FormularioDocumento: React.FC<Props> = ({
 
           const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
 
-          
-          if(dataURLImage.length >= 1){
-            
-            dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
-            validarDocumento(
-              id,
-              dataURLImage,
-              informacionFirmador.nombre != null? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
-              informacionFirmador.apellido != null ?informacionFirmador.apellido :  validacionDocumento.ocr.data.lastName,
-              informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
-              ladoDocumento,
-              tipoDocumento,
-              informacion.foto_persona,
-              informacionFirmador.pais
+          if (dataURLImage.length >= 1) {
+            dispatch(
+              setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
             );
+
+            const data = {
+              id: id,
+              imagen: dataURLImage,
+              nombre:
+                informacionFirmador.nombre != null
+                  ? informacionFirmador.nombre
+                  : validacionDocumento.ocr.data.name,
+              apellido:
+                informacionFirmador.apellido != null
+                  ? informacionFirmador.apellido
+                  : validacionDocumento.ocr.data.lastName,
+              documento:
+                informacionFirmador.documento != null
+                  ? informacionFirmador.documento
+                  : validacionDocumento.ocr.data.ID,
+              ladoDocumento: ladoDocumento,
+              tipoDocumento: tipoDocumento,
+              imagenPersona: informacion.foto_persona,
+              country: informacionFirmador.pais,
+              tries: conteo,
+            };
+            validarDocumento(data);
           } else {
-            setIsCorrupted(true)
+            setIsCorrupted(true);
           }
 
           // if (fileSizeKB<= sizeLimit) {
@@ -326,17 +200,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     evento.target.value = "";
   };
 
-  const validarDocumento = (
-    id: string | number | null | undefined,
-    imagenDocumento: string | ArrayBuffer | null,
-    nombre: string,
-    apellido: string,
-    documento: string,
-    ladoDocumento: string,
-    tipoDocumento: string,
-    imagenPersona: string,
-    country: string | undefined
-  ) => {
+  const validarDocumento = (data: any) => {
     setError(false);
     setLoading(true);
     if (ladoDocumento === "anverso") {
@@ -345,29 +209,21 @@ export const FormularioDocumento: React.FC<Props> = ({
       setReqMessage("validando el documento, espere un momento.");
     }
 
-    const data = {
-      id: id,
-      imagen: imagenDocumento,
-      nombre: nombre,
-      apellido: apellido,
-      documento: documento,
-      ladoDocumento: ladoDocumento,
-      tipoDocumento: tipoDocumento,
-      imagenPersona: imagenPersona,
-      country: country
-    };
-
     axios({
       method: "post",
       url:
         ladoDocumento == "anverso"
-          ? useModel ? URLS.frontValidation :URLS.validarDocumentoAnverso
-          : useModel ?URLS.backValidation :  URLS.validarDocumentoReverso,
+          ? useModel
+            ? URLS.frontValidation
+            : URLS.validarDocumentoAnverso
+          : useModel
+          ? URLS.backValidation
+          : URLS.validarDocumentoReverso,
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
         const adviceMessages = res.data.messages;
-        console.log(res.data)
+        console.log(res.data);
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
@@ -380,28 +236,28 @@ export const FormularioDocumento: React.FC<Props> = ({
           );
 
           if (res.data.face && res.data.validSide == "OK") {
-            console.log('valido')
-            setSuccess(true)
+            console.log("valido");
+            setSuccess(true);
             setTimeout(() => {
-              nextStep()
-            }, 3000)
+              nextStep();
+            }, 3000);
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
-            console.log('invalido')
+            console.log("invalido");
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
             setRetry(true);
           }
 
           if (conteo >= tries) {
-            console.log('valido por intentos')
+            console.log("valido por intentos");
             setMessages([]);
             setRetry(false);
-            setSuccess(true)
+            setSuccess(true);
             setTimeout(() => {
-              nextStep()
-            }, 3000)
+              nextStep();
+            }, 3000);
           }
         }
 
@@ -415,15 +271,15 @@ export const FormularioDocumento: React.FC<Props> = ({
           );
 
           if (res.data.validSide === "OK") {
-            console.log('valido')
-            setSuccess(true)
+            console.log("valido");
+            setSuccess(true);
             setTimeout(() => {
-              nextStep()
-            }, 3000)
+              nextStep();
+            }, 3000);
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
-            console.log('invalido')
+            console.log("invalido");
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setRetry(true);
             setConteo((prev) => prev + 1);
@@ -431,13 +287,13 @@ export const FormularioDocumento: React.FC<Props> = ({
           }
 
           if (conteo >= tries) {
-            console.log('valido por intentos')
+            console.log("valido por intentos");
             setMessages([]);
             setRetry(false);
-            setSuccess(true)
+            setSuccess(true);
             setTimeout(() => {
-              nextStep()
-            }, 3000)
+              nextStep();
+            }, 3000);
           }
         }
       })
@@ -464,7 +320,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   return (
     <div className="documento-container">
-      <SuccessStep show={success}/>
+      <SuccessStep show={success} />
 
       {tipoDocumento === "Pasaporte" && ladoDocumento === "anverso" && (
         <h2 className="documento-title">
@@ -491,7 +347,6 @@ export const FormularioDocumento: React.FC<Props> = ({
                     className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
                   >
                     {message}
-                    
                   </li>
                 ))}
 
@@ -519,7 +374,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       )}
 
       {isCorrupted && (
-        <Alert color="warning" style={{ textAlign: "center" }}> 
+        <Alert color="warning" style={{ textAlign: "center" }}>
           intente subir de nuevo la foto del documento
         </Alert>
       )}
@@ -546,77 +401,112 @@ export const FormularioDocumento: React.FC<Props> = ({
         <>
           {mobile && (
             <>
-              {open && (
-                <>
-                  <span className="text-center text-sm mb-2">
-                    Presione el boton al final de la pantalla para tomar la foto
-                    del documento
+              {!horizontal && !takePhoto && (
+                <div className="text-justify flex flex-col border-gray-300 border-1 bg-slate-100 gap-2 rounded-md p-2">
+                  <p className="m-0 text-sm">
+                    Por favor, gira tu teléfono en modo horizontal para tomar la
+                    foto del documento.
+                  </p>
+                  <p className="m-0 text-sm">
+                    Si el dispositivo no gira automaticamente verifica en
+                    ajustes que la rotación de pantalla esté habilitada.
+                  </p>
+                  <button
+                    onClick={() => setTakePhoto(true)}
+                    className="text-sm border-1 border-gray-200 "
+                  >
+                    Pulse aqui si no gira el dispositivo
+                  </button>
+                </div>
+              )}
+
+              {horizontal && (
+                <div className={`${loading ? "hidden" : "flex"} flex-col `}>
+                  <span className="text-center font-bold text-sm m-0 ">
+                    La foto debe mostrar el documento completo, todos los textos
+                    completamente enfocados y sin ningún tipo de sombra, de
+                    forma que se puedan reconocer todos los datos.
                   </span>
-                  <div className="w-full h-full flex justify-center items-center">
-                      <div
-                        className={`fixed inset-0 flex items-center justify-center z-40`}
-                      >
-                        <div className="bg-white p-6 w-screen h-screen z-40">
-                          <div className="video-container">
-                            <div className="mask-above">
-                              Una vez alineado correctamente, presione el botón
-                              para tomar la foto
-                            </div>
-                            <div className="mask-below">
-                              Por favor, coloque su documento dentro del
-                              recuadro rojo en pantalla y asegúrese de que quede
-                              completamente visible y enfocado
-                            </div>
-                            <video ref={videoRef} autoPlay playsInline muted controls={false} className="z-50"></video>
-                            <div className="rectangle-mask" style={{left: `${rectangulo.x * 100}%`, top: `${rectangulo.y * 100}%`, width: `${rectangulo.width * 100}%`, height: `${rectangulo.height * 100}%`}}></div>
-                          </div>
-                          <div className="buttons">
-                            <Button color="primary" onClick={capturarFoto}>
-                              📷 Capturar
-                            </Button>
 
-                            <Button
-                              color="danger"
-                              onClick={() => setOpen(false)}
-                            >
-                              cerrar
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                  </div>
-
-                  <div ref={elementoScroll}></div>
-                </>
+                  <label
+                    className="file-input text-center"
+                    style={{
+                      background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleCapture}
+                      className="opacity-0 w-0"
+                      disabled={loading}
+                    />
+                    {preview.length <= 0 &&
+                      `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+                    {retry && "Reintentar subir documento"}
+                    {loading && <Spinner></Spinner>}
+                  </label>
+                </div>
               )}
 
-              {!loading && !success && (
-                <button
-                  className="file-input"
-                  onClick={() => {
-                    setOpen(true);
-                    iniciarCamara();
-                  }}
-                >
-                  Tomar foto
-                </button>
+              {!horizontal && takePhoto && (
+                <div className={`${loading ? "hidden" : "flex"} flex-col`}>
+                  <span className="text-center font-bold text-sm m-0 ">
+                    La foto debe mostrar el documento completo, todos los textos
+                    completamente enfocados y sin ningún tipo de sombra, de
+                    forma que se puedan reconocer todos los datos.
+                  </span>
+                  <label
+                    className="file-input text-center"
+                    style={{
+                      background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
+                    }}
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleCapture}
+                      className="opacity-0 w-0"
+                      disabled={loading}
+                    />
+                    {preview.length <= 0 &&
+                      `Subir foto del ${placeholder} de su ${tipoDocumento}`}
+                    {retry && "Reintentar subir documento"}
+                    {loading && <Spinner></Spinner>}
+                  </label>
+                </div>
               )}
-
-              {retry && !continuarBoton && (
-                <Alert color="warning" className="text-center z-0">
-                  vuelva a intentarlo
-                </Alert>
-              )}
-
-              {/* {!mostrarCamara && retry && (
-                <button className="file-input" onClick={retomar}>
-                  tomar foto de nuevo
-                </button>
-              )} */}
             </>
+
+            // <Camera
+            // preview={preview}
+            // ladoDocumento={ladoDocumento}
+            // placeholder={placeholder}
+            // retry={retry}
+            // tipoDocumento={tipoDocumento}
+            // loading={loading}
+            // setIsCorrupted={setIsCorrupted}
+            // setMessages={setMessages}
+            // setRetry={setRetry}
+            // sendDocument={() => {
+            //   validarDocumento(
+            //     id,
+            //     preview,
+            //     informacionFirmador.nombre != null ? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
+            //     informacionFirmador.apellido != null ? informacionFirmador.apellido : validacionDocumento.ocr.data.lastName,
+            //     informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
+            //     ladoDocumento,
+            //     tipoDocumento,
+            //     informacion.foto_persona,
+            //     informacionFirmador.pais
+            //   );
+            // }}
+            // />
           )}
 
-          {!mobile && !success  && (
+          {!mobile && !success && (
             <label
               className="file-input"
               style={{

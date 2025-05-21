@@ -3,14 +3,9 @@ import { useDispatch } from "react-redux";
 import { setTipoDocumento } from "@nucleo/redux/slices/informacionSlice";
 import SuccessStep from "@components/ui/success-step";
 
-interface DocumentList{
-  barcode: string;
-  type: string;
-}
-
 interface Props {
   tipoDocumento: string;
-  documentList: DocumentList[];
+  documentList: string[];
   continuarBoton: boolean;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   nextStep: () => void;
@@ -26,13 +21,6 @@ export const DocumentSelector: React.FC<Props> = ({
 
   const dispatch = useDispatch()
   const [successStep, setSuccessStep] = useState<boolean>(false)
-
-  useEffect(()=> {
-    // if(continuarBoton === true){
-    //   setContinuarBoton(false)
-    // }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
 
   useEffect(() => {
     if (tipoDocumento.length >= 1) {
@@ -60,27 +48,27 @@ export const DocumentSelector: React.FC<Props> = ({
 
       {documentList.map((opcion, index) => (
         <label className="my-1 flex gap-1 hover:cursor-pointer" key={index}>
-          {tipoDocumento.length >= 1 && opcion.type === tipoDocumento ? (
+          {tipoDocumento.length >= 1 && opcion === tipoDocumento ? (
             <input
             type="radio"
               name="tipo_documento"
-              value={opcion.type}
+              value={opcion}
               onChange={onChange}
-              className={`${opcion.type == 'PASAPORTE' && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
+              className={`${opcion == 'PASAPORTE' && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
               checked
-              disabled={opcion.type == 'PASAPORTE' && useModel}
+              disabled={opcion == 'PASAPORTE' && useModel}
               />
             ) : (
               <input
               type="radio"
               name="tipo_documento"
-              value={opcion.type}
+              value={opcion}
               onChange={onChange}
-              className={`${opcion.type == 'PASAPORTE'  && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
-              disabled={opcion.type == 'PASAPORTE' && useModel}
+              className={`${opcion == 'PASAPORTE'  && useModel ? 'hidden' : ''} text-slate-800 font-semibold`}
+              disabled={opcion == 'PASAPORTE' && useModel}
               />
             )}
-          <span className={`${opcion.type == 'PASAPORTE'  && useModel ? 'hidden' : ''}`}>{opcion.type}</span>
+          <span className={`${opcion == 'PASAPORTE'  && useModel ? 'hidden' : ''}`}>{opcion}</span>
         </label>
       ))}
       </div>
