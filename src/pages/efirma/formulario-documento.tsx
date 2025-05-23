@@ -124,15 +124,15 @@ export const FormularioDocumento: React.FC<Props> = ({
     setSuccess(false);
   }, [ladoDocumento]);
 
-  const handleCapture = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    evento.preventDefault();
+  const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
 
     setMessages([]);
     setContinuarBoton(false);
     setRetry(false);
     setIsCorrupted(false);
 
-    const archivo = evento.target.files?.[0];
+    const archivo = event.target.files?.[0];
     const lector = new FileReader();
 
     if (archivo) lector.readAsDataURL(archivo);
@@ -141,63 +141,104 @@ export const FormularioDocumento: React.FC<Props> = ({
       const dataURL = lector.result;
       const img = new Image();
       if (typeof dataURL === "string") {
-        img.src = dataURL;
+        img.onload = () => {
+          if (archivo) {
+            console.log(archivo.size)
+            if (archivo.size < 300 * 1024) {
+              // Imagen menor a 300KB, usar original
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx?.drawImage(img, 0, 0, img.width, img.height);
+              const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
 
-        const imagen = new Image();
+              if (dataURLImage.length >= 1) {
+                dispatch(
+                  setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+                );
+                const data = {
+                  id: id,
+                  imagen: dataURLImage,
+                  nombre:
+                    informacionFirmador.nombre != null
+                      ? informacionFirmador.nombre
+                      : validacionDocumento.ocr.data.name,
+                  apellido:
+                    informacionFirmador.apellido != null
+                      ? informacionFirmador.apellido
+                      : validacionDocumento.ocr.data.lastName,
+                  documento:
+                    informacionFirmador.documento != null
+                      ? informacionFirmador.documento
+                      : validacionDocumento.ocr.data.ID,
+                  ladoDocumento: ladoDocumento,
+                  tipoDocumento: tipoDocumento,
+                  imagenPersona: informacion.foto_persona,
+                  country: informacionFirmador.pais,
+                  tries: conteo,
+                };
+                validarDocumento(data);
+              } else {
+                setIsCorrupted(true);
+              }
+            } else {
+              // Redimensionar imagen si es mayor a 300KB
+              const maxWidth = 1080;
+              const scale = maxWidth / img.width;
+              const newWidth = maxWidth;
+              const newHeight = img.height * scale;
 
-        imagen.src = typeof dataURL === "string" ? dataURL : "";
+              const canvas = document.createElement("canvas");
+              canvas.width = newWidth;
+              canvas.height = newHeight;
 
-        imagen.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
+              const ctx = canvas.getContext("2d");
 
-          canvas.width = imagen.width;
-          canvas.height = imagen.height;
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
-          ctx?.drawImage(imagen, 0, 0, imagen.width, imagen.height);
+                const dataURLImage = canvas.toDataURL("image/jpeg", 0.9);
 
-          const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
-
-          if (dataURLImage.length >= 1) {
-            dispatch(
-              setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
-            );
-
-            const data = {
-              id: id,
-              imagen: dataURLImage,
-              nombre:
-                informacionFirmador.nombre != null
-                  ? informacionFirmador.nombre
-                  : validacionDocumento.ocr.data.name,
-              apellido:
-                informacionFirmador.apellido != null
-                  ? informacionFirmador.apellido
-                  : validacionDocumento.ocr.data.lastName,
-              documento:
-                informacionFirmador.documento != null
-                  ? informacionFirmador.documento
-                  : validacionDocumento.ocr.data.ID,
-              ladoDocumento: ladoDocumento,
-              tipoDocumento: tipoDocumento,
-              imagenPersona: informacion.foto_persona,
-              country: informacionFirmador.pais,
-              tries: conteo,
-            };
-            validarDocumento(data);
-          } else {
-            setIsCorrupted(true);
+                if (dataURLImage.length >= 1) {
+                  dispatch(
+                    setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+                  );
+                  const data = {
+                    id: id,
+                    imagen: dataURLImage,
+                    nombre:
+                      informacionFirmador.nombre != null
+                        ? informacionFirmador.nombre
+                        : validacionDocumento.ocr.data.name,
+                    apellido:
+                      informacionFirmador.apellido != null
+                        ? informacionFirmador.apellido
+                        : validacionDocumento.ocr.data.lastName,
+                    documento:
+                      informacionFirmador.documento != null
+                        ? informacionFirmador.documento
+                        : validacionDocumento.ocr.data.ID,
+                    ladoDocumento: ladoDocumento,
+                    tipoDocumento: tipoDocumento,
+                    imagenPersona: informacion.foto_persona,
+                    country: informacionFirmador.pais,
+                    tries: conteo,
+                  };
+                  validarDocumento(data);
+                } else {
+                  setIsCorrupted(true);
+                }
+              }
+            }
           }
-
-          // if (fileSizeKB<= sizeLimit) {
-          // } else {
-          //   setFileSizeError(true);
-          // }
         };
+
+        img.src = dataURL;
       }
     };
 
-    evento.target.value = "";
+    event.target.value = "";
   };
 
   const validarDocumento = (data: any) => {

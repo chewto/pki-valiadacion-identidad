@@ -1,5 +1,5 @@
-// const pais = 'honducert'
-// const subdomain = 'honducert.firma'
+const pais = 'honducert'
+const subdomain = 'honducert.firma'
 
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
@@ -10,8 +10,8 @@
 // const pais = 'honducert_pruebas'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_temp'
-const subdomain = 'desarrollo'
+// const pais = 'honducert_temp'
+// const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
 // const subdomain = 'desarrollo'
@@ -20,8 +20,8 @@ const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://localhost:4000",
-    fe: "http://localhost:4000/obtener-firmador",
+    validacion: "http://192.168.1.104:4000",
+    fe: "http://192.168.1.104:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``,
