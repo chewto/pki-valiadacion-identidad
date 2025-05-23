@@ -78,6 +78,44 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [horizontal, setHorizontal] = useState<boolean>(false);
   const [takePhoto, setTakePhoto] = useState<boolean>(false);
 
+  const loadingMessages = [
+    "Estamos verificando tu identidad, por favor espera un momento...",
+    "Analizando el documento, esto tomará solo unos segundos.",
+    "Extrayendo la información, por favor no cierres esta ventana.",
+    "Comprobando la autenticidad del documento.",
+    "Leyendo datos como nombre, número de documento y fecha de nacimiento.",
+    "Comparando la información extraída con nuestros registros.",
+    "Verificando la calidad de la imagen del documento.",
+    "Asegurándonos de que el documento esté vigente y legible.",
+    "Casi terminamos, estamos haciendo las últimas comprobaciones.",
+  ];
+
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (  loading) {
+      setLoadingMessageIndex(0);
+      setReqMessage(loadingMessages[0]);
+      interval = setInterval(() => {
+        setLoadingMessageIndex((prev) => {
+          const nextIndex = prev < loadingMessages.length - 1 ? prev + 1 : prev;
+          setReqMessage(loadingMessages[nextIndex]);
+          return nextIndex;
+        });
+      }, 2000);
+    } else {
+      setLoadingMessageIndex(0);
+      setReqMessage("");
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [loading]);
+
+
+  // Replace reqMessage with loadingMessages[loadingMessageIndex] in the UI where loading is shown
+
   const verificarOrientacion = () => {
     if (window.matchMedia("(orientation: landscape)").matches) {
       setHorizontal(true);
@@ -143,7 +181,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       if (typeof dataURL === "string") {
         img.onload = () => {
           if (archivo) {
-            console.log(archivo.size)
+            console.log(archivo.size);
             if (archivo.size < 300 * 1024) {
               // Imagen menor a 300KB, usar original
               const canvas = document.createElement("canvas");
@@ -244,11 +282,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   const validarDocumento = (data: any) => {
     setError(false);
     setLoading(true);
-    if (ladoDocumento === "anverso") {
-      setReqMessage("validando el rostro en el documento, espere un momento.");
-    } else {
-      setReqMessage("validando el documento, espere un momento.");
-    }
+    // if (ladoDocumento === "anverso") {
+    //   setReqMessage("validando el rostro en el documento, espere un momento.");
+    // } else {
+    //   setReqMessage("validando el documento, espere un momento.");
+    // }
 
     axios({
       method: "post",
@@ -348,16 +386,6 @@ export const FormularioDocumento: React.FC<Props> = ({
         setLoading(false);
       });
   };
-
-  useEffect(() => {
-    if (loading) {
-      const timer = setTimeout(() => {
-        setReqMessage("Extrayendo información...");
-      }, 4000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [loading]);
 
   return (
     <div className="documento-container">
