@@ -56,45 +56,20 @@ export const ValidacionVida: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function stopStreaming() {
-    console.log("detenido al mostrar");
-    if (streaming) {
-      streaming.getTracks().forEach((track) => track.stop());
-      setStreaming(null);
-    }
-  }
-
-  const openFrontCamera = async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoInputs = isMobile
-      ? devices.filter(
-          (data) => data.kind == "videoinput" && /front/i.test(data.label)
-        )
-      : devices.filter((data) => data.kind == "videoinput");
-
-    for (const input of videoInputs) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { deviceId: { exact: input.deviceId } },
-          audio: false,
-        });
-
-        console.log(stream);
-        return stream;
-      } catch (e) {
-        return null;
-      }
-    }
-  };
 
   const handleOpenCamera = async () => {
     const video = videoRef.current;
 
-    stopStreaming();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: {
+            exact: "user",
+          },
+        },
+        audio: true,
+      });
 
-    const stream = await openFrontCamera();
-
-    if (stream) {
       if (video) {
         setStreaming(stream);
         video.srcObject = stream;
@@ -103,48 +78,8 @@ export const ValidacionVida: React.FC<Props> = ({
         video.playsInline = true;
         video.controls = false;
       }
-    } else {
-      try {
-        let stream;
-
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: {
-                exact: "user",
-              },
-              width: { ideal: 4096 },
-              height: { ideal: 2160 },
-            },
-            audio: true,
-          });
-        } catch (e) {
-          stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-              facingMode: "user",
-              width: { ideal: 4096 },
-              height: { ideal: 2160 },
-            },
-            audio: true,
-          });
-        }
-        const settings = stream.getVideoTracks()[0].getSettings();
-        if (settings.facingMode !== "user") {
-          throw new Error("No se obtuvo la camara delantera");
-        }
-
-        if (video) {
-          setStreaming(stream);
-          video.srcObject = stream;
-          video.autoplay = true;
-          video.muted = true;
-          video.playsInline = true;
-          video.controls = false;
-        }
-      } catch (e) {
-        console.error(e);
-        alert(`No se puede acceder a la cámara. ${e}`);
-      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -223,7 +158,7 @@ export const ValidacionVida: React.FC<Props> = ({
           movimiento: res.data.movimientoDetectado,
           idCarpetaEntidad: res.data.idCarpetaEntidad,
           idCarpetaUsuario: res.data.idCarpetaUsuario,
-          videoHash: res.data.videoHash,
+          // videoHash: res.data.videoHash,
         };
 
         setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);

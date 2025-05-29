@@ -90,7 +90,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     "Casi terminamos, estamos haciendo las últimas comprobaciones.",
   ];
 
-  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [_, setLoadingMessageIndex] = useState(0);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;

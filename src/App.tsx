@@ -3,7 +3,7 @@ import { ValidacionIdentidad } from "@layouts/validacion-identidad";
 // import EKYCLleida from "@layouts/ekyc-lleida";
 import BarcodeCapture from "@components/validacion-identidad/barcode-capture";
 import TestBrowser from "@components/validacion-identidad/test-browser";
-import CameraTest from "@components/validacion-identidad/test-camera";
+import Verify from "@pages/verify/verify";
 
 function App() {
 
@@ -14,7 +14,10 @@ function App() {
           path="/ekyc-efirma"
           element={<ValidacionIdentidad standalone={false} />}
         />
-        {/* <Route path="/ekyc-lleida" element={<EKYCLleida />} /> */}
+        <Route
+          path="/verify/:payload"
+          element={<Verify/>}
+        />
         <Route path="/ekyc">
           <Route
             path="validation/:hash"
@@ -24,7 +27,6 @@ function App() {
         <Route path="test">
           <Route path="barcode-test" element={<BarcodeCapture/>}/>
           <Route path="deteccion" element={<TestBrowser/>}/>
-          <Route path="camara" element={<CameraTest/>}/>
         </Route>
       </Routes>
     </Router>

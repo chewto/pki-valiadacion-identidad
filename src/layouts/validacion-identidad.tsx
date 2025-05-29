@@ -49,9 +49,9 @@ interface Props {
 }
 
 export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
-  const { hash } = useParams();
   const validationName = "EFIRMA";
-
+  
+  const { hash } = useParams();
   const [params] = useSearchParams();
 
   const idParam = params.get("id");
@@ -154,10 +154,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    console.log(informacionFirmador)
-  }, [informacionFirmador])
-
-  useEffect(() => {
     // pila con esto
     if (mainCounter >= validationParams.documentsTries + 1) {
       // enviar(true);
@@ -198,24 +194,21 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+      useEffect(() => {
     axios.get(getCountry)
     .then((res) => {
-      console.log(res)
       const country = res.data.country
       const documents = res.data.documentList
       setDocumentList(state => [...state, ...documents])
       dispatch(setCountry({country: country}))
     })
-  }, [])
+  }, [dispatch, getCountry])
 
   useEffect(() => {
     if (informacionFirmador.validacionVida) {
-      console.log("buscando info");
       axios
         .get(getMediaUrl)
         .then((res) => {
-          console.log(res)
           if(res.data.evidencias === false){
             window.location.href = standalone ? `${URLS.livenesstest}?hash=${hash}` : `${URLS.livenesstest}?id=${idUsuarioParam}&tipo=${tipoParam}`
           }
@@ -227,7 +220,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             movimiento: res.data.lifeTest,
             idCarpetaEntidad: res.data.idCarpetaEntidad,
             idCarpetaUsuario: res.data.idCarpetaUsuario,
-            videoHash: res.data.videoHash,
+            // videoHash: res.data.videoHash,
           };
 
           dispatch(setIdCarpetas(prueba));
@@ -589,10 +582,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       pruebaVida.idCarpetaUsuario
     );
 
+    // ValidadorFormdata(
+    //   formulario,
+    //   "video_hash",
+    //   pruebaVida.videoHash != undefined ? pruebaVida.videoHash : "no hash"
+    // );
+
     ValidadorFormdata(
       formulario,
       "video_hash",
-      pruebaVida.videoHash != undefined ? pruebaVida.videoHash : "no hash"
+      "no hash"
     );
 
     ValidadorFormdata(

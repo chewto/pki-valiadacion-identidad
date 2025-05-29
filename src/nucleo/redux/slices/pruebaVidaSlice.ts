@@ -5,7 +5,7 @@ const initialState: PruebaVida = {
   movimiento: "",
   idCarpetaEntidad: "",
   idCarpetaUsuario: "",
-  videoHash: ""
+  // videoHash: ""
 }
 
 export const pruebaVidaSlice = createSlice({
@@ -16,11 +16,11 @@ export const pruebaVidaSlice = createSlice({
       state,
       action: PayloadAction<PruebaVida>
     ) => {
-      const { movimiento, idCarpetaEntidad, idCarpetaUsuario, videoHash } = action.payload
+      const { movimiento, idCarpetaEntidad, idCarpetaUsuario } = action.payload
       state.movimiento = movimiento
       state.idCarpetaEntidad = idCarpetaEntidad
-      state.idCarpetaUsuario = idCarpetaUsuario,
-      state.videoHash = videoHash
+      state.idCarpetaUsuario = idCarpetaUsuario
+      // state.videoHash = videoHash
     }
   }
 })
