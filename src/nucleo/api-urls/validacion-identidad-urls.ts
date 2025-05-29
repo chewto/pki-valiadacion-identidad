@@ -1,8 +1,8 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-const pais = 'efirmaPlus'
-const subdomain = 'desarrollo'
+// const pais = 'efirmaPlus'
+// const subdomain = 'desarrollo'
 
 // const pais = 'honducert_pruebas'
 // const subdomain = 'desarrollo'
@@ -10,8 +10,14 @@ const subdomain = 'desarrollo'
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
+
+const pais = 'honducert_desarrollo'
+const subdomain = 'desarrollo'
+
 // const pais = 'desarrollo'
 // const subdomain = 'desarrollo'
+
+
 
 const ekycSubdomain = 'hon'
 
@@ -36,6 +42,12 @@ const rutasURL = {
       validacion: `https://${subdomain}.e-custodia.com/validacion-back`,
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
+      rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
+    },
+    honducert_temp:{
+      validacion: `https://desarrollo.web.honducert.com/validacion-back`,
+      fe: `https://desarrollo.web.honducert.com/fe-back/api/Firmador`,
+      resultados: `https://desarrollo.web.honducert.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     },
     honducert_pruebas:{

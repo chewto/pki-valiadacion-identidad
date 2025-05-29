@@ -678,7 +678,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = [
     <DocumentSelector
       tipoDocumento={informacion.tipoDocumento}
-      documentList={documentTypes["col"]}
+      documentList={documentTypes["hnd"]}
       continuarBoton={continuarBoton}
       setContinuarBoton={setContinuarBoton}
     />,
