@@ -4,14 +4,14 @@
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
 
-// const pais = 'honducert_desarrollo'
-// const subdomain = 'desarrollo'
+const pais = 'honducert_desarrollo'
+const subdomain = 'desarrollo'
 
 // const pais = 'honducert_pruebas'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_temp'
-const subdomain = 'desarrollo'
+// const pais = 'honducert_temp'
+// const subdomain = 'desarrollo'
 
 // const pais = 'desarrollo'
 // const subdomain = 'desarrollo'

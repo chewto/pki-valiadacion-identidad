@@ -13,7 +13,7 @@ interface Props {
   preview: string;
   selfie: string;
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
-  id: number|string | null | undefined;
+  id: number | string | null | undefined;
   nextStep: () => void;
 }
 
@@ -22,7 +22,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   selfie,
   setContinuarBoton,
   id,
-  nextStep
+  nextStep,
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -34,14 +34,16 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
   const [success, setSuccess] = useState<boolean>(false);
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [messages, setMessages] = useState<string[]>([])
+  const [messages, setMessages] = useState<string[]>([]);
   const [mostrarCamara, setMostrarCamara] = useState<boolean>(
     iphone ? true : false
   );
   const [error, setError] = useState<boolean>(false);
 
   const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
-  const [cameraOpens, setCameraOpens] = useState<number>(0)
+  const [cameraOpens, setCameraOpens] = useState<number>(0);
+
+  const [debugData, setDebugData] = useState<string[]>([]);
 
   const capturarOtra = () => {
     dispatch(setVaciarFoto());
@@ -49,8 +51,12 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setContinuarBoton(false);
     setError(false);
     setSuccess(false);
-    setMessages([])
+    setMessages([]);
   };
+
+  useEffect(() => {
+    console.log(debugData, debugData.length, typeof debugData);
+  }, [debugData, setDebugData]);
 
   useEffect(() => {
     if(success){
@@ -62,7 +68,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
   return (
     <>
-    <SuccessStep show={success}/>
+      <SuccessStep show={success} />
       <div
         style={{
           textAlign: "center",
@@ -76,7 +82,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
               Por favor, quítese la gafas o gorra para realizar la verificación.
             </span>
             <p className="advertencia" style={{ margin: "15px 0 0 0" }}>
-              Presione el botón para abrir su camara y prosiga. La selfie tarda 4 segundos en ser capturada.
+              Presione el botón para abrir su camara y prosiga. La selfie tarda
+              4 segundos en ser capturada.
             </p>
           </>
         )}
@@ -93,20 +100,31 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         </Alert>
       )}
 
-      {messages.length >= 1  && (
+      {messages.length >= 1 && (
         <Advertencia
           titulo="Advertencia"
           contenido=""
           elemento={
-          <div>
-            <ul className="p-0">
-              {messages.map((message:string) => (
-                <li className="bg-yellow-200 px-2 py-2 rounded-xl border-2 border-yellow-500 text-xl">{message}</li>
-              ))}
-            </ul>
+            <div>
+              <ul className="p-0">
+                {messages.map((message: string, index) => (
+                  <li
+                    key={index}
+                    className="bg-yellow-200 px-2 py-2 rounded-xl border-2 border-yellow-500 text-xl"
+                  >
+                    {message}
+                  </li>
+                ))}
+              </ul>
 
-            <button onClick={() => setMessages([])} className="stepper-btn mt-2">cerrar</button>
-          </div>}
+              <button
+                onClick={() => setMessages([])}
+                className="stepper-btn mt-2"
+              >
+                cerrar
+              </button>
+            </div>
+          }
         />
       )}
 
@@ -139,6 +157,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           label={selfie}
           idUsuarioFi={id}
           setMessages={setMessages}
+          setDebugData={setDebugData}
         />
       )}
       {!mostrarCamara && (
@@ -147,12 +166,32 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           style={{ width: "100%", margin: "10px 0 0 0" }}
           onClick={() => {
             setMostrarCamara(true);
-            setCameraOpens((state)=> state+1)
+            setCameraOpens((state) => state + 1);
           }}
         >
           Abrir camara
         </button>
       )}
+
+      <div
+        style={{
+          maxHeight: "120px",
+          overflowY: "auto",
+          background: "#f5f5f5",
+          padding: "8px",
+          borderRadius: "6px",
+          marginTop: "12px",
+        }}
+        className="hidden"
+      >
+        <ul>
+          {debugData.map((item, idx) => (
+            <li key={idx} style={{ fontSize: "12px", color: "#333" }}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
     </>
   );
 };

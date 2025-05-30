@@ -19,17 +19,19 @@ interface Props {
   setError: Dispatch<SetStateAction<boolean>>;
   idUsuarioFi: number | string | null | undefined;
   setMessages: Dispatch<SetStateAction<string[]>>;
+  setDebugData: Dispatch<SetStateAction<string[]>>;
 }
 
 export const ValidacionVida: React.FC<Props> = ({
   label,
-  setContinuarBoton,
+  // setContinuarBoton,
   setMostrarPreview,
   setCapturarOtraVez,
   setSuccess,
   setError,
   idUsuarioFi,
   setMessages,
+  setDebugData
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -141,6 +143,9 @@ export const ValidacionVida: React.FC<Props> = ({
     setLoading(true);
 
     formData.append("video", videoData);
+    // const fomdataString = JSON.stringify(formData)
+    // setDebugData((prevData) => [...prevData ,...fomdataString])
+
 
     axios({
       method: "post",
@@ -161,6 +166,17 @@ export const ValidacionVida: React.FC<Props> = ({
           // videoHash: res.data.videoHash,
         };
 
+        // const debug = {
+        //   movimiento: res.data.movimientoDetectado,
+        //   idCarpetaEntidad: res.data.idCarpetaEntidad,
+        //   idCarpetaUsuario: res.data.idCarpetaUsuario,
+        //   preview: preview.length
+        // }
+
+        const debugString = JSON.stringify(res.data);
+        console.warn(debugString);
+        setDebugData((prevData) => [...prevData, debugString]);
+
         setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);
 
         if (res.status == 200) {
@@ -169,7 +185,7 @@ export const ValidacionVida: React.FC<Props> = ({
             dispatch(setIdCarpetas(data));
           }
           if (preview.length >= 1 && res.data.messages.length <= 0) {
-            setContinuarBoton(true);
+            // setContinuarBoton(true);
             setSuccess(true);
             setMessages([]);
           }
