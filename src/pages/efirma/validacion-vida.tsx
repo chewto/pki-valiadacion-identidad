@@ -20,6 +20,7 @@ interface Props {
   idUsuarioFi: number | string | null | undefined;
   setMessages: Dispatch<SetStateAction<string[]>>;
   setDebugData: Dispatch<SetStateAction<string[]>>;
+  setVideoData: Dispatch<SetStateAction<string[]>>;
 }
 
 export const ValidacionVida: React.FC<Props> = ({
@@ -31,7 +32,8 @@ export const ValidacionVida: React.FC<Props> = ({
   setError,
   idUsuarioFi,
   setMessages,
-  setDebugData
+  setDebugData,
+  setVideoData
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -143,9 +145,16 @@ export const ValidacionVida: React.FC<Props> = ({
     setLoading(true);
 
     formData.append("video", videoData);
-    // const fomdataString = JSON.stringify(formData)
-    // setDebugData((prevData) => [...prevData ,...fomdataString])
+    const videoUrl = URL.createObjectURL(videoData);
+    const sizeKB = (videoData.size / 1024).toFixed(2);
+    const xd = {
+      url: videoUrl,
+      peso: sizeKB
+    }
+    setVideoData((prevData) => [...prevData, JSON.stringify(xd)]);
 
+    // Show the size of the video in KB
+    // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
 
     axios({
       method: "post",

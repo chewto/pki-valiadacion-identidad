@@ -45,6 +45,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
   const [debugData, setDebugData] = useState<string[]>([]);
 
+  const [videoData, setVideoData] = useState<string[]>([])
+
   const capturarOtra = () => {
     dispatch(setVaciarFoto());
     setCapturarOtravez(false);
@@ -54,9 +56,13 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setMessages([]);
   };
 
+  // useEffect(() => {
+  //   console.log(debugData, debugData.length, typeof debugData);
+  // }, [debugData, setDebugData]);
+
   useEffect(() => {
-    console.log(debugData, debugData.length, typeof debugData);
-  }, [debugData, setDebugData]);
+    console.log(videoData)
+  }, [videoData, setVideoData])
 
   useEffect(() => {
     if(success){
@@ -158,6 +164,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           idUsuarioFi={id}
           setMessages={setMessages}
           setDebugData={setDebugData}
+          setVideoData={setVideoData}
         />
       )}
       {!mostrarCamara && (
@@ -173,6 +180,27 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         </button>
       )}
 
+      <div className="flex">
+        <div
+        style={{
+          maxHeight: "120px",
+          overflowY: "auto",
+          background: "#f5f5f5",
+          padding: "8px",
+          borderRadius: "6px",
+          marginTop: "12px",
+        }}
+        className="border-2 border-black w-full"
+      >
+        <span>body - video info</span>
+        <ul>
+          {videoData.map((item, idx) => (
+            <li key={idx} style={{ fontSize: "12px", color: "#333" }}>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
       <div
         style={{
           maxHeight: "120px",
@@ -182,8 +210,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           borderRadius: "6px",
           marginTop: "12px",
         }}
-        className="hidden"
+        className="border-2 border-black w-full"
       >
+        <span>respuesta</span>
         <ul>
           {debugData.map((item, idx) => (
             <li key={idx} style={{ fontSize: "12px", color: "#333" }}>
@@ -191,6 +220,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
             </li>
           ))}
         </ul>
+      </div>
+      
       </div>
     </>
   );

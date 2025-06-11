@@ -883,7 +883,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
               )} */}
             </div>
             {componentsSteps[activeSteps]}
-             {/* {componentsSteps[3]}  */}
+             {/* {componentsSteps[2]}  */}
           </div>
           <>
             {mostrarMensaje && loading && (
