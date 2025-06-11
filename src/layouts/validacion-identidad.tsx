@@ -42,6 +42,7 @@ import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
+import { useApproved } from "@nucleo/hooks/useApproved";
 
 
 interface Props {
@@ -115,6 +116,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     idUsuarioParam,
     `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
   );
+
+  useApproved()
 
   const hora = useHour();
   const fecha = useDate();

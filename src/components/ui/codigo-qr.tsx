@@ -5,19 +5,13 @@ import * as CryptoJS from 'crypto-js';
 
 export const CodigoQR: React.FC = () => {
 
-  // const { hash } = useParams();
-  // const [params] = useSearchParams();
-  
-  // const idParam = params.get("id");
-  // const idUsuarioParam = params.get("idUsuario");
-  // const tipoParam = params.get("tipo");
   const secretKey = 'test';
 
   const [direccion, setDireccion] = useState<string>('');
 
   useEffect(() => {
     // Get the current URL
-    const currentUrl = window.location.href;
+    const currentUrl = `${window.location.href}&aprobado=positivo`;
 
     // Encrypt the current URL
     const encryptedData = CryptoJS.AES.encrypt(currentUrl, secretKey).toString();
