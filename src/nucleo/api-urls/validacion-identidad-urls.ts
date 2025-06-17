@@ -1,14 +1,14 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-const pais = 'efirmaPlus'
-const subdomain = 'desarrollo'
+// const pais = 'efirmaPlus'
+// const subdomain = 'desarrollo'
 
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
-// const pais = 'honducert_pruebas'
-// const subdomain = 'desarrollo'
+const pais = 'honducert_pruebas'
+const subdomain = 'desarrollo'
 
 // const pais = 'honducert_temp'
 // const subdomain = 'desarrollo'
@@ -20,12 +20,13 @@ const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://192.168.1.104:4000",
-    fe: "http://192.168.1.104:4000/obtener-firmador",
+    validacion: "http://192.168.1.106:4000",
+    fe: "http://192.168.1.106:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``,
-    validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+    validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
+    saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
   }
   ,
   honducert_desarrollo:{
@@ -33,35 +34,40 @@ const rutasURL = {
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
-      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
     },
     honducert_temp:{
       validacion: `https://desarrollo.web.honducert.com/validacion-back`,
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
-      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
     },
     honducert:{
       validacion: `https://${subdomain}.e-custodia.com/validacion-back`,
       fe: `https://${subdomain}.e-custodia.com/fe-back/api/Firmador`,
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
-      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
     },
     honducert_pruebas:{
       validacion: `https://desarrollo.web.honducert.com/validacion-back`,
-      fe: `https://desarrollo.web.honducert.com/fe-back/api/Firmador`,
+      fe: `https://cavipetrol.efirmaplus.com/fe-back/api/Firmador`,
       resultados: `https://desarrollo.web.honducert.com/efirma.php/`,
       rejected: `https://desarrollo.web.honducert.com/resultado_validacion_fallida`,
-      validacionVida: 'https://desarrollo.web.honducert.com/validacion-vida'
+      validacionVida: 'https://desarrollo.web.honducert.com/validacion-vida',
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
     },
     efirmaPlus:{
       validacion: `https://cavipetrol.efirmaplus.com/validacion-back`,
       fe: `https://cavipetrol.efirmaplus.com/fe-back/api/Firmador`,
       resultados: `https://cavipetrol.efirmaplus.com/efirma.php/`,
       rejected: `https://cavipetrol.efirmaplus.com/resultado_validacion_fallida`,
-      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida'
+      validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
     }
   // libertador:{
   //   validacion: "https://libertador.pkiservices.co/validacion-back",
@@ -85,6 +91,7 @@ const urlBase = rutasURL[pais]["validacion"]
 const efirmaUrl = rutasURL[pais]["resultados"]
 const rejected = rutasURL[pais]['rejected']
 const livenesstest = rutasURL[pais]['validacionVida']
+const saveVideo = rutasURL[pais]['saveVideo']
 
 export const URLS = {
   validationProvider: `${urlBase}/validation/validation-provider`,
@@ -115,7 +122,8 @@ export const URLS = {
   livenesstest: livenesstest,
   getCountry: `${urlBase}/country/get`,
   frontValidation: `${urlBase}/document/front`,
-  backValidation: `${urlBase}/document/back`
+  backValidation: `${urlBase}/document/back`,
+  saveVideo: `${saveVideo}`
 }
 
 export const validationRedirects = {

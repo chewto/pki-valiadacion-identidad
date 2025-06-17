@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
 import "../../styles/selfie-movil.component.css";
@@ -9,6 +10,7 @@ import { setIdCarpetas } from "../../nucleo/redux/slices/pruebaVidaSlice";
 import { PruebaVida } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import faceTemplate from "../../assets/img/face_template_OK.png";
 import { useMobile } from "@nucleo/hooks/useMobile";
+import { useSearchParams } from "react-router-dom";
 
 interface Props {
   label: string;
@@ -30,11 +32,15 @@ export const ValidacionVida: React.FC<Props> = ({
   setCapturarOtraVez,
   setSuccess,
   setError,
-  idUsuarioFi,
+  // idUsuarioFi,
   setMessages,
   setDebugData,
-  setVideoData
+  setVideoData,
 }) => {
+  const [params] = useSearchParams();
+
+  const idUser = params.get("idUsuario");
+
   const iphone = /iPhone/i.test(navigator.userAgent);
 
   const isMobile = useMobile();
@@ -59,7 +65,6 @@ export const ValidacionVida: React.FC<Props> = ({
     handleOpenCamera();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   const handleOpenCamera = async () => {
     const video = videoRef.current;
@@ -141,49 +146,53 @@ export const ValidacionVida: React.FC<Props> = ({
     }
   };
 
-  const handleUploadVideo = (videoData: Blob) => {
+  const handleUploadVideo = async (videoData: Blob) => {
     setLoading(true);
+
+    // Add a filename to the video when appending to FormData
+    const extension = videoData.type.split("/")[1] || "webm"; // Get 'mp4' or 'webm' from the mime type
+    const fileName = `video_${idUser}.${extension}`;
+    formData.append("video", videoData, fileName);
 
     formData.append("video", videoData);
     const videoUrl = URL.createObjectURL(videoData);
     const sizeKB = (videoData.size / 1024).toFixed(2);
     const xd = {
       url: videoUrl,
-      peso: sizeKB
-    }
+      peso: sizeKB,
+    };
     setVideoData((prevData) => [...prevData, JSON.stringify(xd)]);
 
     // Show the size of the video in KB
     // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
 
-    axios({
-      method: "post",
-      url: `${URLS.pruebaVida}?id=${idUsuarioFi}`,
-      data: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    })
+    let videoPath = "";
+
+    await axios
+      .post(URLS.saveVideo, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
       .then((res) => {
-        console.log(res)
+        const path = res.data;
+        videoPath = path.ruta;
+      });
+
+    console.log(videoPath);
+
+    await axios
+      .post(`${URLS.pruebaVida}?path=${videoPath}`)
+      .then((res) => {
+        console.log(res);
         const preview: string = res.data.photo;
 
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,
-          idCarpetaEntidad: res.data.idCarpetaEntidad,
-          idCarpetaUsuario: res.data.idCarpetaUsuario,
-          // videoHash: res.data.videoHash,
+          videoHash: videoPath,
         };
 
-        // const debug = {
-        //   movimiento: res.data.movimientoDetectado,
-        //   idCarpetaEntidad: res.data.idCarpetaEntidad,
-        //   idCarpetaUsuario: res.data.idCarpetaUsuario,
-        //   preview: preview.length
-        // }
-
         const debugString = JSON.stringify(res.data);
-        console.warn(debugString);
         setDebugData((prevData) => [...prevData, debugString]);
 
         setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);

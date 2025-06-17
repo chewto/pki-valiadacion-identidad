@@ -180,7 +180,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         </button>
       )}
 
-      <div className="flex">
+      <div className="hidden">
         <div
         style={{
           maxHeight: "120px",

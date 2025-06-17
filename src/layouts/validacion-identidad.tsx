@@ -172,6 +172,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
+        console.log(res)
+
         if (res.data.dato == null) {
           setGenerated(false);
         }
@@ -221,9 +223,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
           const prueba: PruebaVida = {
             movimiento: res.data.lifeTest,
-            idCarpetaEntidad: res.data.idCarpetaEntidad,
-            idCarpetaUsuario: res.data.idCarpetaUsuario,
-            // videoHash: res.data.videoHash,
+            // idCarpetaEntidad: res.data.idCarpetaEntidad,
+            // idCarpetaUsuario: res.data.idCarpetaUsuario,
+            videoHash: res.data.videoHash,
           };
 
           dispatch(setIdCarpetas(prueba));
@@ -241,6 +243,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       )
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
+        console.log(res)
         if (estadoValidacion.length >= 1) {
           const textList = [
             "se requiere nueva validación",
@@ -319,6 +322,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       );
     }
   };
+
+  useEffect(() => {
+    console.log(informacionFirmador, retry)
+  }, [informacionFirmador, retry])
 
   const appendHiddenInput = (
     formElement: HTMLFormElement,
@@ -573,23 +580,23 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       pruebaVida.movimiento
     );
 
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.idCarpetaEntidad,
-      pruebaVida.idCarpetaEntidad
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.idCarpetaUsuario,
-      pruebaVida.idCarpetaUsuario
-    );
+    // ValidadorFormdata(
+    //   formulario,
+    //   formdataKeys.idCarpetaEntidad,
+    //   pruebaVida.idCarpetaEntidad
+    // );
 
     // ValidadorFormdata(
     //   formulario,
-    //   "video_hash",
-    //   pruebaVida.videoHash != undefined ? pruebaVida.videoHash : "no hash"
+    //   formdataKeys.idCarpetaUsuario,
+    //   pruebaVida.idCarpetaUsuario
     // );
+
+    ValidadorFormdata(
+      formulario,
+      "video_hash",
+      pruebaVida.videoHash
+    );
 
     ValidadorFormdata(
       formulario,

@@ -3,9 +3,7 @@ import { PruebaVida } from '../../interfaces/validacion-identidad/informacion-id
 
 const initialState: PruebaVida = {
   movimiento: "",
-  idCarpetaEntidad: "",
-  idCarpetaUsuario: "",
-  // videoHash: ""
+  videoHash: ""
 }
 
 export const pruebaVidaSlice = createSlice({
@@ -16,11 +14,9 @@ export const pruebaVidaSlice = createSlice({
       state,
       action: PayloadAction<PruebaVida>
     ) => {
-      const { movimiento, idCarpetaEntidad, idCarpetaUsuario } = action.payload
+      const { movimiento, videoHash} = action.payload
       state.movimiento = movimiento
-      state.idCarpetaEntidad = idCarpetaEntidad
-      state.idCarpetaUsuario = idCarpetaUsuario
-      // state.videoHash = videoHash
+      state.videoHash = videoHash
     }
   }
 })
