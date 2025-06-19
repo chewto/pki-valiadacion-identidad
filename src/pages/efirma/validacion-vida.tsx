@@ -150,8 +150,9 @@ export const ValidacionVida: React.FC<Props> = ({
     setLoading(true);
 
     // Add a filename to the video when appending to FormData
-    const extension = videoData.type.split("/")[1] || "webm"; // Get 'mp4' or 'webm' from the mime type
-    const fileName = `video_${idUser}.${extension}`;
+    // const extension = videoData.type.split("/")[1] || "webm"; // Get 'mp4' or 'webm' from the mime type
+    const fileName = `video_${idUser}_2.webm`;
+    console.log(fileName)
     formData.append("video", videoData, fileName);
 
     formData.append("video", videoData);
@@ -179,13 +180,13 @@ export const ValidacionVida: React.FC<Props> = ({
         videoPath = path.ruta;
       });
 
-    console.log(videoPath);
-
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}`)
       .then((res) => {
         console.log(res);
         const preview: string = res.data.photo;
+
+        console.warn(preview)
 
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,

@@ -61,6 +61,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   );
   const dispatch = useDispatch();
 
+  const passport = 'PASAPORTE'
+
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
@@ -152,7 +154,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   ]);
 
   useEffect(() => {
-    if (ladoDocumento === "reverso" && tipoDocumento === "Pasaporte") {
+    if (ladoDocumento === "reverso" && tipoDocumento === passport) {
       dispatch(setFotos({ labelFoto: ladoDocumento, data: imagePlaceholder }));
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
@@ -391,13 +393,13 @@ export const FormularioDocumento: React.FC<Props> = ({
     <div className="documento-container">
       <SuccessStep show={success} />
 
-      {tipoDocumento === "Pasaporte" && ladoDocumento === "anverso" && (
+      {tipoDocumento === passport && ladoDocumento === "anverso" && (
         <h2 className="documento-title">
           Subir foto del {placeholder} de su {tipoDocumento}
         </h2>
       )}
 
-      {tipoDocumento !== "Pasaporte" && (
+      {tipoDocumento !== passport && (
         <h2 className="documento-title">
           Subir foto del {placeholder} de su {tipoDocumento}
         </h2>
@@ -464,7 +466,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         </div>
       )}
 
-      {ladoDocumento === "reverso" && tipoDocumento === "Pasaporte" ? (
+      {ladoDocumento === "reverso" && tipoDocumento === passport ? (
         <></>
       ) : (
         <>
@@ -606,13 +608,13 @@ export const FormularioDocumento: React.FC<Props> = ({
         </>
       )}
 
-      {preview.length >= 1 && !loading && tipoDocumento != "Pasaporte" && (
+      {preview.length >= 1 && !loading && tipoDocumento != passport && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
       )}
 
       {preview.length >= 1 &&
         !loading &&
-        tipoDocumento == "Pasaporte" &&
+        tipoDocumento == passport &&
         ladoDocumento == "anverso" && (
           <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
         )}

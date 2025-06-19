@@ -1,9 +1,5 @@
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  ValidadorFormdata,
-  formdataKeys,
-} from "@nucleo/validadores/validacion-identidad/validador-formdata";
 import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
 import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
@@ -23,7 +19,7 @@ import {
   setFirmador,
   setLivenessTest,
 } from "@nucleo/redux/slices/firmadorSlice";
-import { useDetectBrowser, useDetectOs, useMobile } from "@nucleo/hooks/useMobile";
+import { useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 
 import { FormularioDocumento } from "@pages/efirma/formulario-documento";
@@ -36,14 +32,13 @@ import { MensajeVerificacion } from "@components/ui/mensaje-verificacion";
 import Card from "@components/ui/card";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import safari from "../assets/img/safari.png";
-import chrome from "../assets/img/chrome.png"
+// import safari from "../assets/img/safari.png";
+// import chrome from "../assets/img/chrome.png"
 import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
-import { useApproved } from "@nucleo/hooks/useApproved";
-
+// import { useApproved } from "@nucleo/hooks/useApproved";
 
 interface Props {
   standalone: boolean;
@@ -51,7 +46,7 @@ interface Props {
 
 export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const validationName = "EFIRMA";
-  
+
   const { hash } = useParams();
   const [params] = useSearchParams();
 
@@ -88,9 +83,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ? `${URLS.getMedia}?hash=${hash}`
     : `${URLS.getMedia}?id=${idUsuarioParam}`;
 
-  const getCountry = standalone 
-  ? `${URLS.getCountry}?hash=${hash}`
-  : `${URLS.getCountry}?id=${idUsuarioParam}`
+  const getCountry = standalone
+    ? `${URLS.getCountry}?hash=${hash}`
+    : `${URLS.getCountry}?id=${idUsuarioParam}`;
 
   // const lastValidationUrl = standalone
   //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
@@ -106,10 +101,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
-  const isIOS = useDetectOs('IOS');
-  const isSafari = useDetectBrowser('MOBILE SAFARI')
-  const isAndroid = useDetectOs('ANDROID')
-  const isChrome = useDetectBrowser('CHROME')
+  // const isIOS = useDetectOs('IOS');
+  // const isSafari = useDetectBrowser('MOBILE SAFARI')
+  // const isAndroid = useDetectOs('ANDROID')
+  // const isChrome = useDetectBrowser('CHROME')
 
   useValidationRedirect(
     validationName,
@@ -117,7 +112,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
   );
 
-  useApproved()
+  // useApproved()
 
   const hora = useHour();
   const fecha = useDate();
@@ -148,11 +143,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     documentsTries: 0,
   });
 
-  const [documentList, setDocumentList] = useState<string[]>([])
+  const [documentList, setDocumentList] = useState<string[]>([]);
 
-  const [hasSent, setHasSent] = useState(false)
+  // const [hasSent, setHasSent] = useState(false);
 
-  const [useModel, setUseModel] = useState<boolean>(false)
+  const [useModel, setUseModel] = useState<boolean>(false);
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -172,7 +167,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
-        console.log(res)
+        console.log(res);
 
         if (res.data.dato == null) {
           setGenerated(false);
@@ -181,41 +176,42 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         dispatch(setFirmador(res.data.dato));
         if (standalone) {
           dispatch(setDirecciones(res.data.dato));
-          setUseModel(res.data.dato.usoModelo == null ? false : true)
+          setUseModel(res.data.dato.usoModelo == null ? false : true);
         }
       })
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
 
-    if(!standalone){
+    if (!standalone) {
       axios({
-        method: 'get',
-        url: `${URLS.getLivenessTest}?id=${idUsuarioParam}`
-      }).then(res => {
-        dispatch(setLivenessTest({data: res.data.validacionVida}))
-      })
+        method: "get",
+        url: `${URLS.getLivenessTest}?id=${idUsuarioParam}`,
+      }).then((res) => {
+        dispatch(setLivenessTest({ data: res.data.validacionVida }));
+      });
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-      useEffect(() => {
-    axios.get(getCountry)
-    .then((res) => {
-      const country = res.data.country
-      const documents = res.data.documentList
-      setDocumentList(state => [...state, ...documents])
-      dispatch(setCountry({country: country}))
-    })
-  }, [dispatch, getCountry])
+  useEffect(() => {
+    axios.get(getCountry).then((res) => {
+      const country = res.data.country;
+      const documents = res.data.documentList;
+      setDocumentList((state) => [...state, ...documents]);
+      dispatch(setCountry({ country: country }));
+    });
+  }, [dispatch, getCountry]);
 
   useEffect(() => {
     if (informacionFirmador.validacionVida) {
       axios
         .get(getMediaUrl)
         .then((res) => {
-          if(res.data.evidencias === false){
-            window.location.href = standalone ? `${URLS.livenesstest}?hash=${hash}` : `${URLS.livenesstest}?id=${idUsuarioParam}&tipo=${tipoParam}`
+          if (res.data.evidencias === false) {
+            window.location.href = standalone
+              ? `${URLS.livenesstest}?hash=${hash}`
+              : `${URLS.livenesstest}?id=${idUsuarioParam}&tipo=${tipoParam}`;
           }
           dispatch(
             setFotos({ labelFoto: "foto_persona", data: res.data.photo })
@@ -243,7 +239,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       )
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
-        console.log(res)
+        console.log(res);
         if (estadoValidacion.length >= 1) {
           const textList = [
             "se requiere nueva validación",
@@ -324,8 +320,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   useEffect(() => {
-    console.log(informacionFirmador, retry)
-  }, [informacionFirmador, retry])
+    console.log(informacionFirmador, retry);
+  }, [informacionFirmador, retry]);
 
   const appendHiddenInput = (
     formElement: HTMLFormElement,
@@ -342,309 +338,24 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const enviar = async (failed: boolean) => {
     // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
 
-    console.log('finalizando validacion')
+    console.log("finalizando validacion");
 
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.anverso_documento,
-      informacion.anverso
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.reverso_documento,
-      informacion.reverso
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.foto_persona,
-      informacion.foto_persona
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.tipoDocumento,
-      informacion.tipoDocumento
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.dispositivo,
-      informacion.dispositivo
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.navegador,
-      informacion.navegador
-    );
-
-    ValidadorFormdata(formulario, formdataKeys.latitud, informacion.latitud);
-    ValidadorFormdata(formulario, formdataKeys.longitud, informacion.longitud);
-    ValidadorFormdata(formulario, formdataKeys.hora, informacion.hora);
-    ValidadorFormdata(formulario, formdataKeys.fecha, informacion.fecha);
-    ValidadorFormdata(formulario, formdataKeys.ip, informacion.ip);
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.porcentajeNombreOCR,
-      validacionDocumento.ocr.percentage.name
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.porcentajeApellidoOCR,
-      validacionDocumento.ocr.percentage.lastName
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.porcentajeDocumentoOCR,
-      validacionDocumento.ocr.percentage.ID
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.nombreOCR,
-      validacionDocumento.ocr.data.name
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.apellidoOCR,
-      validacionDocumento.ocr.data.lastName
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.documentoOCR,
-      validacionDocumento.ocr.data.ID
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrz,
-      validacionDocumento.mrz.code
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrzName,
-      validacionDocumento.mrz.data.name
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrzLastname,
-      validacionDocumento.mrz.data.lastName
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrzNamePercent,
-      validacionDocumento.mrz.percentages.name
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.mrzLastnamePercent,
-      validacionDocumento.mrz.percentages.lastName
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.codigoBarras,
-      validacionDocumento.barcode
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontCode,
-      validacionDocumento.sides.front.code
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontCountry,
-      validacionDocumento.sides.front.country
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontCountryCheck,
-      validacionDocumento.sides.front.countryCheck
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontType,
-      validacionDocumento.sides.front.type
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontTypeCheck,
-      validacionDocumento.sides.front.countryCheck
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.frontIsExpired,
-      validacionDocumento.sides.front.isExpired ? "!OK" : "OK"
-    );
-
-    ValidadorFormdata(
-      formulario,
-      'front_tries',
-      `${validacionDocumento.sides.front.tries}`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backCode,
-      `${
-        validacionDocumento.sides.back.code != undefined
-          ? validacionDocumento.sides.back.code
-          : ""
-      }`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backCountry,
-      `${
-        validacionDocumento.sides.back.country != undefined
-          ? validacionDocumento.sides.back.country
-          : ""
-      }`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backCountryCheck,
-      `${
-        validacionDocumento.sides.back.countryCheck != undefined
-          ? validacionDocumento.sides.back.countryCheck
-          : ""
-      }`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backType,
-      `${
-        validacionDocumento.sides.back.type != undefined
-          ? validacionDocumento.sides.back.type
-          : ""
-      }`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backTypeCheck,
-      `${
-        validacionDocumento.sides.back.typeCheck != undefined
-          ? validacionDocumento.sides.back.typeCheck
-          : ""
-      }`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.backIsExpired,
-      `${validacionDocumento.sides.back.isExpired ? "!OK" : "OK"}`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      'back_tries',
-      `${validacionDocumento.sides.back.tries}`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.nombres,
-      informacionFirmador.nombre
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.apellidos,
-      informacionFirmador.apellido
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.email,
-      informacionFirmador.correo
-    );
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.numero_documento,
-      informacionFirmador.documento
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.movimiento,
-      pruebaVida.movimiento
-    );
-
-    // ValidadorFormdata(
-    //   formulario,
-    //   formdataKeys.idCarpetaEntidad,
-    //   pruebaVida.idCarpetaEntidad
-    // );
-
-    // ValidadorFormdata(
-    //   formulario,
-    //   formdataKeys.idCarpetaUsuario,
-    //   pruebaVida.idCarpetaUsuario
-    // );
-
-    ValidadorFormdata(
-      formulario,
-      "video_hash",
-      pruebaVida.videoHash
-    );
-
-    ValidadorFormdata(
-      formulario,
-      "video_hash",
-      "no hash"
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.validationAttendance,
-      validationParams.validationAttendance
-    );
-
-    ValidadorFormdata(
-      formulario,
-      formdataKeys.validationPercent,
-      validationParams.validationPercent
-    );
-
-    ValidadorFormdata(
-      formulario,
-      "callback",
-      informacionFirmador.callback ?? ""
-    );
-
-    ValidadorFormdata(
-      formulario,
-      "face",
-      validacionDocumento.face ? "OK" : "!OK"
-    );
-
-    ValidadorFormdata(
-      formulario,
-      "confidence",
-      `${validacionDocumento.confidence}`
-    );
-
-    ValidadorFormdata(
-      formulario,
-      "country",
-      informacionFirmador.pais ?? ''
-    );
-
-    // ValidadorFormdata(
-    //   formulario,
-    //   'landmarks',
-    //   validacionDocumento.landmarks
-    // );
+    const reqBody: {
+      info: typeof informacion;
+      documentValidation: typeof validacionDocumento;
+      signInfo: typeof informacionFirmador;
+      livenessTest: typeof pruebaVida;
+      params: typeof validationParams;
+      failed?: string;
+      failedBack?: string;
+      failedFront?: string;
+    } = {
+      info: informacion,
+      documentValidation: validacionDocumento,
+      signInfo: informacionFirmador,
+      livenessTest: pruebaVida,
+      params: validationParams,
+    };
 
     if (!failed) {
       setMostrar(true);
@@ -655,208 +366,236 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       let idUsuario = 0;
 
       await axios({
-      method: "post",
-      url: url,
-      data: formulario,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+        method: "post",
+        url: url,
+        data: JSON.stringify(reqBody),
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
-      .then((res) => {
-        idValidacion = res.data.idValidacion;
-        idUsuario = res.data.idUsuario;
-        state = res.data.estadoVerificacion;
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-        setError(true);
-      })
-      .finally(() => {
-        console.log(state, idValidacion, idUsuario);
+        .then((res) => {
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
+          state = res.data.estadoVerificacion;
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+          setError(true);
+        })
+        .finally(() => {
+          console.log(state, idValidacion, idUsuario);
 
-        if (standalone) {
-        if (formRef.current) {
-          const formElement = formRef.current;
-          appendHiddenInput(
-          formElement,
-          "idValidacion",
-          idValidacion.toString()
-          );
-          appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
-          appendHiddenInput(formElement, "estadoValidacion", state);
-          appendHiddenInput(
-          formElement,
-          "tipo",
-          informacionFirmador.tipoValidacion?.toString() ?? ""
-          );
-          appendHiddenInput(
-          formElement,
-          "reintentoURL",
-          window.location.href
-          );
+          if (standalone) {
+            if (formRef.current) {
+              const formElement = formRef.current;
+              appendHiddenInput(
+                formElement,
+                "idValidacion",
+                idValidacion.toString()
+              );
+              appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
+              appendHiddenInput(formElement, "estadoValidacion", state);
+              appendHiddenInput(
+                formElement,
+                "tipo",
+                informacionFirmador.tipoValidacion?.toString() ?? ""
+              );
+              appendHiddenInput(
+                formElement,
+                "reintentoURL",
+                window.location.href
+              );
 
-          console.log(formRef);
-          formElement.submit();
-        }
-        }
-        if (!standalone) {
-        const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-        window.location.href = newUrl;
-        }
-      });
+              console.log(formRef);
+              formElement.submit();
+            }
+          }
+          if (!standalone) {
+            const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+            window.location.href = newUrl;
+          }
+        });
     }
 
     if (failed) {
-      ValidadorFormdata(formulario, "failed", "OK");
+      // ValidadorFormdata(formulario, "failed", "OK");
 
-      ValidadorFormdata(
-      formulario,
-      "failed_back",
-      validacionDocumento.sideResult.back
-      );
+      // ValidadorFormdata(
+      // formulario,
+      // "failed_back",
+      // validacionDocumento.sideResult.back
+      // );
 
-      ValidadorFormdata(
-      formulario,
-      "failed_front",
-      validacionDocumento.sideResult.front
-      );
+      // ValidadorFormdata(
+      // formulario,
+      // "failed_front",
+      // validacionDocumento.sideResult.front
+      // );
+
+      reqBody["failed"] = "OK";
+      reqBody["failedBack"] = validacionDocumento.sideResult.back;
+      reqBody["failedFront"] = validacionDocumento.sideResult.front;
 
       let idValidacion = 0;
       let idUsuario = 0;
 
       axios({
-      method: "post",
-      url: url,
-      data: formulario,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+        method: "post",
+        url: url,
+        data: formulario,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
-      .then((res) => {
-        idValidacion = res.data.idValidacion;
-        idUsuario = res.data.idUsuario;
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-        setError(true);
-      })
-      .finally(() => {
-        window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-      });
+        .then((res) => {
+          idValidacion = res.data.idValidacion;
+          idUsuario = res.data.idUsuario;
+        })
+        .catch((err) => {
+          console.log(err);
+          setLoading(false);
+          setError(true);
+        })
+        .finally(() => {
+          window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+        });
     }
-    };
+  };
 
-    
-    const [activeSteps, setActiveSteps] = useState<number>(0);
-    
-    const handleNext = () => {
-      setActiveSteps((prevActiveStep) => prevActiveStep + 1);
-    };
+  const [activeSteps, setActiveSteps] = useState<number>(0);
 
-    const steps = useMemo(() => {
-      return informacionFirmador.validacionVida
+  const handleNext = () => {
+    setActiveSteps((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const steps = useMemo(() => {
+    return informacionFirmador.validacionVida
       ? ["1", "2", "3", "4"]
       : ["1", "2", "3", "4", "5"];
-    }, [informacionFirmador.validacionVida]);
+  }, [informacionFirmador.validacionVida]);
 
-    const componentsSteps = useMemo(() => {return informacionFirmador.validacionVida
-    ? [
-      <DocumentSelector
-        tipoDocumento={informacion.tipoDocumento}
-        documentList={documentList}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        useModel={standalone ? useModel : false}
-        nextStep={handleNext}
-      />,
-      <AccesoCamara
-        setContinuarBoton={setContinuarBoton}
-        nextStep={handleNext}
-      />,
-      <FormularioDocumento
-        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-        tipoDocumento={informacion.tipoDocumento}
-        preview={informacion.anverso}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        ladoDocumento={labelFoto.anverso}
-        useModel={useModel}
-        tries={validationParams.documentsTries}
-        attendance={validationParams.validationAttendance}
-        setMainCounter={setMainCounter}
-        nextStep={handleNext}
-      />,
-      <FormularioDocumento
-        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-        tipoDocumento={informacion.tipoDocumento}
-        preview={informacion.reverso}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        ladoDocumento={labelFoto.reverso}
-        useModel={useModel}
-        tries={validationParams.documentsTries}
-        attendance={validationParams.validationAttendance}
-        setMainCounter={setMainCounter}
-        nextStep={handleNext}
-      />,
-      ]
-    : [
-      <DocumentSelector
-        tipoDocumento={informacion.tipoDocumento}
-        documentList={documentList}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        useModel={standalone ? useModel : false}
-        nextStep={handleNext}
-      />,
-      <AccesoCamara
-        setContinuarBoton={setContinuarBoton}
-        nextStep={handleNext}
-      />,
-      <FormularioFotoPersona
-        setContinuarBoton={setContinuarBoton}
-        preview={informacion.foto_persona}
-        selfie={labelFoto.foto_persona}
-        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-        nextStep={handleNext}
-      />,
-      <FormularioDocumento
-        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-        tipoDocumento={informacion.tipoDocumento}
-        preview={informacion.anverso}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        ladoDocumento={labelFoto.anverso}
-        useModel={useModel}
-        tries={validationParams.documentsTries}
-        attendance={validationParams.validationAttendance}
-        setMainCounter={setMainCounter}
-        nextStep={handleNext}
-      />,
-      <FormularioDocumento
-        id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-        tipoDocumento={informacion.tipoDocumento}
-        preview={informacion.reverso}
-        continuarBoton={continuarBoton}
-        setContinuarBoton={setContinuarBoton}
-        ladoDocumento={labelFoto.reverso}
-        useModel={useModel}
-        tries={validationParams.documentsTries}
-        attendance={validationParams.validationAttendance}
-        setMainCounter={setMainCounter}
-        nextStep={handleNext}
-      />,
-      ]}, [continuarBoton, documentList, idUsuarioParam, informacion.anverso, informacion.foto_persona, informacion.reverso, informacion.tipoDocumento, informacionFirmador.idUsuario, informacionFirmador.validacionVida, labelFoto.anverso, labelFoto.foto_persona, labelFoto.reverso, standalone, useModel, validationParams.documentsTries, validationParams.validationAttendance]);
+  const componentsSteps = useMemo(() => {
+    return informacionFirmador.validacionVida
+      ? [
+          <DocumentSelector
+            tipoDocumento={informacion.tipoDocumento}
+            documentList={documentList}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            useModel={standalone ? useModel : false}
+            nextStep={handleNext}
+          />,
+          <AccesoCamara
+            setContinuarBoton={setContinuarBoton}
+            nextStep={handleNext}
+          />,
+          <FormularioDocumento
+            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+            tipoDocumento={informacion.tipoDocumento}
+            preview={informacion.anverso}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            ladoDocumento={labelFoto.anverso}
+            useModel={useModel}
+            tries={validationParams.documentsTries}
+            attendance={validationParams.validationAttendance}
+            setMainCounter={setMainCounter}
+            nextStep={handleNext}
+          />,
+          <FormularioDocumento
+            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+            tipoDocumento={informacion.tipoDocumento}
+            preview={informacion.reverso}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            ladoDocumento={labelFoto.reverso}
+            useModel={useModel}
+            tries={validationParams.documentsTries}
+            attendance={validationParams.validationAttendance}
+            setMainCounter={setMainCounter}
+            nextStep={handleNext}
+          />,
+        ]
+      : [
+          <DocumentSelector
+            tipoDocumento={informacion.tipoDocumento}
+            documentList={documentList}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            useModel={standalone ? useModel : false}
+            nextStep={handleNext}
+          />,
+          <AccesoCamara
+            setContinuarBoton={setContinuarBoton}
+            nextStep={handleNext}
+          />,
+          <FormularioFotoPersona
+            setContinuarBoton={setContinuarBoton}
+            preview={informacion.foto_persona}
+            selfie={labelFoto.foto_persona}
+            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+            nextStep={handleNext}
+          />,
+          <FormularioDocumento
+            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+            tipoDocumento={informacion.tipoDocumento}
+            preview={informacion.anverso}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            ladoDocumento={labelFoto.anverso}
+            useModel={useModel}
+            tries={validationParams.documentsTries}
+            attendance={validationParams.validationAttendance}
+            setMainCounter={setMainCounter}
+            nextStep={handleNext}
+          />,
+          <FormularioDocumento
+            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+            tipoDocumento={informacion.tipoDocumento}
+            preview={informacion.reverso}
+            continuarBoton={continuarBoton}
+            setContinuarBoton={setContinuarBoton}
+            ladoDocumento={labelFoto.reverso}
+            useModel={useModel}
+            tries={validationParams.documentsTries}
+            attendance={validationParams.validationAttendance}
+            setMainCounter={setMainCounter}
+            nextStep={handleNext}
+          />,
+        ];
+  }, [
+    continuarBoton,
+    documentList,
+    idUsuarioParam,
+    informacion.anverso,
+    informacion.foto_persona,
+    informacion.reverso,
+    informacion.tipoDocumento,
+    informacionFirmador.idUsuario,
+    informacionFirmador.validacionVida,
+    labelFoto.anverso,
+    labelFoto.foto_persona,
+    labelFoto.reverso,
+    standalone,
+    useModel,
+    validationParams.documentsTries,
+    validationParams.validationAttendance,
+  ]);
 
-    useEffect(() => {
-    if (activeSteps === steps.length && !hasSent) {
-      console.log("final de la validacion");
-      enviar(false);
-      setHasSent(true)
-    }
-    }, [activeSteps, steps, hasSent, handleNext]);
+  // useEffect(() => {
+  // if (activeSteps === steps.length && !hasSent && informacion.tipoDocumento !== 'PASAPORTE') {
+  //   console.log("final de la validacion");
+  //   enviar(false);
+  //   setHasSent(true)
+  // }
+
+  // if (activeSteps === steps.length - 1 && !hasSent && informacion.tipoDocumento === 'PASAPORTE') {
+  //   console.log("final de la validacion");
+  //   enviar(false);
+  //   setHasSent(true)
+  // }
+  // }, [activeSteps, steps, hasSent, handleNext]);
 
   return (
     <>
@@ -893,7 +632,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
               )} */}
             </div>
             {componentsSteps[activeSteps]}
-             {/* {componentsSteps[2]}  */}
+            {/* {componentsSteps[2]}  */}
           </div>
           <>
             {mostrarMensaje && loading && (
@@ -913,21 +652,64 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           </>
         </Card>
 
-        {isIOS && !isSafari && (
+        {/* {isIOS && !isSafari && (
           <Advertencia
             titulo="Advertencia"
             contenido="Está usando un dispositivo IOS, para realizar la validación, use el navegador Safari"
             elemento={<img src={safari} className="w-1/4" />}
           />
-        )}
+        )} */}
 
-        {isAndroid && !isChrome && (
+        {/* {isAndroid && !isChrome && (
           <Advertencia
             titulo="Advertencia"
             contenido="Está usando un dispositivo Android, para realizar la validación, use el navegador Google Chrome"
             elemento={<img src={chrome} className="w-1/4" />}
           />
-        )}
+        )} */}
+
+        {activeSteps === steps.length &&
+          informacion.tipoDocumento !== "PASAPORTE" && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                <h2 className="text-lg text-center font-semibold mb-4">
+                  Finalizar validación
+                </h2>
+                <p className="mb-6 text-center">SELECCIONE FINALIZAR</p>
+                <button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    enviar(false);
+                    // setHasSent(true);
+                  }}
+                >
+                  Finalizar
+                </button>
+              </div>
+            </div>
+          )}
+
+        {/* pasaporte */}
+        {activeSteps === steps.length - 1 &&
+          informacion.tipoDocumento === "PASAPORTE" && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                <h2 className="text-lg text-center font-semibold mb-4">
+                  Finalizar validación
+                </h2>
+                <p className="mb-6 text-center">SELECCIONE FINALIZAR</p>
+                <button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => {
+                    enviar(false);
+                    // setHasSent(true);
+                  }}
+                >
+                  Finalizar
+                </button>
+              </div>
+            </div>
+          )}
 
         {!retry && (
           <Advertencia
