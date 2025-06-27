@@ -151,13 +151,19 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    // pila con esto
-    if (mainCounter >= validationParams.documentsTries + 1) {
-      // enviar(true);
-      console.log("validacion fallida");
-    }
-  }, [mainCounter]);
+  // useEffect(() => {
+  //   // pila con esto
+  //   if (mainCounter >= validationParams.documentsTries + 1) {
+  //     // enviar(true);
+  //     console.log("validacion fallida");
+  //   }
+  // }, [mainCounter]);
+
+  // console.log(mainCounter)
+
+  useEffect(() =>{
+    console.log(validacionDocumento)
+  },[validacionDocumento])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -469,11 +475,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
   };
 
-  const steps = useMemo(() => {
-    return informacionFirmador.validacionVida
-      ? ["1", "2", "3", "4"]
-      : ["1", "2", "3", "4", "5"];
-  }, [informacionFirmador.validacionVida]);
+  // const steps = useMemo(() => {
+  //   return informacionFirmador.validacionVida
+  //     ? ["1", "2", "3", "4"]
+  //     : ["1", "2", "3", "4", "5"];
+  // }, [informacionFirmador.validacionVida]);
 
   const componentsSteps = useMemo(() => {
     return informacionFirmador.validacionVida
@@ -482,12 +488,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             tipoDocumento={informacion.tipoDocumento}
             documentList={documentList}
             continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
             useModel={standalone ? useModel : false}
             nextStep={handleNext}
           />,
           <AccesoCamara
-            setContinuarBoton={setContinuarBoton}
             nextStep={handleNext}
           />,
           <FormularioDocumento
@@ -522,12 +526,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             tipoDocumento={informacion.tipoDocumento}
             documentList={documentList}
             continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
             useModel={standalone ? useModel : false}
             nextStep={handleNext}
           />,
           <AccesoCamara
-            setContinuarBoton={setContinuarBoton}
             nextStep={handleNext}
           />,
           <FormularioFotoPersona
@@ -667,49 +669,26 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             elemento={<img src={chrome} className="w-1/4" />}
           />
         )} */}
-
-        {activeSteps === steps.length &&
-          informacion.tipoDocumento !== "PASAPORTE" && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-                <h2 className="text-lg text-center font-semibold mb-4">
-                  Finalizar validación
-                </h2>
-                <p className="mb-6 text-center">SELECCIONE FINALIZAR</p>
-                <button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={() => {
-                    enviar(false);
-                    // setHasSent(true);
-                  }}
-                >
-                  Finalizar
-                </button>
-              </div>
+        {/* Mostrar botón de finalizar solo en el último paso, pero si es pasaporte, mostrarlo un paso antes */}
+        {(continuarBoton) && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+              <h2 className="text-lg text-center font-semibold mb-4">
+          Proceso de validación terminado.
+              </h2>
+              <p className="mb-6 text-center">Evidencias enviadas.</p>
+              <button
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => {
+            enviar(false);
+            // setHasSent(true);
+          }}
+              >
+          Enviar
+              </button>
             </div>
-          )}
-
-        {/* pasaporte */}
-        {activeSteps === steps.length - 1 &&
-          informacion.tipoDocumento === "PASAPORTE" && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-                <h2 className="text-lg text-center font-semibold mb-4">
-                  Finalizar validación
-                </h2>
-                <p className="mb-6 text-center">SELECCIONE FINALIZAR</p>
-                <button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  onClick={() => {
-                    enviar(false);
-                    // setHasSent(true);
-                  }}
-                >
-                  Finalizar
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
+        )}
 
         {!retry && (
           <Advertencia

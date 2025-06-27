@@ -4,8 +4,8 @@
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
 
-const pais = 'honducert_desarrollo'
-const subdomain = 'desarrollo'
+// const pais = 'honducert_desarrollo'
+// const subdomain = 'desarrollo'
 
   // const pais = 'honducert_pruebas'
   // const subdomain = 'desarrollo'
@@ -13,15 +13,16 @@ const subdomain = 'desarrollo'
 // const pais = 'honducert_temp'
 // const subdomain = 'desarrollo'
 
-// const pais = 'desarrollo'
-// const subdomain = 'desarrollo'
+const pais = 'desarrollo'
+const subdomain = 'desarrollo'
 
 const ekycSubdomain = 'hon'
 
 const rutasURL = {
   desarrollo:{
-    validacion: "http://192.168.1.106:4000",
-    fe: "http://192.168.1.106:4000/obtener-firmador",
+    ocr: "http://localhost:4500",
+    validacion: "http://192.168.1.107:4000",
+    fe: "http://192.168.1.107:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``,
@@ -60,7 +61,8 @@ const rutasURL = {
       resultados: `https://desarrollo.web.honducert.com/efirma.php/`,
       rejected: `https://desarrollo.web.honducert.com/resultado_validacion_fallida`,
       validacionVida: 'https://desarrollo.web.honducert.com/validacion-vida',
-      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
+      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video',
+      ocr: "https://desarrollo.web.honducert.com/validacion-ocr-back",
     },
     efirmaPlus:{
       validacion: `https://cavipetrol.efirmaplus.com/validacion-back`,
@@ -93,6 +95,7 @@ const efirmaUrl = rutasURL[pais]["resultados"]
 const rejected = rutasURL[pais]['rejected']
 const livenesstest = rutasURL[pais]['validacionVida']
 const saveVideo = rutasURL[pais]['saveVideo']
+const ocr = rutasURL[pais]['ocr']
 
 export const URLS = {
   validationProvider: `${urlBase}/validation/validation-provider`,
@@ -124,7 +127,8 @@ export const URLS = {
   getCountry: `${urlBase}/country/get`,
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
-  saveVideo: `${saveVideo}`
+  saveVideo: `${saveVideo}`,
+  ocr: `${ocr}/ocr`
 }
 
 export const validationRedirects = {

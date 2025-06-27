@@ -44,7 +44,7 @@ export interface ValidacionDocumento {
   face: boolean;
   confidence: number;
   mrz: MRZ;
-  barcode: string;
+  barcode: string | null;
   sideResult: {
     front: string;
     back: string;

@@ -1,14 +1,13 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "reactstrap";
 import accesoCamara from '../../assets/img/acceso-camara.jpg'
 import { useMobile } from "@nucleo/hooks/useMobile";
 
 interface Props {
-  setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   nextStep: () => void;
 }
 
-export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton, nextStep }) => {
+export const AccesoCamara: React.FC<Props> = ({ nextStep }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [desplegarCamara, setDesplegarCamara] = useState<number>(0);
 
@@ -27,7 +26,6 @@ export const AccesoCamara: React.FC<Props> = ({ setContinuarBoton, nextStep }) =
               video.play();
               console.log("accesso permitido");
               setDesplegarCamara(1);
-              setContinuarBoton(true);
               video.srcObject.getVideoTracks().forEach((track) => track.stop())
             }
           })

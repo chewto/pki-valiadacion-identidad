@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setTipoDocumento } from "@nucleo/redux/slices/informacionSlice";
 import SuccessStep from "@components/ui/success-step";
@@ -7,7 +7,6 @@ interface Props {
   tipoDocumento: string;
   documentList: string[];
   continuarBoton: boolean;
-  setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   nextStep: () => void;
   useModel: boolean;
 }

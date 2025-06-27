@@ -156,6 +156,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     if (ladoDocumento === "reverso" && tipoDocumento === passport) {
       dispatch(setFotos({ labelFoto: ladoDocumento, data: imagePlaceholder }));
+      setContinuarBoton(true)
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
@@ -183,7 +184,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       if (typeof dataURL === "string") {
         img.onload = () => {
           if (archivo) {
-            console.log(archivo.size);
             if (archivo.size < 300 * 1024) {
               // Imagen menor a 300KB, usar original
               const canvas = document.createElement("canvas");
@@ -244,6 +244,8 @@ export const FormularioDocumento: React.FC<Props> = ({
                   dispatch(
                     setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
                   );
+
+                  console.log(dataURLImage)
                   const data = {
                     id: id,
                     imagen: dataURLImage,
@@ -281,16 +283,21 @@ export const FormularioDocumento: React.FC<Props> = ({
     event.target.value = "";
   };
 
-  const validarDocumento = (data: any) => {
+  const validarDocumento = async (data: any) => {
+    const start = performance.now();
     setError(false);
     setLoading(true);
-    // if (ladoDocumento === "anverso") {
-    //   setReqMessage("validando el rostro en el documento, espere un momento.");
-    // } else {
-    //   setReqMessage("validando el documento, espere un momento.");
-    // }
 
-    axios({
+    await axios({
+      method: "post",
+      url: URLS.ocr,
+      data: { image: data.imagen }
+    }).then(res => {
+      console.log(res)
+      data['ocr'] = res.data
+    })
+
+    await axios({
       method: "post",
       url:
         ladoDocumento == "anverso"
@@ -304,7 +311,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     })
       .then((res: AxiosResponse<any>) => {
         const adviceMessages = res.data.messages;
-        console.log(res.data);
+        console.log(res);
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
@@ -354,6 +361,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (res.data.validSide === "OK") {
             console.log("valido");
             setSuccess(true);
+            setContinuarBoton(true)
             setTimeout(() => {
               nextStep();
             }, 3000);
@@ -372,6 +380,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setMessages([]);
             setRetry(false);
             setSuccess(true);
+            setContinuarBoton(true)
             setTimeout(() => {
               nextStep();
             }, 3000);
@@ -386,6 +395,8 @@ export const FormularioDocumento: React.FC<Props> = ({
       })
       .finally(() => {
         setLoading(false);
+        const end = performance.now();
+        console.log(`validarDocumento tardó ${(end - start).toFixed(2)} ms`);
       });
   };
 

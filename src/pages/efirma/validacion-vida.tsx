@@ -167,26 +167,24 @@ export const ValidacionVida: React.FC<Props> = ({
     // Show the size of the video in KB
     // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
 
-    let videoPath = "";
+    let videoPath = "./videos/test.webm";
 
-    await axios
-      .post(URLS.saveVideo, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => {
-        const path = res.data;
-        videoPath = path.ruta;
-      });
+    // await axios
+    //   .post(URLS.saveVideo, formData, {
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //   .then((res) => {
+    //     const path = res.data;
+    //     videoPath = path.ruta;
+    //   });
 
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}`)
       .then((res) => {
         console.log(res);
         const preview: string = res.data.photo;
-
-        console.warn(preview)
 
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,
