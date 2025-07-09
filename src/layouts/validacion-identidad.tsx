@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
@@ -135,7 +136,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
-  const [mainCounter, setMainCounter] = useState<number>(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setMainCounter] = useState<number>(0);
 
   const [validationParams, setValidationParams] = useState({
     validationAttendance: "",
@@ -268,6 +270,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: validationParamsUrl,
     })
       .then((res) => {
+
+        console.log(res.data)
         const { validationPercent, validationAttendance, documentsTries } =
           res.data;
 
@@ -328,6 +332,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     console.log(informacionFirmador, retry);
   }, [informacionFirmador, retry]);
+
+
 
   const appendHiddenInput = (
     formElement: HTMLFormElement,
@@ -469,6 +475,14 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
+  // useEffect(() => {
+  //   console.log(continuarBoton)
+    
+  //   if(continuarBoton){
+  //     enviar(false);
+  //   }
+  // },[continuarBoton, setContinuarBoton])
+
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
   const handleNext = () => {
@@ -485,6 +499,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     return informacionFirmador.validacionVida
       ? [
           <DocumentSelector
+            key="document-selector"
             tipoDocumento={informacion.tipoDocumento}
             documentList={documentList}
             continuarBoton={continuarBoton}
@@ -492,9 +507,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <AccesoCamara
+            key="acceso-camara"
             nextStep={handleNext}
           />,
           <FormularioDocumento
+            key="formulario-anverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
             tipoDocumento={informacion.tipoDocumento}
             preview={informacion.anverso}
@@ -508,6 +525,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <FormularioDocumento
+            key="formulario-reverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
             tipoDocumento={informacion.tipoDocumento}
             preview={informacion.reverso}
@@ -523,6 +541,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         ]
       : [
           <DocumentSelector
+            key="document-selector"
             tipoDocumento={informacion.tipoDocumento}
             documentList={documentList}
             continuarBoton={continuarBoton}
@@ -530,9 +549,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <AccesoCamara
+            key="acceso-camara"
             nextStep={handleNext}
           />,
           <FormularioFotoPersona
+            key="formulario-foto-persona"
             setContinuarBoton={setContinuarBoton}
             preview={informacion.foto_persona}
             selfie={labelFoto.foto_persona}
@@ -540,6 +561,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <FormularioDocumento
+            key="formulario-anverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
             tipoDocumento={informacion.tipoDocumento}
             preview={informacion.anverso}
@@ -553,6 +575,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <FormularioDocumento
+            key="formulario-reverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
             tipoDocumento={informacion.tipoDocumento}
             preview={informacion.reverso}
@@ -670,25 +693,27 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )} */}
         {/* Mostrar botón de finalizar solo en el último paso, pero si es pasaporte, mostrarlo un paso antes */}
-        {(continuarBoton) && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        
+            <div
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+            style={{ display: continuarBoton ? "" : "none" }}
+            >
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
               <h2 className="text-lg text-center font-semibold mb-4">
-          Proceso de validación terminado.
+              Proceso de validación terminado.
               </h2>
               <p className="mb-6 text-center">Evidencias enviadas.</p>
               <button
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => {
-            enviar(false);
-            // setHasSent(true);
-          }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              onClick={() => {
+                enviar(false);
+                // setHasSent(true);
+              }}
               >
-          Enviar
+              Enviar
               </button>
             </div>
-          </div>
-        )}
+            </div>
 
         {!retry && (
           <Advertencia

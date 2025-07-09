@@ -1,8 +1,8 @@
 // const pais = 'honducert'
 // const subdomain = 'honducert.firma'
 
-// const pais = 'efirmaPlus'
-// const subdomain = 'desarrollo'
+const pais = 'efirmaPlus'
+const subdomain = 'desarrollo'
 
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
@@ -13,8 +13,8 @@
 // const pais = 'honducert_temp'
 // const subdomain = 'desarrollo'
 
-const pais = 'desarrollo'
-const subdomain = 'desarrollo'
+// const pais = 'desarrollo'
+// const subdomain = 'desarrollo'
 
 const ekycSubdomain = 'hon'
 
@@ -70,7 +70,8 @@ const rutasURL = {
       resultados: `https://cavipetrol.efirmaplus.com/efirma.php/`,
       rejected: `https://cavipetrol.efirmaplus.com/resultado_validacion_fallida`,
       validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
-      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
+      saveVideo: 'https://cavipetrol.efirmaplus.com/fe-val-back/api/Video',
+      ocr: "https://cavipetrol.efirmaplus.com/validacion-ocr-back"
     }
   // libertador:{
   //   validacion: "https://libertador.pkiservices.co/validacion-back",
