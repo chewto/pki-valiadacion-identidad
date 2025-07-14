@@ -184,96 +184,10 @@ export const FormularioDocumento: React.FC<Props> = ({
       if (typeof dataURL === "string") {
         img.onload = () => {
           if (archivo) {
-            // if (archivo.size < 300 * 1024) {
-            //   // Imagen menor a 300KB, usar original
-            //   const canvas = document.createElement("canvas");
-            //   const ctx = canvas.getContext("2d");
-            //   canvas.width = img.width;
-            //   canvas.height = img.height;
-            //   ctx?.drawImage(img, 0, 0, img.width, img.height);
-            //   const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
-
-            //   if (dataURLImage.length >= 1) {
-            //     dispatch(
-            //       setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
-            //     );
-            //     const data = {
-            //       id: id,
-            //       imagen: dataURLImage,
-            //       nombre:
-            //         informacionFirmador.nombre != null
-            //           ? informacionFirmador.nombre
-            //           : validacionDocumento.ocr.data.name,
-            //       apellido:
-            //         informacionFirmador.apellido != null
-            //           ? informacionFirmador.apellido
-            //           : validacionDocumento.ocr.data.lastName,
-            //       documento:
-            //         informacionFirmador.documento != null
-            //           ? informacionFirmador.documento
-            //           : validacionDocumento.ocr.data.ID,
-            //       ladoDocumento: ladoDocumento,
-            //       tipoDocumento: tipoDocumento,
-            //       imagenPersona: informacion.foto_persona,
-            //       country: informacionFirmador.pais,
-            //       tries: conteo,
-            //     };
-            //     validarDocumento(data);
-            //   } else {
-            //     setIsCorrupted(true);
-            //   }
-            // } else {
-            //   // Redimensionar imagen si es mayor a 300KB
-            //   const maxWidth = 1080;
-            //   const scale = maxWidth / img.width;
-            //   const newWidth = maxWidth;
-            //   const newHeight = img.height * scale;
-
-            //   const canvas = document.createElement("canvas");
-            //   canvas.width = newWidth;
-            //   canvas.height = newHeight;
-
-            //   const ctx = canvas.getContext("2d");
-
-            //   if (ctx) {
-            //     ctx.drawImage(img, 0, 0, newWidth, newHeight);
-
-            //     const dataURLImage = canvas.toDataURL("image/jpeg", 0.9);
-
-            //     if (dataURLImage.length >= 1) {
-            //       dispatch(
-            //         setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
-            //       );
-
-            //       console.log(dataURLImage)
-            //       const data = {
-            //         id: id,
-            //         imagen: dataURLImage,
-            //         nombre:
-            //           informacionFirmador.nombre != null
-            //             ? informacionFirmador.nombre
-            //             : validacionDocumento.ocr.data.name,
-            //         apellido:
-            //           informacionFirmador.apellido != null
-            //             ? informacionFirmador.apellido
-            //             : validacionDocumento.ocr.data.lastName,
-            //         documento:
-            //           informacionFirmador.documento != null
-            //             ? informacionFirmador.documento
-            //             : validacionDocumento.ocr.data.ID,
-            //         ladoDocumento: ladoDocumento,
-            //         tipoDocumento: tipoDocumento,
-            //         imagenPersona: informacion.foto_persona,
-            //         country: informacionFirmador.pais,
-            //         tries: conteo,
-            //       };
-            //       validarDocumento(data);
-            //     } else {
-            //       setIsCorrupted(true);
-            //     }
-            //   }
-            // }
-            const canvas = document.createElement("canvas");
+            if (archivo.size < 300 * 1024) {
+              console.log("imagen menor a 300kb")
+              // Imagen menor a 300KB, usar original
+              const canvas = document.createElement("canvas");
               const ctx = canvas.getContext("2d");
               canvas.width = img.width;
               canvas.height = img.height;
@@ -309,6 +223,93 @@ export const FormularioDocumento: React.FC<Props> = ({
               } else {
                 setIsCorrupted(true);
               }
+            } else {
+              // Redimensionar imagen si es mayor a 300KB
+              const maxWidth = 1080;
+              const scale = maxWidth / img.width;
+              const newWidth = maxWidth;
+              const newHeight = img.height * scale;
+
+              const canvas = document.createElement("canvas");
+              canvas.width = newWidth;
+              canvas.height = newHeight;
+
+              const ctx = canvas.getContext("2d");
+
+              if (ctx) {
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                const dataURLImage = canvas.toDataURL("image/jpeg", 0.9);
+
+                if (dataURLImage.length >= 1) {
+                  dispatch(
+                    setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+                  );
+
+                  console.log(dataURLImage)
+                  const data = {
+                    id: id,
+                    imagen: dataURLImage,
+                    nombre:
+                      informacionFirmador.nombre != null
+                        ? informacionFirmador.nombre
+                        : validacionDocumento.ocr.data.name,
+                    apellido:
+                      informacionFirmador.apellido != null
+                        ? informacionFirmador.apellido
+                        : validacionDocumento.ocr.data.lastName,
+                    documento:
+                      informacionFirmador.documento != null
+                        ? informacionFirmador.documento
+                        : validacionDocumento.ocr.data.ID,
+                    ladoDocumento: ladoDocumento,
+                    tipoDocumento: tipoDocumento,
+                    imagenPersona: informacion.foto_persona,
+                    country: informacionFirmador.pais,
+                    tries: conteo,
+                  };
+                  validarDocumento(data);
+                } else {
+                  setIsCorrupted(true);
+                }
+              }
+            }
+            // const canvas = document.createElement("canvas");
+            //   const ctx = canvas.getContext("2d");
+            //   canvas.width = img.width;
+            //   canvas.height = img.height;
+            //   ctx?.drawImage(img, 0, 0, img.width, img.height);
+            //   const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
+
+            //   if (dataURLImage.length >= 1) {
+            //     dispatch(
+            //       setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+            //     );
+            //     const data = {
+            //       id: id,
+            //       imagen: dataURLImage,
+            //       nombre:
+            //         informacionFirmador.nombre != null
+            //           ? informacionFirmador.nombre
+            //           : validacionDocumento.ocr.data.name,
+            //       apellido:
+            //         informacionFirmador.apellido != null
+            //           ? informacionFirmador.apellido
+            //           : validacionDocumento.ocr.data.lastName,
+            //       documento:
+            //         informacionFirmador.documento != null
+            //           ? informacionFirmador.documento
+            //           : validacionDocumento.ocr.data.ID,
+            //       ladoDocumento: ladoDocumento,
+            //       tipoDocumento: tipoDocumento,
+            //       imagenPersona: informacion.foto_persona,
+            //       country: informacionFirmador.pais,
+            //       tries: conteo,
+            //     };
+            //     validarDocumento(data);
+            //   } else {
+            //     setIsCorrupted(true);
+            //   }
           }
         };
 
@@ -331,6 +332,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     }).then(res => {
       console.log(res)
       data['ocr'] = res.data
+      data['textAngle'] = res.data.textAngle
     })
 
     await axios({
@@ -488,7 +490,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       )}
 
       {error && (
-        <Alert color="danger">ha ocurrido un error con el servidor</Alert>
+        <Alert color="danger">Para terminar la validación contacte con Soporte.</Alert>
       )}
 
       {isCorrupted && (

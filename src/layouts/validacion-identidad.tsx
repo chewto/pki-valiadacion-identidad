@@ -710,7 +710,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 // setHasSent(true);
               }}
               >
-              Enviar
+              Finalizar
               </button>
             </div>
             </div>
