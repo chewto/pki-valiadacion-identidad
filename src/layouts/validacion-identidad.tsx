@@ -624,7 +624,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex md:items-center md:mt-0 xsm:items-start  justify-center  xsm:px-1 md:pt-0 xsm:pt-5">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex md:items-start md:mt-0  justify-center  xsm:px-1 md:pt-0 xsm:pt-5">
         <Card>
           <Header titulo="Validación de identidad" />
           <div className="m-0">

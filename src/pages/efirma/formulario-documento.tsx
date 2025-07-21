@@ -331,7 +331,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: { image: data.imagen }
     }).then(res => {
       console.log(res)
-      data['ocr'] = res.data
+      data['ocr'] = res.data.ocr
       data['textAngle'] = res.data.textAngle
     })
 
@@ -366,7 +366,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setSuccess(true);
             setTimeout(() => {
               nextStep();
-            }, 3000);
+            }, 700);
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
@@ -383,7 +383,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setSuccess(true);
             setTimeout(() => {
               nextStep();
-            }, 3000);
+            }, 700);
           }
         }
 
@@ -402,7 +402,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setContinuarBoton(true)
             setTimeout(() => {
               nextStep();
-            }, 3000);
+            }, 700);
           }
 
           if (res.data.validSide != "OK" && conteo < tries) {
@@ -421,7 +421,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setContinuarBoton(true)
             setTimeout(() => {
               nextStep();
-            }, 3000);
+            }, 700);
           }
         }
       })

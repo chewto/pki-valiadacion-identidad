@@ -13,7 +13,7 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const pasosTipo2 = informacionFirmador.validacionVida ? [4, 5, 6, 7] : [4, 5, 6, 7,8];
 
   return (
-    <div className="flex sm:justify-evenly xsm:justify-between my-4 ">
+    <div className="flex sm:justify-evenly xsm:justify-between my-1 ">
 
       {tipo === "1" && (
         <>

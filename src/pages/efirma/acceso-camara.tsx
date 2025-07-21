@@ -47,7 +47,7 @@ export const AccesoCamara: React.FC<Props> = ({ nextStep }) => {
 
   useEffect(() => {
     if(desplegarCamara === 1){
-      setTimeout(nextStep, 2500)
+      setTimeout(nextStep, 1000)
     }
   },[desplegarCamara, setDesplegarCamara,nextStep])
 

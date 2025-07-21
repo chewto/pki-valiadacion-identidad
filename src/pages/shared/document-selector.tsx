@@ -28,7 +28,7 @@ export const DocumentSelector: React.FC<Props> = ({
 
       setTimeout(() => {
         nextStep()
-      },3000)
+      },700)
     }
   }, [tipoDocumento.length]);
 

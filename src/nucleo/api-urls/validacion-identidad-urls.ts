@@ -1,5 +1,5 @@
-// const pais = 'honducert'
-// const subdomain = 'honducert.firma'
+const pais = 'honducert'
+const subdomain = 'honducert.firma'
 
 // const pais = 'efirmaPlus'
 // const subdomain = 'desarrollo'
@@ -7,8 +7,8 @@
 // const pais = 'honducert_desarrollo'
 // const subdomain = 'desarrollo'
 
-  const pais = 'honducert_pruebas'
-  const subdomain = 'desarrollo'
+  // const pais = 'honducert_pruebas'
+  // const subdomain = 'desarrollo'
 
 // const pais = 'honducert_temp'
 // const subdomain = 'desarrollo'
@@ -21,8 +21,8 @@ const ekycSubdomain = 'hon'
 const rutasURL = {
   desarrollo:{
     ocr: "http://localhost:4500",
-    validacion: "http://192.168.1.107:4000",
-    fe: "http://192.168.1.107:4000/obtener-firmador",
+    validacion: "http://192.168.1.116:4000",
+    fe: "http://192.168.1.116:4000/obtener-firmador",
     resultados: "",
     // rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`
     rejected: ``,
@@ -53,7 +53,8 @@ const rutasURL = {
       resultados: `https://${subdomain}.e-custodia.com/efirma.php/`,
       rejected: `https://${subdomain}.e-custodia.com/resultado_validacion_fallida`,
       validacionVida: 'https://desarrollo.e-custodia.com/validacion-vida',
-      saveVideo: 'https://desarrollo.web.honducert.com/fe-val-back/api/Video'
+      saveVideo: 'https://honducert.firma.e-custodia.com/fe-val-back/api/Video',
+      ocr:  "https://honducert.firma.e-custodia.com/validacion-ocr-back"
     },
     honducert_pruebas:{
       validacion: `https://desarrollo.web.honducert.com/validacion-back`,

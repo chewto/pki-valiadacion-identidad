@@ -56,19 +56,11 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setMessages([]);
   };
 
-  // useEffect(() => {
-  //   console.log(debugData, debugData.length, typeof debugData);
-  // }, [debugData, setDebugData]);
-
-  useEffect(() => {
-    console.log(videoData)
-  }, [videoData, setVideoData])
-
   useEffect(() => {
     if(success){
       setTimeout(() => {
         nextStep()
-      }, 3000)
+      }, 700)
     }
   }, [success,setSuccess])
 
