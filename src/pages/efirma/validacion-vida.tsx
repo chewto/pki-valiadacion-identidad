@@ -41,10 +41,6 @@ export const ValidacionVida: React.FC<Props> = ({
 
   const idUser = params.get("idUsuario");
 
-  const iphone = /iPhone/i.test(navigator.userAgent);
-
-  const isMobile = useMobile();
-
   const dispatch = useDispatch();
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -60,7 +56,7 @@ export const ValidacionVida: React.FC<Props> = ({
   let mediaRecorder: MediaRecorder | null = null;
 
   useEffect(() => {
-    console.log(isMobile);
+  
     // handleStartRecording();
     handleOpenCamera();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,14 +66,9 @@ export const ValidacionVida: React.FC<Props> = ({
     const video = videoRef.current;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: {
-            exact: "user",
-          },
-        },
-        audio: true,
-      });
+
+      const constraints = { video: { facingMode: 'user' }, audio: true }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
       if (video) {
         setStreaming(stream);
@@ -104,6 +95,9 @@ export const ValidacionVida: React.FC<Props> = ({
 
       if (timerCount < 0) {
         clearInterval(recordingTimer);
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+        }
       }
     }, 1000);
 
@@ -115,7 +109,7 @@ export const ValidacionVida: React.FC<Props> = ({
       }
     }, 500);
 
-    const mimeType = iphone ? "video/mp4" : "video/webm";
+    const mimeType = "video/webm";
 
     if (streaming) {
       mediaRecorder = new MediaRecorder(streaming, {
@@ -151,8 +145,7 @@ export const ValidacionVida: React.FC<Props> = ({
 
     // Add a filename to the video when appending to FormData
     // const extension = videoData.type.split("/")[1] || "webm"; // Get 'mp4' or 'webm' from the mime type
-    const fileName = `video_${idUser}_2.webm`;
-    console.log(fileName)
+    const fileName = `video_${idUser}.webm`;
     formData.append("video", videoData, fileName);
 
     formData.append("video", videoData);
@@ -183,7 +176,6 @@ export const ValidacionVida: React.FC<Props> = ({
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}`)
       .then((res) => {
-        console.log(res);
         const preview: string = res.data.photo;
 
         const data: PruebaVida = {
