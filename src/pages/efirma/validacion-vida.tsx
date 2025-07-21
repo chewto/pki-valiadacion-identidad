@@ -9,7 +9,6 @@ import { Button, Spinner } from "reactstrap";
 import { setIdCarpetas } from "../../nucleo/redux/slices/pruebaVidaSlice";
 import { PruebaVida } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import faceTemplate from "../../assets/img/face_template_OK.png";
-import { useMobile } from "@nucleo/hooks/useMobile";
 import { useSearchParams } from "react-router-dom";
 
 interface Props {
