@@ -31,9 +31,7 @@ const Camara: React.FC = () => {
       }
     };
     initCamera();
-    return () => {
-      stream?.getTracks().forEach((track) => track.stop());
-    };
+    return () => stream?.getTracks().forEach((track) => track.stop());
     // eslint-disable-next-line
   }, []);
 
@@ -44,20 +42,36 @@ const Camara: React.FC = () => {
       return;
     }
 
-    // Local array to accumulate data
     let chunks: Blob[] = [];
 
-    // Determine supported mimeType
-    const candidateTypes = [
-      "video/webm; codecs=vp9",
-      "video/webm; codecs=vp8",
-      "video/webm"
-    ];
+    // Detect Safari (iOS) vs otros
+    const ua = navigator.userAgent;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+    // Priorizar tipos compatibles con Safari y otros
+    const candidateTypes = isSafari
+      ? [
+          "video/mp4; codecs=avc1.42E01E",
+          "video/mp4",
+          "video/webm; codecs=vp9",
+          "video/webm; codecs=vp8",
+          "video/webm"
+        ]
+      : [
+          "video/webm; codecs=vp9",
+          "video/webm; codecs=vp8",
+          "video/webm",
+          "video/mp4; codecs=avc1.42E01E",
+          "video/mp4"
+        ];
     const mimeType = candidateTypes.find((type) => MediaRecorder.isTypeSupported(type)) || "";
 
-    const recorder = mimeType
-      ? new MediaRecorder(stream, { mimeType })
-      : new MediaRecorder(stream);
+    let recorder: MediaRecorder;
+    try {
+      recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+    } catch (e) {
+      recorder = new MediaRecorder(stream);
+    }
 
     recorder.ondataavailable = (event) => {
       if (event.data && event.data.size > 0) {
@@ -84,15 +98,12 @@ const Camara: React.FC = () => {
         );
       }
 
-      // Enviar al servidor
       saveMedia(videoBlob);
 
-      // Actualizar UI
       setShowVideoControls(true);
       setShowReset(true);
       setIsRecording(false);
 
-      // Reset local chunks
       chunks = [];
     };
 
@@ -113,9 +124,7 @@ const Camara: React.FC = () => {
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageDataUrl = canvas.toDataURL("image/png");
 
-    if (selfieImgRef.current) {
-      selfieImgRef.current.src = imageDataUrl;
-    }
+    if (selfieImgRef.current) selfieImgRef.current.src = imageDataUrl;
     setShowSelfie(true);
     setShowVideoControls(true);
     setShowReset(true);
@@ -130,9 +139,7 @@ const Camara: React.FC = () => {
     setStatus({ message: "Grabando durante 4 segundos...", type: "info" });
     mediaRecorder.start();
     setTimeout(() => {
-      if (mediaRecorder.state === "recording") {
-        mediaRecorder.stop();
-      }
+      if (mediaRecorder.state === "recording") mediaRecorder.stop();
     }, 4000);
   };
 
@@ -140,16 +147,15 @@ const Camara: React.FC = () => {
     const formData = new FormData();
     const endpoint = URLS.saveVideo;
     if (data instanceof Blob) {
-      formData.append("video_data", data, "my_video.webm");
+      const blobType = data.type || "";
+      const ext = blobType.startsWith("video/mp4") ? "mp4" : "webm";
+      formData.append("video_data", data, `my_video.${ext}`);
     } else {
       formData.append("image_data", data);
     }
     setStatus({ message: "Subiendo al servidor...", type: "info" });
     try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(endpoint, { method: "POST", body: formData });
       if (!response.ok) throw new Error(`Error del servidor: ${response.statusText}`);
       const result = await response.json();
       setStatus({ message: result.message, type: result.success ? "success" : "error" });
@@ -220,86 +226,25 @@ const Camara: React.FC = () => {
       <div id="action-buttons" style={{ marginTop: 16 }}>
         <button
           id="selfie-btn"
-          style={{
-            padding: "12px 24px",
-            fontSize: 16,
-            cursor: "pointer",
-            border: "none",
-            borderRadius: 8,
-            margin: "10px 5px",
-            fontWeight: "bold",
-            backgroundColor: "#007bff",
-            color: "white",
-            display: showVideoControls ? "none" : "inline-block"
-          }}
+          style={{ padding: "12px 24px", fontSize: 16, cursor: "pointer", border: "none", borderRadius: 8, margin: "10px 5px", fontWeight: "bold", backgroundColor: "#007bff", color: "white", display: showVideoControls ? "none" : "inline-block" }}
           onClick={takeSelfie}
           disabled={!stream || isRecording}
-        >
-          Tomar Foto
-        </button>
+        >Tomar Foto</button>
         <button
           id="video-btn"
-          style={{
-            padding: "12px 24px",
-            fontSize: 16,
-            cursor: "pointer",
-            border: "none",
-            borderRadius: 8,
-            margin: "10px 5px",
-            fontWeight: "bold",
-            backgroundColor: "#dc3545",
-            color: "white",
-            display: showVideoControls ? "none" : "inline-block"
-          }}
+          style={{ padding: "12px 24px", fontSize: 16, cursor: "pointer", border: "none", borderRadius: 8, margin: "10px 5px", fontWeight: "bold", backgroundColor: "#dc3545", color: "white", display: showVideoControls ? "none" : "inline-block" }}
           onClick={recordVideo}
           disabled={!stream || isRecording || !mediaRecorder}
-        >
-          Grabar Video (4s)
-        </button>
+        >Grabar Video (4s)</button>
         <button
           id="reset-btn"
-          style={{
-            padding: "12px 24px",
-            fontSize: 16,
-            cursor: "pointer",
-            border: "none",
-            borderRadius: 8,
-            margin: "10px 5px",
-            fontWeight: "bold",
-            backgroundColor: "#6c757d",
-            color: "white",
-            display: showReset ? "inline-block" : "none"
-          }}
+          style={{ padding: "12px 24px", fontSize: 16, cursor: "pointer", border: "none", borderRadius: 8, margin: "10px 5px", fontWeight: "bold", backgroundColor: "#6c757d", color: "white", display: showReset ? "inline-block" : "none" }}
           onClick={resetToLiveView}
-        >
-          Reiniciar Cámara
-        </button>
+        >Reiniciar Cámara</button>
       </div>
       <canvas ref={canvasRef} style={{ display: "none" }} />
       {status && (
-        <div
-          className={`message ${status.type}`}
-          style={{
-            marginTop: 15,
-            padding: "12px 20px",
-            borderRadius: 8,
-            fontWeight: "bold",
-            textAlign: "center",
-            backgroundColor:
-              status.type === "success"
-                ? "#d4edda"
-                : status.type === "error"
-                ? "#f8d7da"
-                : "#cce5ff",
-            color:
-              status.type === "success"
-                ? "#155724"
-                : status.type === "error"
-                ? "#721c24"
-                : "#004085",
-            display: "block"
-          }}
-        >
+        <div className={`message ${status.type}`} style={{ marginTop: 15, padding: "12px 20px", borderRadius: 8, fontWeight: "bold", textAlign: "center", backgroundColor: status.type === "success" ? "#d4edda" : status.type === "error" ? "#f8d7da" : "#cce5ff", color: status.type === "success" ? "#155724" : status.type === "error" ? "#721c24" : "#004085", display: "block" }}>
           {status.message}
         </div>
       )}
