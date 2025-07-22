@@ -4,7 +4,6 @@ import { ValidacionIdentidad } from "@layouts/validacion-identidad";
 import BarcodeCapture from "@components/validacion-identidad/barcode-capture";
 import TestBrowser from "@components/validacion-identidad/test-browser";
 import Verify from "@pages/verify/verify";
-import Camara from "@pages/camara";
 
 function App() {
 
@@ -28,7 +27,6 @@ function App() {
         <Route path="test">
           <Route path="barcode-test" element={<BarcodeCapture/>}/>
           <Route path="deteccion" element={<TestBrowser/>}/>
-          <Route path="camara" element={<Camara/>}/>
         </Route>
       </Routes>
     </Router>

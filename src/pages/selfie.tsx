@@ -1,0 +1,277 @@
+import faceTemplate from "@assets/img/face_template_OK.png"
+import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import { setFotos } from "@nucleo/redux/slices/informacionSlice";
+import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
+import axios from "axios";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import { Spinner } from "reactstrap";
+
+interface Props {
+  label: string;
+  setContinuarBoton: Dispatch<SetStateAction<boolean>>;
+  setMostrarPreview: Dispatch<SetStateAction<boolean>>;
+  setCapturarOtraVez: Dispatch<SetStateAction<boolean>>;
+  setSuccess: Dispatch<SetStateAction<boolean>>;
+  setError: Dispatch<SetStateAction<boolean>>;
+  idUsuarioFi: number | string | null | undefined;
+  setMessages: Dispatch<SetStateAction<string[]>>;
+}
+
+const Selfie: React.FC<Props> = ({
+  label,
+  setMostrarPreview,
+  setCapturarOtraVez,
+  setSuccess,
+  setError,
+  setMessages
+}) => {
+
+  const dispatch = useDispatch()
+
+  const [params] = useSearchParams();
+
+  const idUser = params.get("idUsuario");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
+  const [isRecording, setIsRecording] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const initCamera = async () => {
+      try {
+        const constraints = { video: { facingMode: "user" }, audio: true };
+        const mediaStream = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err: any) {
+        console.log(err);
+      }
+    };
+    initCamera();
+    return () => stream?.getTracks().forEach((track) => track.stop());
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    if (!stream) return;
+    if (typeof MediaRecorder === "undefined") {
+      return;
+    }
+
+    let chunks: Blob[] = [];
+
+    // Detect Safari (iOS) vs otros
+    const ua = navigator.userAgent;
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+    // Priorizar tipos compatibles con Safari y otros
+    const candidateTypes = isSafari
+      ? [
+          "video/mp4; codecs=avc1.42E01E",
+          "video/mp4",
+          "video/webm; codecs=vp9",
+          "video/webm; codecs=vp8",
+          "video/webm",
+        ]
+      : [
+          "video/webm; codecs=vp9",
+          "video/webm; codecs=vp8",
+          "video/webm",
+          "video/mp4; codecs=avc1.42E01E",
+          "video/mp4",
+        ];
+    const mimeType =
+      candidateTypes.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+
+    let recorder: MediaRecorder;
+    try {
+      recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+    } catch (e) {
+      recorder = new MediaRecorder(stream);
+    }
+
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+
+    recorder.onstop = () => {
+      const blobType = mimeType || "application/octet-stream";
+      const videoBlob = new Blob(chunks, { type: blobType });
+      // const videoURL = URL.createObjectURL(videoBlob);
+
+      if (videoRef.current) {
+        // videoRef.current.srcObject = null;
+        // videoRef.current.src = videoURL;
+        videoRef.current.controls = false;
+        videoRef.current.classList.remove("live-stream");
+        videoRef.current.play().catch((e) => console.log(e));
+      }
+
+      saveMedia(videoBlob);
+
+      setIsRecording(false);
+
+      chunks = [];
+    };
+
+    setMediaRecorder(recorder);
+    // eslint-disable-next-line
+  }, [stream]);
+
+  const recordVideo = () => {
+    if (!mediaRecorder) return;
+    setIsRecording(true);
+    mediaRecorder.start();
+    setTimeout(() => {
+      if (mediaRecorder.state === "recording") mediaRecorder.stop();
+    }, 4000);
+  };
+
+  const saveMedia = async (data: Blob) => {
+    setLoading(true);
+    const formData = new FormData();
+
+    const blobType = data.type || "";
+    const ext = blobType.startsWith("video/mp4") ? "mp4" : "webm";
+    const filename = `video_${idUser}.${ext}`;
+    formData.append("video_data", data, filename);
+
+    // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
+
+    let videoPath = "";
+
+    await axios
+      .post(URLS.saveVideo, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((res) => {
+        const path = res.data;
+        videoPath = path.ruta;
+      });
+
+    await axios
+      .post(`${URLS.pruebaVida}?path=${videoPath}`)
+      .then((res) => {
+        console.log(res);
+        const preview: string = res.data.photo;
+
+        const data: PruebaVida = {
+          movimiento: res.data.movimientoDetectado,
+          videoHash: videoPath,
+        };
+
+        console.log(data);
+
+        setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);
+
+        if (res.status == 200) {
+          if (preview.length >= 1) {
+            dispatch(setFotos({ labelFoto: label, data: preview }));
+            dispatch(setIdCarpetas(data));
+          }
+          if (preview.length >= 1 && res.data.messages.length <= 0) {
+            // setContinuarBoton(true);
+            setSuccess(true);
+            setMessages([]);
+          }
+        }
+
+        // if (res.status == 201) {
+        //   setIsCorrupted(true);
+        // }
+      })
+      .finally(() => {
+        setMostrarPreview(true);
+        setCapturarOtraVez(true);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+      });
+  };
+
+  // const resetToLiveView = () => {
+  //   if (videoRef.current && stream) {
+  //     videoRef.current.srcObject = stream;
+  //     videoRef.current.controls = false;
+  //     videoRef.current.classList.add("live-stream");
+  //   }
+  // };
+
+  return (
+    <div
+    >
+      {!loading ? (
+        <>
+        <div
+        id="media-container"
+        style={{
+          border: "5px solid #555",
+          borderRadius: 10,
+          overflow: "hidden",
+          boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
+          position: "relative",
+          width: "100%",
+          backgroundColor: "#000",
+        }}
+            >
+        <img
+          src={faceTemplate}
+          className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:w-6/12 xsm:w-10/12"
+          alt=""
+          style={{ pointerEvents: "none" }}
+        />
+
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          controls={false}
+          style={{
+            width: "100%",
+            height: "auto",
+          }}
+        />
+            </div>
+
+      <div className="flex justify-center">
+        <button
+          id="video-btn"
+          onClick={recordVideo}
+          disabled={isRecording}
+          className={!isRecording ? 'bg-blue-600 py-2 px-3 mt-3 text-white' : 'bg-blue-300 py-2 px-3 mt-3 text-white'}
+        >
+          Grabar Video
+        </button>
+      </div>
+        </>
+      ): (
+        <div className="flex flex-col items-center justify-center my-2">
+          <Spinner/>
+          <span>
+            Validando rostro.
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Selfie;

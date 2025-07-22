@@ -4,9 +4,9 @@ import "@styles/styles.css";
 import { setVaciarFoto } from "@nucleo/redux/slices/informacionSlice";
 import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
-import { ValidacionVida } from "./validacion-vida";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
+import Selfie from "@pages/selfie";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -43,9 +43,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
   const [cameraOpens, setCameraOpens] = useState<number>(0);
 
-  const [debugData, setDebugData] = useState<string[]>([]);
+  // const [debugData, setDebugData] = useState<string[]>([]);
 
-  const [videoData, setVideoData] = useState<string[]>([])
+  // const [videoData, setVideoData] = useState<string[]>([])
 
   const capturarOtra = () => {
     dispatch(setVaciarFoto());
@@ -146,7 +146,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       )}
 
       {mostrarCamara && !capturarOtraVez && (
-        <ValidacionVida
+        <Selfie
           setSuccess={setSuccess}
           setContinuarBoton={setContinuarBoton}
           setMostrarPreview={setMostrarPreview}
@@ -155,8 +155,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           label={selfie}
           idUsuarioFi={id}
           setMessages={setMessages}
-          setDebugData={setDebugData}
-          setVideoData={setVideoData}
         />
       )}
       {!mostrarCamara && (
@@ -171,50 +169,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           Abrir camara
         </button>
       )}
-
-      <div className="hidden">
-        <div
-        style={{
-          maxHeight: "120px",
-          overflowY: "auto",
-          background: "#f5f5f5",
-          padding: "8px",
-          borderRadius: "6px",
-          marginTop: "12px",
-        }}
-        className="border-2 border-black w-full"
-      >
-        <span>body - video info</span>
-        <ul>
-          {videoData.map((item, idx) => (
-            <li key={idx} style={{ fontSize: "12px", color: "#333" }}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div
-        style={{
-          maxHeight: "120px",
-          overflowY: "auto",
-          background: "#f5f5f5",
-          padding: "8px",
-          borderRadius: "6px",
-          marginTop: "12px",
-        }}
-        className="border-2 border-black w-full"
-      >
-        <span>respuesta</span>
-        <ul>
-          {debugData.map((item, idx) => (
-            <li key={idx} style={{ fontSize: "12px", color: "#333" }}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-      
-      </div>
     </>
   );
 };
