@@ -163,10 +163,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   // console.log(mainCounter)
 
-  useEffect(() =>{
-    console.log(validacionDocumento)
-  },[validacionDocumento])
-
   useEffect(() => {
     document.title = "Validacion identidad";
 
@@ -270,8 +266,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: validationParamsUrl,
     })
       .then((res) => {
-
-        console.log(res.data)
         const { validationPercent, validationAttendance, documentsTries } =
           res.data;
 
@@ -329,10 +323,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
-  useEffect(() => {
-    console.log(informacionFirmador, retry);
-  }, [informacionFirmador, retry]);
-
 
 
   const appendHiddenInput = (
@@ -348,10 +338,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
-    // await axios.post(`${URLS.finalizarProceso}?id=${idParam}`)
-
-    console.log("finalizando validacion");
-
+  
     const reqBody: {
       info: typeof informacion;
       documentValidation: typeof validacionDocumento;
@@ -391,12 +378,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           state = res.data.estadoVerificacion;
         })
         .catch((err) => {
-          console.log(err);
           setLoading(false);
           setError(true);
         })
         .finally(() => {
-          console.log(state, idValidacion, idUsuario);
 
           if (standalone) {
             if (formRef.current) {
@@ -419,7 +404,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 window.location.href
               );
 
-              console.log(formRef);
               formElement.submit();
             }
           }
@@ -475,13 +459,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(continuarBoton)
-    
-  //   if(continuarBoton){
-  //     enviar(false);
-  //   }
-  // },[continuarBoton, setContinuarBoton])
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
@@ -607,20 +584,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationParams.documentsTries,
     validationParams.validationAttendance,
   ]);
-
-  // useEffect(() => {
-  // if (activeSteps === steps.length && !hasSent && informacion.tipoDocumento !== 'PASAPORTE') {
-  //   console.log("final de la validacion");
-  //   enviar(false);
-  //   setHasSent(true)
-  // }
-
-  // if (activeSteps === steps.length - 1 && !hasSent && informacion.tipoDocumento === 'PASAPORTE') {
-  //   console.log("final de la validacion");
-  //   enviar(false);
-  //   setHasSent(true)
-  // }
-  // }, [activeSteps, steps, hasSent, handleNext]);
 
   return (
     <>
