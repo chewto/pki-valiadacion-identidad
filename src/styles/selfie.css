@@ -18,6 +18,10 @@
   align-items: center;
 }
 
+.indicator{
+  z-index: 200;
+}
+
 @media (max-width: 380px) {
   .mask {
     width: 12rem;

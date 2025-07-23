@@ -276,12 +276,10 @@ const Selfie: React.FC<Props> = ({
         />
 
         {isRecording && (
-          <div className="opacity-90 absolute top-0 xsm:left-3 md:left-2 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg z-50 ">
-              Grabando {counter} s
-              <div
-                className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"
-              ></div>
-            </div>
+          <div className="text-sm font-semibold opacity-90 absolute top-0 left-1/2 transform -translate-x-1/2 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg indicator">
+            Grabando {counter} s
+            <div className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"></div>
+          </div>
         )}
 
         <video
