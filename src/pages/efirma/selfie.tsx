@@ -257,20 +257,10 @@ const Selfie: React.FC<Props> = ({
         <div
         id="media-container"
         className="video-container"
-        // style={{
-        //   border: "5px solid #555",
-        //   borderRadius: 10,
-        //   overflow: "hidden",
-        //   boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
-        //   position: "relative",
-        //   width: "100%",
-        //   backgroundColor: "#000",
-        // }}
-            >
+        >
         <img
           src={faceTemplate}
           className="mask"
-          // className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:w-6/12 xsm:w-10/12"
           alt=""
           style={{ pointerEvents: "none" }}
         />
@@ -289,12 +279,13 @@ const Selfie: React.FC<Props> = ({
           muted
           controls={false}
           className="video"
-          // style={{
-          //   width: "100%",
-          //   height: "auto",
-          // }}
+          style={{
+            transform: "scaleX(-1)", // Aplica efecto espejo
+            // width: "100%",
+            // height: "auto",
+          }}
         />
-            </div>
+        </div>
 
       <div className="flex justify-center">
         <button
