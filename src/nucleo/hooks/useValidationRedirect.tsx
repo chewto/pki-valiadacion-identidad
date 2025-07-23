@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   URLS,
   validationRedirects,
-} from "../api-urls/validacion-identidad-urls";
+} from "../api-urls/urls";
 
 export const useValidationRedirect = (
   validationName: string,

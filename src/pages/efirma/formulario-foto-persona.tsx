@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
-import Selfie from "@pages/selfie";
+import Selfie from "@pages/efirma/selfie";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {

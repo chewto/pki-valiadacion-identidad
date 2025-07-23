@@ -1,5 +1,5 @@
 import SpinnerLoading from "@components/ui/spinner-loading";
-import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "@nucleo/api-urls/urls";
 import {  documentTypes } from "@nucleo/documents/documentsTypes";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";

@@ -21,10 +21,9 @@ import {
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
-import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../../nucleo/api-urls/urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
-import "@styles/camara.css";
 import SuccessStep from "@components/ui/success-step";
 // import Camera from '@pages/efirma/nueva-camara'
 
@@ -542,14 +541,14 @@ export const FormularioDocumento: React.FC<Props> = ({
 
               {horizontal && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col `}>
-                  <span className="text-center font-bold text-sm m-0 ">
+                  <span className="text-center font-bold text-xs md:text-sm  m-0 ">
                     La foto debe mostrar el documento completo, todos los textos
                     completamente enfocados y sin ningún tipo de sombra, de
                     forma que se puedan reconocer todos los datos.
                   </span>
 
                   <label
-                    className="file-input text-center"
+                    className="file-input text-center text-sm md:text-sm"
                     style={{
                       background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
                     }}

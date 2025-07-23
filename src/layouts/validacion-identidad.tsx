@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "@nucleo/api-urls/urls";
 import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
 import { useHour } from "@nucleo/hooks/useHour";
@@ -377,7 +377,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           idUsuario = res.data.idUsuario;
           state = res.data.estadoVerificacion;
         })
-        .catch((err) => {
+        .catch(() => {
           setLoading(false);
           setError(true);
         })
@@ -587,7 +587,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex md:items-start md:mt-0  justify-center  xsm:px-1 md:pt-0 xsm:pt-5">
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center">
         <Card>
           <Header titulo="Validación de identidad" />
           <div className="m-0">

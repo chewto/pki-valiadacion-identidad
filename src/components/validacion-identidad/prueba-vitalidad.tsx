@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { useRef, useEffect, Dispatch, SetStateAction } from "react";
-import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../../nucleo/api-urls/urls";
 
 interface Props{
   porcentaje: number | undefined;

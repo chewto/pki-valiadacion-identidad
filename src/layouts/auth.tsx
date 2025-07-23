@@ -1,5 +1,5 @@
 import Card from "@components/ui/card";
-import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "@nucleo/api-urls/urls";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";

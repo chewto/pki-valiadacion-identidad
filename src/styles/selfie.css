@@ -1,0 +1,31 @@
+.video{
+  width: 28rem;
+  z-index: 50;
+  border-radius: 10px;
+}
+
+.mask{
+  position: absolute;
+  width: 15rem;
+  z-index: 100;
+}
+
+.video-container{
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@media (max-width: 380px) {
+  .mask {
+    width: 12rem;
+  }
+}
+
+@media (max-width: 330px) {
+  .mask {
+    width: 10rem;
+  }
+}

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { URLS } from "../../nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "../../nucleo/api-urls/urls";
 import "../../styles/selfie-movil.component.css";
 import axios from "axios";
 import { useDispatch } from "react-redux";

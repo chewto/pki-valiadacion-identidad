@@ -1,5 +1,5 @@
 import faceTemplate from "@assets/img/face_template_OK.png"
-import { URLS } from "@nucleo/api-urls/validacion-identidad-urls";
+import { URLS } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "reactstrap";
+import '@styles/selfie.css'
 
 interface Props {
   label: string;
@@ -42,6 +43,8 @@ const Selfie: React.FC<Props> = ({
   );
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+
+  const [counter, setCounter] = useState<number>(4);
 
   useEffect(() => {
     const initCamera = async () => {
@@ -138,8 +141,39 @@ const Selfie: React.FC<Props> = ({
     setIsRecording(true);
     mediaRecorder.start();
     setTimeout(() => {
-      if (mediaRecorder.state === "recording") mediaRecorder.stop();
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+      mediaRecorder.stop();
+      if (videoRef.current) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        const tracks = stream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
+        });
+      }
+    }
     }, 4000);
+
+    let timerCount = counter;
+
+    const recordingTimer = setInterval(() => {
+      setCounter((prev) => prev - 1);
+      timerCount -= 1;
+
+      if (timerCount < 0) {
+        clearInterval(recordingTimer);
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          mediaRecorder.stop();
+        }
+      }
+    }, 1000);
+
+    const recordingIndicatorTimer = setInterval(() => {
+      setIsRecording(true);
+
+      if (timerCount < 0) {
+        clearInterval(recordingIndicatorTimer);
+      }
+    }, 500);
   };
 
   const saveMedia = async (data: Blob) => {
@@ -222,32 +256,45 @@ const Selfie: React.FC<Props> = ({
         <>
         <div
         id="media-container"
-        style={{
-          border: "5px solid #555",
-          borderRadius: 10,
-          overflow: "hidden",
-          boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
-          position: "relative",
-          width: "100%",
-          backgroundColor: "#000",
-        }}
+        className="video-container"
+        // style={{
+        //   border: "5px solid #555",
+        //   borderRadius: 10,
+        //   overflow: "hidden",
+        //   boxShadow: "0 6px 12px rgba(0,0,0,0.2)",
+        //   position: "relative",
+        //   width: "100%",
+        //   backgroundColor: "#000",
+        // }}
             >
         <img
           src={faceTemplate}
-          className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:w-6/12 xsm:w-10/12"
+          className="mask"
+          // className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 md:w-6/12 xsm:w-10/12"
           alt=""
           style={{ pointerEvents: "none" }}
         />
+
+        {isRecording && (
+          <div className="opacity-90 absolute top-0 xsm:left-3 md:left-2 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg z-50 ">
+              Grabando {counter} s
+              <div
+                className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"
+              ></div>
+            </div>
+        )}
 
         <video
           ref={videoRef}
           autoPlay
           playsInline
+          muted
           controls={false}
-          style={{
-            width: "100%",
-            height: "auto",
-          }}
+          className="video"
+          // style={{
+          //   width: "100%",
+          //   height: "auto",
+          // }}
         />
             </div>
 
@@ -256,7 +303,7 @@ const Selfie: React.FC<Props> = ({
           id="video-btn"
           onClick={recordVideo}
           disabled={isRecording}
-          className={!isRecording ? 'bg-blue-600 py-2 px-3 mt-3 text-white' : 'bg-blue-300 py-2 px-3 mt-3 text-white'}
+          className={`py-2 px-3 mt-2 text-white font-bold rounded-md text-sm ${!isRecording ? 'bg-blue-600' : 'bg-blue-300'}`}
         >
           Grabar Video
         </button>
