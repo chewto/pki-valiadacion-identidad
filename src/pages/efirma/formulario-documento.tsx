@@ -60,11 +60,12 @@ export const FormularioDocumento: React.FC<Props> = ({
   );
   const dispatch = useDispatch();
 
-  const passport = 'PASAPORTE'
+  const passport = "PASAPORTE";
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(0);
+  const [triesCounter, setTriesCounter] = useState<number>(tries);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -95,7 +96,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-    if (  loading) {
+    if (loading) {
       setLoadingMessageIndex(0);
       setReqMessage(loadingMessages[0]);
       interval = setInterval(() => {
@@ -113,7 +114,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       if (interval) clearInterval(interval);
     };
   }, [loading]);
-
 
   // Replace reqMessage with loadingMessages[loadingMessageIndex] in the UI where loading is shown
 
@@ -155,7 +155,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     if (ladoDocumento === "reverso" && tipoDocumento === passport) {
       dispatch(setFotos({ labelFoto: ladoDocumento, data: imagePlaceholder }));
-      setContinuarBoton(true)
+      setContinuarBoton(true);
     }
   }, [ladoDocumento, tipoDocumento, setContinuarBoton, dispatch]);
 
@@ -184,7 +184,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         img.onload = () => {
           if (archivo) {
             if (archivo.size < 300 * 1024) {
-              console.log("imagen menor a 300kb")
+              console.log("imagen menor a 300kb");
               // Imagen menor a 300KB, usar original
               const canvas = document.createElement("canvas");
               const ctx = canvas.getContext("2d");
@@ -245,7 +245,6 @@ export const FormularioDocumento: React.FC<Props> = ({
                     setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
                   );
 
-                  console.log(dataURLImage)
                   const data = {
                     id: id,
                     imagen: dataURLImage,
@@ -320,6 +319,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
+    setTriesCounter((state) => state - 1);
     const start = performance.now();
     setError(false);
     setLoading(true);
@@ -327,12 +327,12 @@ export const FormularioDocumento: React.FC<Props> = ({
     await axios({
       method: "post",
       url: URLS.ocr,
-      data: { image: data.imagen }
-    }).then(res => {
-      console.log(res)
-      data['ocr'] = res.data.ocr
-      data['textAngle'] = res.data.textAngle
-    })
+      data: { image: data.imagen },
+    }).then((res) => {
+      console.log(res);
+      data["ocr"] = res.data.ocr;
+      data["textAngle"] = res.data.textAngle;
+    });
 
     await axios({
       method: "post",
@@ -398,7 +398,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           if (res.data.validSide === "OK") {
             console.log("valido");
             setSuccess(true);
-            setContinuarBoton(true)
+            setContinuarBoton(true);
             setTimeout(() => {
               nextStep();
             }, 700);
@@ -417,7 +417,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setMessages([]);
             setRetry(false);
             setSuccess(true);
-            setContinuarBoton(true)
+            setContinuarBoton(true);
             setTimeout(() => {
               nextStep();
             }, 700);
@@ -452,6 +452,12 @@ export const FormularioDocumento: React.FC<Props> = ({
           Subir foto del {placeholder} de su {tipoDocumento}
         </h2>
       )}
+
+      <div className={`${triesCounter >= 1 ? 'flex'  : 'hidden'} justify-center  mb-1`}>
+        <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">
+          Intentos restantes: {triesCounter + 1}{" "}
+        </span>
+      </div>
 
       {messages.length >= 1 && (
         <Advertencia
@@ -489,7 +495,9 @@ export const FormularioDocumento: React.FC<Props> = ({
       )}
 
       {error && (
-        <Alert color="danger">Para terminar la validación contacte con Soporte.</Alert>
+        <Alert color="danger">
+          Para terminar la validación contacte con Soporte.
+        </Alert>
       )}
 
       {isCorrupted && (

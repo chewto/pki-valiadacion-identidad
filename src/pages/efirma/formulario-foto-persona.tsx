@@ -15,6 +15,7 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   id: number | string | null | undefined;
   nextStep: () => void;
+  tries: number;
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   setContinuarBoton,
   id,
   nextStep,
+  tries
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -43,6 +45,10 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   const [capturarOtraVez, setCapturarOtravez] = useState<boolean>(false);
   const [cameraOpens, setCameraOpens] = useState<number>(0);
 
+  const [triesCounter, setTriesCounter] = useState<number>(tries)
+
+  const [counter, setCounter] = useState<number>(0)
+
   // const [debugData, setDebugData] = useState<string[]>([]);
 
   // const [videoData, setVideoData] = useState<string[]>([])
@@ -54,6 +60,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
     setError(false);
     setSuccess(false);
     setMessages([]);
+    setTriesCounter(state => state - 1)
   };
 
   useEffect(() => {
@@ -63,6 +70,15 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       }, 700)
     }
   }, [success,setSuccess])
+
+  useEffect(() => {
+    if(counter == tries){
+      setSuccess(true)
+      // setTimeout(() => {
+      //   nextStep()
+      // }, 700)
+    }
+  }, [counter,tries])
 
   return (
     <>
@@ -130,6 +146,10 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         <Previsualizacion preview={preview} nombrePreview={selfie} />
       )}
 
+      <div className={`${mostrarCamara ? 'flex' : 'hidden'} justify-center  mb-1`}>
+            <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">Intentos restantes: {triesCounter + 1} </span>
+      </div>
+
       {capturarOtraVez && !success && (
         <div
           style={{
@@ -155,6 +175,9 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           label={selfie}
           idUsuarioFi={id}
           setMessages={setMessages}
+          counter={counter}
+          setCounter={setCounter}
+          tries={tries}
         />
       )}
       {!mostrarCamara && (
@@ -164,6 +187,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           onClick={() => {
             setMostrarCamara(true);
             setCameraOpens((state) => state + 1);
+            setTriesCounter(state => state - 1)
           }}
         >
           Abrir camara

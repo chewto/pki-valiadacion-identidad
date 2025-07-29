@@ -1,4 +1,4 @@
-import faceTemplate from "@assets/img/face_template_OK.png"
+import faceTemplate from "@assets/img/face_template_OK.png";
 import { URLS } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "reactstrap";
-import '@styles/selfie.css'
+import "@styles/selfie.css";
 
 interface Props {
   label: string;
@@ -19,6 +19,9 @@ interface Props {
   setError: Dispatch<SetStateAction<boolean>>;
   idUsuarioFi: number | string | null | undefined;
   setMessages: Dispatch<SetStateAction<string[]>>;
+  counter: number;
+  setCounter: Dispatch<SetStateAction<number>>;
+  tries: number;
 }
 
 const Selfie: React.FC<Props> = ({
@@ -27,10 +30,12 @@ const Selfie: React.FC<Props> = ({
   setCapturarOtraVez,
   setSuccess,
   setError,
-  setMessages
+  setMessages,
+  counter,
+  setCounter,
+  tries,
 }) => {
-
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const [params] = useSearchParams();
 
@@ -44,7 +49,7 @@ const Selfie: React.FC<Props> = ({
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [counter, setCounter] = useState<number>(4);
+  const [timer, setTimer] = useState<number>(4);
 
   useEffect(() => {
     const initCamera = async () => {
@@ -142,21 +147,21 @@ const Selfie: React.FC<Props> = ({
     mediaRecorder.start();
     setTimeout(() => {
       if (mediaRecorder && mediaRecorder.state === "recording") {
-      mediaRecorder.stop();
-      if (videoRef.current) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        const tracks = stream.getTracks();
-        tracks.forEach((track) => {
-          track.stop();
-        });
+        mediaRecorder.stop();
+        if (videoRef.current) {
+          const stream = videoRef.current.srcObject as MediaStream;
+          const tracks = stream.getTracks();
+          tracks.forEach((track) => {
+            track.stop();
+          });
+        }
       }
-    }
     }, 4000);
 
-    let timerCount = counter;
+    let timerCount = timer;
 
     const recordingTimer = setInterval(() => {
-      setCounter((prev) => prev - 1);
+      setTimer((prev) => prev - 1);
       timerCount -= 1;
 
       if (timerCount < 0) {
@@ -203,7 +208,7 @@ const Selfie: React.FC<Props> = ({
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}`)
       .then((res) => {
-        console.log(res);
+
         const preview: string = res.data.photo;
 
         const data: PruebaVida = {
@@ -211,11 +216,25 @@ const Selfie: React.FC<Props> = ({
           videoHash: videoPath,
         };
 
-        console.log(data);
-
-        setMessages((prevMessages) => [...prevMessages, ...res.data.messages]);
+        if (counter < tries - 1) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            ...res.data.messages,
+          ]);
+        }
+        if (counter == tries) {
+          setMessages([]);
+        }
 
         if (res.status == 200) {
+          if (
+            !res.data.photoResult.isReal &&
+            res.data.movimientoDetectado == "!OK"
+          ) {
+            setCounter((state) => state + 1);
+            // setTriesCounter((state) => state - 1)
+          }
+
           if (preview.length >= 1) {
             dispatch(setFotos({ labelFoto: label, data: preview }));
             dispatch(setIdCarpetas(data));
@@ -250,60 +269,56 @@ const Selfie: React.FC<Props> = ({
   // };
 
   return (
-    <div
-    >
+    <div>
       {!loading ? (
         <>
-        <div
-        id="media-container"
-        className="video-container"
-        >
-        <img
-          src={faceTemplate}
-          className="mask"
-          alt=""
-          style={{ pointerEvents: "none" }}
-        />
+          <div id="media-container" className="video-container">
+            <img
+              src={faceTemplate}
+              className="mask"
+              alt=""
+              style={{ pointerEvents: "none" }}
+            />
 
-        {isRecording && (
-          <div className="text-sm font-semibold opacity-90 absolute top-0 left-1/2 transform -translate-x-1/2 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg indicator">
-            Grabando {counter} s
-            <div className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"></div>
+            {isRecording && (
+              <div className="text-sm font-semibold opacity-90 absolute top-0 left-1/2 transform -translate-x-1/2 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg indicator">
+                Grabando {timer} s
+                <div className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"></div>
+              </div>
+            )}
+
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              controls={false}
+              className="video"
+              style={{
+                transform: "scaleX(-1)", // Aplica efecto espejo
+                // width: "100%",
+                // height: "auto",
+              }}
+            />
           </div>
-        )}
 
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          controls={false}
-          className="video"
-          style={{
-            transform: "scaleX(-1)", // Aplica efecto espejo
-            // width: "100%",
-            // height: "auto",
-          }}
-        />
-        </div>
-
-      <div className="flex justify-center">
-        <button
-          id="video-btn"
-          onClick={recordVideo}
-          disabled={isRecording}
-          className={`py-2 px-3 mt-2 text-white font-bold rounded-md text-sm ${!isRecording ? 'bg-blue-600' : 'bg-blue-300'}`}
-        >
-          Grabar Video
-        </button>
-      </div>
+          <div className="flex justify-center">
+            <button
+              id="video-btn"
+              onClick={recordVideo}
+              disabled={isRecording}
+              className={`py-2 px-3 mt-2 text-white font-bold rounded-md text-sm ${
+                !isRecording ? "bg-blue-600" : "bg-blue-300"
+              }`}
+            >
+              Grabar Video
+            </button>
+          </div>
         </>
-      ): (
+      ) : (
         <div className="flex flex-col items-center justify-center my-2">
-          <Spinner/>
-          <span>
-            Validando rostro.
-          </span>
+          <Spinner />
+          <span>Validando rostro.</span>
         </div>
       )}
     </div>

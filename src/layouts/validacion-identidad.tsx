@@ -536,6 +536,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             selfie={labelFoto.foto_persona}
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
             nextStep={handleNext}
+            tries={validationParams.documentsTries}
           />,
           <FormularioDocumento
             key="formulario-anverso"
