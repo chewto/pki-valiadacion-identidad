@@ -205,58 +205,62 @@ const Selfie: React.FC<Props> = ({
         videoPath = path.ruta;
       });
 
+    // Detectar si el dispositivo es móvil o desktop
+    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    const deviceType = isMobile ? "MOBILE" : "DESKTOP";
+
     await axios
-      .post(`${URLS.pruebaVida}?path=${videoPath}`)
+      .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
       .then((res) => {
 
-        const preview: string = res.data.photo;
+      const preview: string = res.data.photo;
 
-        const data: PruebaVida = {
-          movimiento: res.data.movimientoDetectado,
-          videoHash: videoPath,
-        };
+      const data: PruebaVida = {
+        movimiento: res.data.movimientoDetectado,
+        videoHash: videoPath,
+      };
 
-        if (counter < tries - 1) {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            ...res.data.messages,
-          ]);
-        }
-        if (counter == tries) {
-          setMessages([]);
-        }
+      if (counter < tries - 1) {
+        setMessages((prevMessages) => [
+        ...prevMessages,
+        ...res.data.messages,
+        ]);
+      }
+      if (counter == tries) {
+        setMessages([]);
+      }
 
-        if (res.status == 200) {
-          if (
-            !res.data.photoResult.isReal &&
-            res.data.movimientoDetectado == "!OK"
-          ) {
-            setCounter((state) => state + 1);
-            // setTriesCounter((state) => state - 1)
-          }
-
-          if (preview.length >= 1) {
-            dispatch(setFotos({ labelFoto: label, data: preview }));
-            dispatch(setIdCarpetas(data));
-          }
-          if (preview.length >= 1 && res.data.messages.length <= 0) {
-            // setContinuarBoton(true);
-            setSuccess(true);
-            setMessages([]);
-          }
+      if (res.status == 200) {
+        if (
+        !res.data.photoResult.isReal &&
+        res.data.movimientoDetectado == "!OK"
+        ) {
+        setCounter((state) => state + 1);
+        // setTriesCounter((state) => state - 1)
         }
 
-        // if (res.status == 201) {
-        //   setIsCorrupted(true);
-        // }
+        if (preview.length >= 1) {
+        dispatch(setFotos({ labelFoto: label, data: preview }));
+        dispatch(setIdCarpetas(data));
+        }
+        if (preview.length >= 1 && res.data.messages.length <= 0) {
+        // setContinuarBoton(true);
+        setSuccess(true);
+        setMessages([]);
+        }
+      }
+
+      // if (res.status == 201) {
+      //   setIsCorrupted(true);
+      // }
       })
       .finally(() => {
-        setMostrarPreview(true);
-        setCapturarOtraVez(true);
-        setLoading(false);
+      setMostrarPreview(true);
+      setCapturarOtraVez(true);
+      setLoading(false);
       })
       .catch(() => {
-        setError(true);
+      setError(true);
       });
   };
 

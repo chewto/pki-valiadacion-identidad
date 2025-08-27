@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as CryptoJS from "crypto-js";
 import SpinnerLoading from "@components/ui/spinner-loading";
+const redirectURL = import.meta.env.VITE_BASE_URL
 
 export default function Verify() {
   const { payload } = useParams();
@@ -38,7 +39,7 @@ export default function Verify() {
       <div style={{ display: "none" }}>
         <form
           ref={formRef}
-          action="https://desarrollo.e-custodia.com/verificar_dispositivo.php"
+          action={redirectURL}
           method="POST"
         >
           <input type="hidden" name="rutavalidacion" value={decryptedUrl} />
