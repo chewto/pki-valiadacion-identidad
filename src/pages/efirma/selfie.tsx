@@ -51,6 +51,31 @@ const Selfie: React.FC<Props> = ({
 
   const [timer, setTimer] = useState<number>(4);
 
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const sendingMessages = [
+    "aplicando filtros",
+    "obteniendo frames",
+    "validando rostro"
+  ];
+
+  useEffect(() => {
+    if (!loading) {
+      setCurrentMessageIndex(0);
+      return;
+    }
+    if (currentMessageIndex >= sendingMessages.length - 1) return;
+
+    const min = 1800, max = 4000;
+    const timeout = setTimeout(() => {
+      setCurrentMessageIndex((prev) =>
+        prev < sendingMessages.length - 1 ? prev + 1 : prev
+      );
+    }, Math.floor(Math.random() * (max - min + 1)) + min);
+
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line
+  }, [loading, currentMessageIndex]);
+
   useEffect(() => {
     const initCamera = async () => {
       try {
@@ -213,6 +238,8 @@ const Selfie: React.FC<Props> = ({
       .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
       .then((res) => {
 
+      console.log(res.data)
+
       const preview: string = res.data.photo;
 
       const data: PruebaVida = {
@@ -232,7 +259,7 @@ const Selfie: React.FC<Props> = ({
 
       if (res.status == 200) {
         if (
-        !res.data.photoResult.isReal &&
+        !res.data.photoResult.isReal ||
         res.data.movimientoDetectado == "!OK"
         ) {
         setCounter((state) => state + 1);
@@ -291,6 +318,12 @@ const Selfie: React.FC<Props> = ({
               </div>
             )}
 
+            {isRecording && (
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 text-2xl text-white rounded-md bg-black opacity-70 z-[100] px-2 py-1">
+              sonria
+            </div>
+            )}
+
             <video
               ref={videoRef}
               autoPlay
@@ -299,7 +332,7 @@ const Selfie: React.FC<Props> = ({
               controls={false}
               className="video"
               style={{
-                transform: "scaleX(-1)", // Aplica efecto espejo
+                transform: "scaleX(-1)",
                 // width: "100%",
                 // height: "auto",
               }}
@@ -322,7 +355,7 @@ const Selfie: React.FC<Props> = ({
       ) : (
         <div className="flex flex-col items-center justify-center my-2">
           <Spinner />
-          <span>Validando rostro.</span>
+            <span>{sendingMessages[currentMessageIndex]}</span>
         </div>
       )}
     </div>

@@ -124,7 +124,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
                 {messages.map((message: string, index) => (
                   <li
                     key={index}
-                    className="bg-yellow-200 px-2 py-2 rounded-xl border-2 border-yellow-500 text-xl"
+                    className="bg-yellow-200 px-2 py-2 my-1 rounded-xl border-2 border-yellow-500 text-xl"
                   >
                     {message}
                   </li>

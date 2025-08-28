@@ -164,7 +164,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   // console.log(mainCounter)
 
   useEffect(() => {
-    document.title = "Validacion identidad (testing)";
+    document.title = "Validacion identidad";
 
     axios({
       method: "get",
