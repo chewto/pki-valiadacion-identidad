@@ -219,21 +219,25 @@ const Selfie: React.FC<Props> = ({
 
     let videoPath = "";
 
+    const savingStart = performance.now();
     await axios
       .post(URLS.saveVideo, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
       })
       .then((res) => {
-        const path = res.data;
-        videoPath = path.ruta;
+      const path = res.data;
+      videoPath = path.ruta;
       });
+    const savingEnd = performance.now();
+    const savingTime = (savingEnd - savingStart).toFixed(2)
 
     // Detectar si el dispositivo es móvil o desktop
     const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
     const deviceType = isMobile ? "MOBILE" : "DESKTOP";
 
+    const detectStart = performance.now()
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
       .then((res) => {
@@ -289,6 +293,22 @@ const Selfie: React.FC<Props> = ({
       .catch(() => {
       setError(true);
       });
+    const detectEnd = performance.now()
+    const detectTime = (detectEnd - detectStart).toFixed(2);
+
+    await axios.post(
+      URLS.logs,
+      {
+        message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTimegit}`
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+
   };
 
   // const resetToLiveView = () => {

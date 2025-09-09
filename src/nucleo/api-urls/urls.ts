@@ -21,6 +21,7 @@ const saveVideo = rutasURL['saveVideo']
 const ocr = rutasURL['ocr']
 
 export const URLS = {
+  logs: `${urlBase}/log`,
   validationProvider: `${urlBase}/validation/validation-provider`,
   standaloneValidation: `${urlBase}/validation/standalone`,
   ValidacionIdentidadTipo1: `${urlBase}/validacion-identidad-tipo-1`,
