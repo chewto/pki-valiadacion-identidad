@@ -466,6 +466,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
   };
 
+  const handleReturn = () => {
+    setActiveSteps((prevActiveStep) => prevActiveStep - 1)
+  }
+
   // const steps = useMemo(() => {
   //   return informacionFirmador.validacionVida
   //     ? ["1", "2", "3", "4"]
@@ -500,6 +504,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
             nextStep={handleNext}
+            returnStep={handleReturn}
           />,
           <FormularioDocumento
             key="formulario-reverso"
@@ -513,6 +518,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             tries={validationParams.documentsTries}
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
+            returnStep={handleReturn}
             nextStep={handleNext}
           />,
         ]
@@ -551,6 +557,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
             nextStep={handleNext}
+            returnStep={handleReturn}
           />,
           <FormularioDocumento
             key="formulario-reverso"
@@ -565,6 +572,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
             nextStep={handleNext}
+            returnStep={handleReturn}
           />,
         ];
   }, [

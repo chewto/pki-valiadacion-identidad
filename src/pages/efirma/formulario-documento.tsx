@@ -39,6 +39,7 @@ interface Props {
   useModel: boolean;
   setMainCounter: Dispatch<SetStateAction<number>>;
   nextStep: () => void;
+  returnStep: () => void | null;
 }
 
 export const FormularioDocumento: React.FC<Props> = ({
@@ -52,6 +53,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   tries,
   setMainCounter,
   nextStep,
+  returnStep
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
@@ -381,8 +383,17 @@ export const FormularioDocumento: React.FC<Props> = ({
             setRetry(false);
             setSuccess(true);
             setTimeout(() => {
-              nextStep();
-            }, 700);
+                nextStep();
+              }, 700);
+            // if(res.data.faceDetected){
+            //   setTimeout(() => {
+            //     nextStep();
+            //   }, 700);
+            // }else{
+            //   setTimeout(() => {
+            //     returnStep()
+            //   })
+            // }
           }
         }
 
