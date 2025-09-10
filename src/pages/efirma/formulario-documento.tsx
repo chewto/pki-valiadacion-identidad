@@ -362,7 +362,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setFotos({ labelFoto: ladoDocumento, data: res.data.image })
           );
 
-          if (res.data.face && res.data.validSide == "OK") {
+          if (res.data.face && res.data.faceDetected && res.data.validSide == "OK") {
             console.log("valido");
             setSuccess(true);
             setTimeout(() => {
@@ -382,18 +382,16 @@ export const FormularioDocumento: React.FC<Props> = ({
             setMessages([]);
             setRetry(false);
             setSuccess(true);
-            setTimeout(() => {
+          
+            if(res.data.faceDetected){
+              setTimeout(() => {
                 nextStep();
               }, 700);
-            // if(res.data.faceDetected){
-            //   setTimeout(() => {
-            //     nextStep();
-            //   }, 700);
-            // }else{
-            //   setTimeout(() => {
-            //     returnStep()
-            //   })
-            // }
+            }else{
+              setTimeout(() => {
+                returnStep()
+              })
+            }
           }
         }
 
