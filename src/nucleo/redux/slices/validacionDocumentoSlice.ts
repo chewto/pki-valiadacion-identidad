@@ -28,25 +28,25 @@ const initialState: ValidacionDocumento = {
   },
   barcode: "",
   sideResult:{
-    front:"",
-    back: ''
+    front:false,
+    back: false
   },
   sides:{
     front: {
       code:'',
       country: '',
-      countryCheck: '',
+      countryCheck: false,
       type: '',
-      typeCheck: '',
+      typeCheck: false,
       isExpired: null,
       tries: 0
     },
     back: {
       code:'',
       country: '',
-      countryCheck: '',
+      countryCheck: false,
       type: '',
-      typeCheck: '',
+      typeCheck: false,
       isExpired: null,
       tries: 0
     },
@@ -101,14 +101,14 @@ export const validacionDocumentolice = createSlice({
     },
     setBackResult:(
       state,
-      action: PayloadAction<{sideResult: string}>
+      action: PayloadAction<{sideResult: boolean}>
     ) => {
       const {sideResult} = action.payload
       state.sideResult.back = sideResult
     },
     setFrontResult:(
       state,
-      action: PayloadAction<{sideResult: string}>
+      action: PayloadAction<{sideResult: boolean}>
     ) => {
       const {sideResult} = action.payload
       state.sideResult.front = sideResult

@@ -46,8 +46,8 @@ export interface ValidacionDocumento {
   mrz: MRZ;
   barcode: string | null;
   sideResult: {
-    front: string;
-    back: string;
+    front: boolean;
+    back: boolean;
   }
   sides: CorrespondingSide;
 }
@@ -72,9 +72,9 @@ interface MRZData{
 export interface DocumentData{
   code: string;
   country: string;
-  countryCheck: string;
+  countryCheck: boolean;
   type: string;
-  typeCheck: string;
+  typeCheck: boolean;
   isExpired: boolean | null;
   tries: number;
 }

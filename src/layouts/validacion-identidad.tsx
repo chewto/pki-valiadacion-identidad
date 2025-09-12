@@ -430,8 +430,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       // );
 
       reqBody["failed"] = "OK";
-      reqBody["failedBack"] = validacionDocumento.sideResult.back;
-      reqBody["failedFront"] = validacionDocumento.sideResult.front;
+      // reqBody["failedBack"] = validacionDocumento.sideResult.back;
+      // reqBody["failedFront"] = validacionDocumento.sideResult.front;
 
       let idValidacion = 0;
       let idUsuario = 0;
