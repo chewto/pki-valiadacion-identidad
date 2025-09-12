@@ -93,6 +93,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
+
+
   const formulario = new FormData();
 
   const labelFoto = {
@@ -154,14 +156,17 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   // useEffect(() => {
-  //   // pila con esto
-  //   if (mainCounter >= validationParams.documentsTries + 1) {
-  //     // enviar(true);
-  //     console.log("validacion fallida");
-  //   }
-  // }, [mainCounter]);
-
-  // console.log(mainCounter)
+  //   console.log(informacion)
+  // }, [informacion])
+  // useEffect(() => {
+  //   console.log(informacionFirmador)
+  // }, [informacionFirmador])
+  // useEffect(() => {
+  //   console.log(validacionDocumento)
+  // }, [validacionDocumento])
+  // useEffect(() => {
+  //   console.log(pruebaVida)
+  // }, [pruebaVida])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -338,7 +343,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
-  
+
     const reqBody: {
       info: typeof informacion;
       documentValidation: typeof validacionDocumento;
@@ -355,6 +360,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       livenessTest: pruebaVida,
       params: validationParams,
     };
+
 
     if (!failed) {
       setMostrar(true);
