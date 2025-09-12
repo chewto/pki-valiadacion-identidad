@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import * as CryptoJS from "crypto-js";
 import SpinnerLoading from "@components/ui/spinner-loading";
-const redirectURL = import.meta.env.VITE_BASE_URL
+const redirectURL = import.meta.env.VITE_REDIRECT_URL
 
 export default function Verify() {
   const { payload } = useParams();
