@@ -362,7 +362,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setFotos({ labelFoto: ladoDocumento, data: res.data.image })
           );
 
-          if (res.data.face && res.data.validSide == "OK") {
+          if (res.data.face && res.data.faceDetected && res.data.validSide) {
             console.log("valido");
             setSuccess(true);
             setTimeout(() => {
@@ -370,7 +370,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             }, 700);
           }
 
-          if (res.data.validSide != "OK" && conteo < tries) {
+          if (!res.data.validSide && conteo < tries) {
             console.log("invalido");
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setConteo((prev) => prev + 1);
@@ -406,7 +406,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setFotos({ labelFoto: ladoDocumento, data: res.data.image })
           );
 
-          if (res.data.validSide === "OK") {
+          if (res.data.validSide) {
             console.log("valido");
             setSuccess(true);
             setContinuarBoton(true);
@@ -415,7 +415,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             }, 700);
           }
 
-          if (res.data.validSide != "OK" && conteo < tries) {
+          if (!res.data.validSide && conteo < tries) {
             console.log("invalido");
             setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
             setRetry(true);
