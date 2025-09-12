@@ -404,6 +404,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 "tipo",
                 informacionFirmador.tipoValidacion?.toString() ?? ""
               );
+              
               appendHiddenInput(
                 formElement,
                 "reintentoURL",
