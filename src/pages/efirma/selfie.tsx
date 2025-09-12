@@ -299,7 +299,7 @@ const Selfie: React.FC<Props> = ({
     await axios.post(
       URLS.logs,
       {
-        message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTimegit}`
+        message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`
       },
       {
         headers: {

@@ -53,7 +53,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   tries,
   setMainCounter,
   nextStep,
-  returnStep
+  // returnStep
 }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
