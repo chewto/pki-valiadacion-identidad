@@ -464,9 +464,9 @@ export const FormularioDocumento: React.FC<Props> = ({
         </h2>
       )}
 
-      <div className={`${triesCounter >= 0 ? 'flex'  : 'hidden'} justify-center  mb-1`}>
+      <div className={`${triesCounter >= 1 ? 'flex'  : 'hidden'} justify-center  mb-1`}>
         <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">
-          Intentos restantes: {triesCounter + 1}{" "}
+          Intentos restantes: {triesCounter}{" "}
         </span>
       </div>
 

@@ -215,8 +215,6 @@ const Selfie: React.FC<Props> = ({
     const filename = `video_${idUser}.${ext}`;
     formData.append("video_data", data, filename);
 
-    // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
-
     let videoPath = "";
 
     const savingStart = performance.now();

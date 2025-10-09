@@ -161,9 +161,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   // useEffect(() => {
   //   console.log(informacionFirmador)
   // }, [informacionFirmador])
-  // useEffect(() => {
-  //   console.log(validacionDocumento)
-  // }, [validacionDocumento])
+  useEffect(() => {
+    console.log(validacionDocumento)
+  }, [validacionDocumento])
   // useEffect(() => {
   //   console.log(pruebaVida)
   // }, [pruebaVida])
@@ -205,6 +205,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     axios.get(getCountry).then((res) => {
+      console.log(res.data)
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);
@@ -360,7 +361,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       livenessTest: pruebaVida,
       params: validationParams,
     };
-
 
     if (!failed) {
       setMostrar(true);

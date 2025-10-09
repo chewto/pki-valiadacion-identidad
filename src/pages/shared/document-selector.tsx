@@ -32,10 +32,10 @@ export const DocumentSelector: React.FC<Props> = ({
     }
   }, [tipoDocumento.length]);
 
-  const onChange = (evento: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = evento.target.value;
-    dispatch(setTipoDocumento({tipoDocumento: valor}))
-  };
+const onChange = (evento: React.ChangeEvent<HTMLInputElement>) => {
+  const valor = evento.target.value;
+  dispatch(setTipoDocumento({tipoDocumento: valor}))
+};
 
   return (
     <div className="flex flex-col">
