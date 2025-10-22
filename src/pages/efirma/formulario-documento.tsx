@@ -66,7 +66,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
-  const [conteo, setConteo] = useState<number>(0);
+  const [conteo, setConteo] = useState<number>(1);
   const [triesCounter, setTriesCounter] = useState<number>(tries);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -331,7 +331,6 @@ export const FormularioDocumento: React.FC<Props> = ({
       url: URLS.ocr,
       data: { image: data.imagen },
     }).then((res) => {
-      console.log(res);
       data["ocr"] = res.data.ocr;
       data["textAngle"] = res.data.textAngle;
     });
@@ -350,7 +349,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     })
       .then((res: AxiosResponse<any>) => {
         const adviceMessages = res.data.messages;
-        console.log(res);
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
           dispatch(setValidacionCodigoBarras(res.data));
@@ -377,7 +375,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setRetry(true);
           }
 
-          if (conteo >= tries) {
+          if (conteo == tries) {
             console.log("valido por intentos");
             setMessages([]);
             setRetry(false);
@@ -423,7 +421,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setMainCounter((prev) => prev + 1);
           }
 
-          if (conteo >= tries) {
+          if (conteo == tries) {
             console.log("valido por intentos");
             setMessages([]);
             setRetry(false);
