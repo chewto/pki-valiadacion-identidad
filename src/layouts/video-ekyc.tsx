@@ -9,7 +9,7 @@ export default function VideoEKYC() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center xsm:px-1">
-      <Card>
+      <Card isBlocked={false}>
         <Header titulo="Validacion de Identidad"></Header>
         <div>{steps[0]}</div>
       </Card>

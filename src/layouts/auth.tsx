@@ -38,7 +38,7 @@ export default function Auth() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex md:items-center md:mt-0 xsm:items-start  justify-center  xsm:px-1 md:pt-0 xsm:pt-5">
-      <Card>
+      <Card isBlocked={false}>
         <div className="flex justify-center items-center">
           {loading && (
             <div className="flex justify-center items-center flex-col gap-2">

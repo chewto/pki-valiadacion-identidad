@@ -6,6 +6,12 @@
   margin-top: 0.4rem;
 }
 
+.blocked-card{
+  pointer-events: none; 
+  opacity: 0.6; 
+  cursor: not-allowed;
+}
+
 @media (min-width: 640px) { /* xsm */
   .background-card {
     border-radius: 0.5rem; /* rounded-lg */

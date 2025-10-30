@@ -41,6 +41,8 @@ import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
+const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === 'true';
+
 interface Props {
   standalone: boolean;
 }
@@ -601,42 +603,62 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationParams.validationAttendance,
   ]);
 
+  const useKeyboardBlocker = () => {
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      // Bloquear F12
+      if (event.key === 'F12') {
+        event.preventDefault();
+      }
+
+      // Bloquear Ctrl+Shift+I (Windows/Linux) o Cmd+Opt+I (Mac)
+      if (
+        (event.ctrlKey && event.shiftKey && event.key === 'I') || // Ctrl+Shift+I
+        (event.metaKey && event.altKey && event.key === 'i')      // Cmd+Opt+I (Mac)
+      ) {
+        event.preventDefault();
+      }
+
+      // Bloquear Ctrl+Shift+J o Cmd+Opt+J (Para abrir la consola)
+      if (
+        (event.ctrlKey && event.shiftKey && event.key === 'J') || // Ctrl+Shift+J
+        (event.metaKey && event.altKey && event.key === 'j')      // Cmd+Opt+J (Mac)
+      ) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Limpiar el listener al desmontar el componente
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []); // El array vacío asegura que solo se monte y desmonte una vez
+};
+
+  const handleContextMenu = (e: React.MouseEvent<any>) => {
+    if(!isDevMode){
+      console.log(isDevMode)
+      e.preventDefault();
+    }
+  }
+
+  useKeyboardBlocker()
+
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center">
-        <Card>
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center" onContextMenu={handleContextMenu}>
+
+        <Card isBlocked={!retry} >
           <Header titulo="Validación de identidad" />
           <div className="m-0">
             <PasosEnumerados tipo="3" paso={activeSteps} />
             <div className="content-buttons">
-              {/* <Button disabled={activeSteps === 0} onClick={handleBack}>
-                Volver
-              </Button> */}
-
-              {/* {activeSteps <= steps.length - 2 && (
-                <Button
-                  disabled={!continuarBoton}
-                  variant="contained"
-                  color="primary"
-                  onClick={handleNext}
-                >
-                  {continuarBoton ? "Continuar" : "Esperando"}
-                </Button>
-              )} */}
-
-              {/* {activeSteps === steps.length  && (
-                <Button
-                  // disabled={!continuarBoton}
-                  variant="contained"
-                  color="primary"
-                  onClick={() => enviar(false)}
-                >
-                  {continuarBoton ? "Finalizar" : "Esperando"}
-                </Button>
-              )} */}
             </div>
+            <>
             {componentsSteps[activeSteps]}
-            {/* {componentsSteps[2]}  */}
+            </>
           </div>
           <>
             {mostrarMensaje && loading && (
