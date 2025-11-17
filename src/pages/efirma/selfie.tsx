@@ -1,4 +1,4 @@
-import faceTemplate from "@assets/img/face_template_OK.png";
+import faceTemplate from "/face_template_OK.png";
 import { URLS } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";

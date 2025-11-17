@@ -140,6 +140,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
+  const [sending, setSending] = useState<boolean>(false);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setMainCounter] = useState<number>(0);
 
@@ -157,18 +159,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  // useEffect(() => {
-  //   console.log(informacion)
-  // }, [informacion])
-  // useEffect(() => {
-  //   console.log(informacionFirmador)
-  // }, [informacionFirmador])
-  useEffect(() => {
-    console.log(validacionDocumento)
-  }, [validacionDocumento])
-  // useEffect(() => {
-  //   console.log(pruebaVida)
-  // }, [pruebaVida])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -206,6 +196,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, []);
 
   useEffect(() => {
+    // agregar prefix
     axios.get(getCountry).then((res) => {
       console.log(res.data)
       const country = res.data.country;
@@ -243,6 +234,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
 
   useEffect(() => {
+
+    // usar prefix
     axios
       .get(
         standalone
@@ -269,6 +262,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         }
       });
 
+    // usar prefix
     axios({
       method: "get",
       url: validationParamsUrl,
@@ -347,6 +341,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const enviar = async (failed: boolean) => {
 
+    setSending(true)
+
     const reqBody: {
       info: typeof informacion;
       documentValidation: typeof validacionDocumento;
@@ -372,6 +368,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       let idValidacion = 0;
       let idUsuario = 0;
 
+      // agregar prefix
       await axios({
         method: "post",
         url: url,
@@ -710,6 +707,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 enviar(false);
                 // setHasSent(true);
               }}
+              disabled={sending}
               >
               Finalizar
               </button>
