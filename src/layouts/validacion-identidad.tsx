@@ -39,6 +39,8 @@ import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
+import SpinnerLoading from "@components/ui/spinner-loading";
+import { Spinner } from "reactstrap";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
@@ -417,49 +419,49 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         });
     }
 
-    if (failed) {
-      // ValidadorFormdata(formulario, "failed", "OK");
+    // if (failed) {
+    //   // ValidadorFormdata(formulario, "failed", "OK");
 
-      // ValidadorFormdata(
-      // formulario,
-      // "failed_back",
-      // validacionDocumento.sideResult.back
-      // );
+    //   // ValidadorFormdata(
+    //   // formulario,
+    //   // "failed_back",
+    //   // validacionDocumento.sideResult.back
+    //   // );
 
-      // ValidadorFormdata(
-      // formulario,
-      // "failed_front",
-      // validacionDocumento.sideResult.front
-      // );
+    //   // ValidadorFormdata(
+    //   // formulario,
+    //   // "failed_front",
+    //   // validacionDocumento.sideResult.front
+    //   // );
 
-      reqBody["failed"] = "OK";
-      // reqBody["failedBack"] = validacionDocumento.sideResult.back;
-      // reqBody["failedFront"] = validacionDocumento.sideResult.front;
+    //   reqBody["failed"] = "OK";
+    //   // reqBody["failedBack"] = validacionDocumento.sideResult.back;
+    //   // reqBody["failedFront"] = validacionDocumento.sideResult.front;
 
-      let idValidacion = 0;
-      let idUsuario = 0;
+    //   let idValidacion = 0;
+    //   let idUsuario = 0;
 
-      axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          setError(true);
-        })
-        .finally(() => {
-          window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-        });
-    }
+    //   axios({
+    //     method: "post",
+    //     url: url,
+    //     data: formulario,
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //     .then((res) => {
+    //       idValidacion = res.data.idValidacion;
+    //       idUsuario = res.data.idUsuario;
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       setLoading(false);
+    //       setError(true);
+    //     })
+    //     .finally(() => {
+    //       window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+    //     });
+    // }
   };
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
@@ -689,19 +691,20 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             <h2 className="text-lg text-center font-semibold mb-4">
               Proceso de validación terminado.
             </h2>
-            <p className="mb-6 text-center">Evidencias enviadas.</p>
+            <p className="mb-6 text-center">{loading ? "Enviando evidencias." : "Enviar evidencias." }</p>
             <form
+            className="flex justify-center items-center"
               onSubmit={(e) => {
                 e.preventDefault(); // Detiene el envío nativo del HTML
                 enviar(false); // Llama a tu función de envío asíncrona
               }}
             >
-              <button
+              {!loading ? (<button
                 type="submit" // 👈 Asegúrate de que el botón sea 'submit'
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               >
                 Finalizar
-              </button>
+              </button> ): (<div className="flex items-center justify-center flex-col"><Spinner color="primary"/></div>)}
             </form>
           </div>
         </div>
