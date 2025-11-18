@@ -39,7 +39,6 @@ import { CodigoQR } from "@components/ui/codigo-qr";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
-import SpinnerLoading from "@components/ui/spinner-loading";
 import { Spinner } from "reactstrap";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
@@ -418,6 +417,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           }
         });
     }
+
+    console.log(formulario)
 
     // if (failed) {
     //   // ValidadorFormdata(formulario, "failed", "OK");
