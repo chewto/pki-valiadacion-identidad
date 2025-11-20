@@ -1,4 +1,6 @@
-import React, { useRef, useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { useRef, useEffect, useState } from "react";
 import * as faceapi from "face-api.js";
 import faceTemplate from "/face_template_OK.png";
 import "@styles/selfie.css";
@@ -359,11 +361,16 @@ const FaceDetection: React.FC = () => {
 
         const preview: string = res.data.photo;
 
+        setImg(preview)
+        console.log(isRecording)
+
 
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,
           videoHash: videoPath,
         };
+
+        console.log(data)
 
         //   if (counter < tries - 1) {
         //     setMessages((prevMessages) => [
