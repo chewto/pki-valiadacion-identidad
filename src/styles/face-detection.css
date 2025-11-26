@@ -1,0 +1,29 @@
+.mask-detection{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18rem;
+  max-width: 350px; 
+  opacity: 0.5;
+  pointer-events: "none";
+  z-index: 100;
+}
+
+@media (max-width: 426px) {
+  .mask {
+    width: 15rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .mask {
+    width: 13rem;
+  }
+}
+
+@media (max-width: 330px) {
+  .mask {
+    width: 11rem;
+  }
+}

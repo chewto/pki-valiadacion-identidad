@@ -6,7 +6,8 @@ import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
-import Selfie from "@pages/efirma/selfie";
+// import Selfie from "@pages/efirma/selfie";
+import FaceDetection from "@layouts/face-test";
 //import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
@@ -166,7 +167,21 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       )}
 
       {mostrarCamara && !capturarOtraVez && (
-        <Selfie
+        // <Selfie
+        //   setSuccess={setSuccess}
+        //   setContinuarBoton={setContinuarBoton}
+        //   setMostrarPreview={setMostrarPreview}
+        //   setCapturarOtraVez={setCapturarOtravez}
+        //   setError={setError}
+        //   label={selfie}
+        //   idUsuarioFi={id}
+        //   setMessages={setMessages}
+        //   counter={counter}
+        //   setCounter={setCounter}
+        //   tries={tries}
+        // />
+
+        <FaceDetection
           setSuccess={setSuccess}
           setContinuarBoton={setContinuarBoton}
           setMostrarPreview={setMostrarPreview}
