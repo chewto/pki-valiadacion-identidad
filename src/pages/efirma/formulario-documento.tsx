@@ -375,7 +375,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setRetry(true);
           }
 
-          if (conteo == tries) {
+          if (!res.data.validSide && conteo == tries) {
             console.log("valido por intentos");
             setMessages([]);
             setRetry(false);
@@ -421,7 +421,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             setMainCounter((prev) => prev + 1);
           }
 
-          if (conteo == tries) {
+          if (!res.data.validSide && conteo == tries) {
             console.log("valido por intentos");
             setMessages([]);
             setRetry(false);

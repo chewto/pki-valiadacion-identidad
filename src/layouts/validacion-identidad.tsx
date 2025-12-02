@@ -40,9 +40,10 @@ import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 // import FaceDetection from "./face-test";
+import { Spinner } from "reactstrap";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
-const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === 'true';
+const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
 
 interface Props {
   standalone: boolean;
@@ -95,8 +96,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   //   ? `${URLS.comprobarValidacion}?hash=${informacionFirmador.idUsuario}`
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
-
-
 
   const formulario = new FormData();
 
@@ -160,7 +159,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-
   useEffect(() => {
     document.title = "Validacion identidad";
 
@@ -199,7 +197,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     // agregar prefix
     axios.get(getCountry).then((res) => {
-      console.log(res.data)
+      console.log(res.data);
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);
@@ -326,8 +324,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   };
 
-
-
   const appendHiddenInput = (
     formElement: HTMLFormElement,
     name: string,
@@ -388,7 +384,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           setError(true);
         })
         .finally(() => {
-
           if (standalone) {
             if (formRef.current) {
               const formElement = formRef.current;
@@ -404,7 +399,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 "tipo",
                 informacionFirmador.tipoValidacion?.toString() ?? ""
               );
-              
+
               appendHiddenInput(
                 formElement,
                 "reintentoURL",
@@ -421,51 +416,52 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         });
     }
 
-    if (failed) {
-      // ValidadorFormdata(formulario, "failed", "OK");
+    console.log(formulario)
 
-      // ValidadorFormdata(
-      // formulario,
-      // "failed_back",
-      // validacionDocumento.sideResult.back
-      // );
+    // if (failed) {
+    //   // ValidadorFormdata(formulario, "failed", "OK");
 
-      // ValidadorFormdata(
-      // formulario,
-      // "failed_front",
-      // validacionDocumento.sideResult.front
-      // );
+    //   // ValidadorFormdata(
+    //   // formulario,
+    //   // "failed_back",
+    //   // validacionDocumento.sideResult.back
+    //   // );
 
-      reqBody["failed"] = "OK";
-      // reqBody["failedBack"] = validacionDocumento.sideResult.back;
-      // reqBody["failedFront"] = validacionDocumento.sideResult.front;
+    //   // ValidadorFormdata(
+    //   // formulario,
+    //   // "failed_front",
+    //   // validacionDocumento.sideResult.front
+    //   // );
 
-      let idValidacion = 0;
-      let idUsuario = 0;
+    //   reqBody["failed"] = "OK";
+    //   // reqBody["failedBack"] = validacionDocumento.sideResult.back;
+    //   // reqBody["failedFront"] = validacionDocumento.sideResult.front;
 
-      axios({
-        method: "post",
-        url: url,
-        data: formulario,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-        })
-        .catch((err) => {
-          console.log(err);
-          setLoading(false);
-          setError(true);
-        })
-        .finally(() => {
-          window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-        });
-    }
+    //   let idValidacion = 0;
+    //   let idUsuario = 0;
+
+    //   axios({
+    //     method: "post",
+    //     url: url,
+    //     data: formulario,
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //     .then((res) => {
+    //       idValidacion = res.data.idValidacion;
+    //       idUsuario = res.data.idUsuario;
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       setLoading(false);
+    //       setError(true);
+    //     })
+    //     .finally(() => {
+    //       window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+    //     });
+    // }
   };
-
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
@@ -474,8 +470,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const handleReturn = () => {
-    setActiveSteps((prevActiveStep) => prevActiveStep - 1)
-  }
+    setActiveSteps((prevActiveStep) => prevActiveStep - 1);
+  };
 
   // const steps = useMemo(() => {
   //   return informacionFirmador.validacionVida
@@ -494,10 +490,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             useModel={standalone ? useModel : false}
             nextStep={handleNext}
           />,
-          <AccesoCamara
-            key="acceso-camara"
-            nextStep={handleNext}
-          />,
+          <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
           <FormularioDocumento
             key="formulario-anverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -538,10 +531,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             useModel={standalone ? useModel : false}
             nextStep={handleNext}
           />,
-          <AccesoCamara
-            key="acceso-camara"
-            nextStep={handleNext}
-          />,
+          <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
           <FormularioFotoPersona
             key="formulario-foto-persona"
             setContinuarBoton={setContinuarBoton}
@@ -602,61 +592,60 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   ]);
 
   const useKeyboardBlocker = () => {
-  useEffect(() => {
-    const handleKeyDown = (event: any) => {
-      // Bloquear F12
-      if (event.key === 'F12') {
-        event.preventDefault();
-      }
+    useEffect(() => {
+      const handleKeyDown = (event: any) => {
+        // Bloquear F12
+        if (event.key === "F12") {
+          event.preventDefault();
+        }
 
-      // Bloquear Ctrl+Shift+I (Windows/Linux) o Cmd+Opt+I (Mac)
-      if (
-        (event.ctrlKey && event.shiftKey && event.key === 'I') || // Ctrl+Shift+I
-        (event.metaKey && event.altKey && event.key === 'i')      // Cmd+Opt+I (Mac)
-      ) {
-        event.preventDefault();
-      }
+        // Bloquear Ctrl+Shift+I (Windows/Linux) o Cmd+Opt+I (Mac)
+        if (
+          (event.ctrlKey && event.shiftKey && event.key === "I") || // Ctrl+Shift+I
+          (event.metaKey && event.altKey && event.key === "i") // Cmd+Opt+I (Mac)
+        ) {
+          event.preventDefault();
+        }
 
-      // Bloquear Ctrl+Shift+J o Cmd+Opt+J (Para abrir la consola)
-      if (
-        (event.ctrlKey && event.shiftKey && event.key === 'J') || // Ctrl+Shift+J
-        (event.metaKey && event.altKey && event.key === 'j')      // Cmd+Opt+J (Mac)
-      ) {
-        event.preventDefault();
-      }
-    };
+        // Bloquear Ctrl+Shift+J o Cmd+Opt+J (Para abrir la consola)
+        if (
+          (event.ctrlKey && event.shiftKey && event.key === "J") || // Ctrl+Shift+J
+          (event.metaKey && event.altKey && event.key === "j") // Cmd+Opt+J (Mac)
+        ) {
+          event.preventDefault();
+        }
+      };
 
-    window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
 
-    // Limpiar el listener al desmontar el componente
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, []); // El array vacío asegura que solo se monte y desmonte una vez
-};
+      // Limpiar el listener al desmontar el componente
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }, []); // El array vacío asegura que solo se monte y desmonte una vez
+  };
 
   const handleContextMenu = (e: React.MouseEvent<any>) => {
-    if(!isDevMode){
-      console.log(isDevMode)
+    if (!isDevMode) {
+      console.log(isDevMode);
       e.preventDefault();
     }
-  }
+  };
 
-  useKeyboardBlocker()
+  useKeyboardBlocker();
 
   return (
     <>
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center" onContextMenu={handleContextMenu}>
-
-        <Card isBlocked={!retry} >
+      <main
+        className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center"
+        onContextMenu={handleContextMenu}
+      >
+        <Card isBlocked={!retry}>
           <Header titulo="Validación de identidad" />
           <div className="m-0">
             <PasosEnumerados tipo="3" paso={activeSteps} />
-            <div className="content-buttons">
-            </div>
-            <>
-            {componentsSteps[activeSteps]}
-            </>
+            <div className="content-buttons"></div>
+            <>{componentsSteps[activeSteps]}</>
           </div>
           <>
             {mostrarMensaje && loading && (
@@ -692,28 +681,32 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           />
         )} */}
         {/* Mostrar botón de finalizar solo en el último paso, pero si es pasaporte, mostrarlo un paso antes */}
-        
-            <div
-            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-            style={{ display: continuarBoton ? "" : "none" }}
-            >
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
-              <h2 className="text-lg text-center font-semibold mb-4">
+
+        <div
+          className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+          style={{ display: continuarBoton ? "" : "none" }}
+        >
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg text-center font-semibold mb-4">
               Proceso de validación terminado.
-              </h2>
-              <p className="mb-6 text-center">Evidencias enviadas.</p>
-              <button
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {
-                enviar(false);
-                // setHasSent(true);
+            </h2>
+            <p className="mb-6 text-center">{loading ? "Enviando evidencias." : "Enviar evidencias." }</p>
+            <form
+            className="flex justify-center items-center"
+              onSubmit={(e) => {
+                e.preventDefault(); // Detiene el envío nativo del HTML
+                enviar(false); // Llama a tu función de envío asíncrona
               }}
-              disabled={sending}
+            >
+              {!loading ? (<button
+                type="submit" // 👈 Asegúrate de que el botón sea 'submit'
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               >
-              Finalizar
-              </button>
-            </div>
-            </div>
+                Finalizar
+              </button> ): (<div className="flex items-center justify-center flex-col"><Spinner color="primary"/></div>)}
+            </form>
+          </div>
+        </div>
 
         {!retry && (
           <Advertencia
