@@ -140,7 +140,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const [retry, setRetry] = useState<boolean>(false);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
-  const [sending, setSending] = useState<boolean>(false);
+  // const [sending, setSending] = useState<boolean>(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setMainCounter] = useState<number>(0);
@@ -337,8 +337,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
-
-    setSending(true)
 
     const reqBody: {
       info: typeof informacion;
