@@ -39,7 +39,7 @@ interface Props {
 
 // --- CONFIGURACIÓN ---
 const MODEL_URL = "/models";
-const DRAWING_IMG_URL = "/face_template_OK.png"; // RUTA DE TU IMAGEN
+// const DRAWING_IMG_URL = "/face_template_OK.png"; // RUTA DE TU IMAGEN
 const BRIGHTNESS_THRESHOLD = 50;
 
 const FaceDetection: React.FC<Props> = ({
@@ -107,6 +107,13 @@ const FaceDetection: React.FC<Props> = ({
     // eslint-disable-next-line
   }, [loading, currentMessageIndex]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      // setMessage("ESPERANDO ROSTRO");
+      console.log("por favor coloquese en el recuadro para iniciar automaticamente la captura")
+    }, 6000);
+  }, [])
+
 
   // 3. CARGA INICIAL
   useEffect(() => {
@@ -119,7 +126,7 @@ const FaceDetection: React.FC<Props> = ({
 
         // Cargar imagen en memoria para el Canvas
         const imgObj = new Image();
-        imgObj.src = DRAWING_IMG_URL;
+        imgObj.src = faceTemplate;
         imgObj.onload = () => {
           drawingImageRef.current = { img: imgObj, isLoaded: true };
           startVideo();
