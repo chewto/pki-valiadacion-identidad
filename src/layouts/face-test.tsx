@@ -85,9 +85,11 @@ const FaceDetection: React.FC<Props> = ({
   const sendingMessages = [
     "aplicando filtros",
     "obteniendo frames",
-    "validando rostro"
+    "validando rostro",
   ];
-  // const [img, setImg] = useState<string>('');
+
+  const [showAdvice, setShowAdvice] = useState(false);
+  const [enableButton, setEnableButton] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -96,7 +98,8 @@ const FaceDetection: React.FC<Props> = ({
     }
     if (currentMessageIndex >= sendingMessages.length - 1) return;
 
-    const min = 1800, max = 4000;
+    const min = 1800,
+      max = 4000;
     const timeout = setTimeout(() => {
       setCurrentMessageIndex((prev) =>
         prev < sendingMessages.length - 1 ? prev + 1 : prev
@@ -107,13 +110,14 @@ const FaceDetection: React.FC<Props> = ({
     // eslint-disable-next-line
   }, [loading, currentMessageIndex]);
 
+  // activar boton manual
   useEffect(() => {
-    setTimeout(() => {
-      // setMessage("ESPERANDO ROSTRO");
-      console.log("por favor coloquese en el recuadro para iniciar automaticamente la captura")
-    }, 6000);
-  }, [])
-
+    if (!isCenteredAndOk) {
+      setTimeout(() => {
+        setShowAdvice(true);
+      }, 1000);
+    }
+  }, []);
 
   // 3. CARGA INICIAL
   useEffect(() => {
@@ -151,7 +155,7 @@ const FaceDetection: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (isCenteredAndOk) recordVideo();
+    if (isCenteredAndOk && !enableButton) recordVideo();
   }, [isCenteredAndOk]);
 
   // 4. INICIAR CÁMARA
@@ -221,6 +225,14 @@ const FaceDetection: React.FC<Props> = ({
       );
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       const ctx = canvas.getContext("2d");
+
+      // activar primera advertencia
+
+      // if( resizedDetections.length === 0 ){
+      //   setTimeout(() => {
+      //     setShowAdvice(true);
+      //   }, 1000); 
+      // }
 
       if (ctx) {
         // A. CÁLCULO DE BRILLO
@@ -524,42 +536,112 @@ const FaceDetection: React.FC<Props> = ({
   // 7. RENDER
   return (
     <div className="my-2">
-      {!loading ? (
-        <div style={styles.mainContainer}>
-        {!isRecording ? <div style={styles.statusIndicator}>{message}</div> : <div style={styles.statusIndicator}>Mantengase quieto.</div> }
-
-        {isModelLoaded && <div style={styles.loadingOverlay}>Cargando IA...</div>}
-
+      {showAdvice && (
         <div
           style={{
-            ...styles.videoWrapper,
-            width: videoDimensions.width || "100%",
-            // height: videoDimensions.height || '100%',
-            opacity: videoDimensions.width ? 1 : 0,
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 200,
+            padding: 16,
           }}
+          onClick={() =>{setShowAdvice(false) ; setEnableButton(true);}}
         >
-          {isRecording && (
-            <div className="text-sm font-semibold opacity-90 absolute top-2 left-4 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg indicator z-50">
-              Grabando {timer} s
-              <div className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"></div>
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "rgba(17,17,17,0.95)",
+              color: "#fff",
+              padding: "20px 24px",
+              borderRadius: 12,
+              maxWidth: 420,
+              width: "100%",
+              textAlign: "center",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+            }}
+          >
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+              Por favor coloca tu rostro dentro del recuadro para iniciar la
+              captura
+            </p>
+            <div style={{ marginTop: 12 }}>
+              <button
+                onClick={() => {setShowAdvice(false) ; setEnableButton(true);}}
+                style={{
+                  marginTop: 8,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "#fff",
+                  color: "#111",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Entendido
+              </button>
             </div>
-          )}
-          <video ref={videoRef} muted playsInline style={styles.fullSize} />
-          <canvas ref={canvasRef} style={styles.fullSizeAbsolute} />/
-          {/* REFERENCIA ESTÁTICA CENTRAL (SEMI-TRANSPARENTE) */}
-          <img
-            ref={maskImgRef}
-            src={faceTemplate}
-            alt="Guía"
-            className="mask-detection"
-            // style={styles.maskImage}
-          />
+          </div>
         </div>
-      </div>
-      ) : (<div className="flex flex-col justify-center items-center"><span>{sendingMessages[currentMessageIndex]}
-        </span>
-        <Spinner color="primary" />
-        </div>)}
+      )}
+
+      {!loading ? (
+        <div style={styles.mainContainer}>
+          {!isRecording ? (
+            <div style={styles.statusIndicator}>{message}</div>
+          ) : (
+            <div style={styles.statusIndicator}>Mantengase quieto.</div>
+          )}
+
+          {isModelLoaded && (
+            <div style={styles.loadingOverlay}>Cargando IA...</div>
+          )}
+
+          <div
+            style={{
+              ...styles.videoWrapper,
+              width: videoDimensions.width || "100%",
+              // height: videoDimensions.height || '100%',
+              opacity: videoDimensions.width ? 1 : 0,
+            }}
+          >
+            {isRecording && (
+              <div className="text-sm font-semibold opacity-90 absolute top-2 left-4 flex justify-center items-center gap-2 my-2 px-2 py-1 bg-white rounded-lg indicator z-50">
+                Grabando {timer} s
+                <div className="w-3 h-3 transition-colors duration-300 rounded-xl bg-red-600"></div>
+              </div>
+            )}
+            <video ref={videoRef} muted playsInline style={styles.fullSize} />
+            <canvas ref={canvasRef} style={styles.fullSizeAbsolute} />/
+            {/* REFERENCIA ESTÁTICA CENTRAL (SEMI-TRANSPARENTE) */}
+            <img
+              ref={maskImgRef}
+              src={faceTemplate}
+              alt="Guía"
+              className="mask-detection"
+              // style={styles.maskImage}
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col justify-center items-center">
+          <span>{sendingMessages[currentMessageIndex]}</span>
+          <Spinner color="primary" />
+        </div>
+      )}
+
+      {enableButton && (
+        <div className="w-full flex justify-center items-center">
+            <button onClick={() => setIsCenteredAndOk(true)} className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg">
+              Grabar video
+            </button>
+          </div>
+      )}
     </div>
   );
 };
