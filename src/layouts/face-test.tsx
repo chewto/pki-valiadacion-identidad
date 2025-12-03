@@ -566,8 +566,7 @@ const FaceDetection: React.FC<Props> = ({
             }}
           >
             <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              Por favor coloca tu rostro dentro del recuadro para iniciar la
-              captura
+              Se habilitara el boton para la captura del selfie, debido a que no detectamos que su rostro este alineado con el indicador.
             </p>
             <div style={{ marginTop: 12 }}>
               <button
