@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "reactstrap";
 import "@styles/selfie.css";
+import { setSelfieTime } from "@nucleo/redux/slices/timerSlice";
 
 interface Props {
   label: string;
@@ -55,7 +56,7 @@ const Selfie: React.FC<Props> = ({
   const sendingMessages = [
     "aplicando filtros",
     "obteniendo frames",
-    "validando rostro"
+    "validando rostro",
   ];
 
   useEffect(() => {
@@ -65,7 +66,8 @@ const Selfie: React.FC<Props> = ({
     }
     if (currentMessageIndex >= sendingMessages.length - 1) return;
 
-    const min = 1800, max = 4000;
+    const min = 1800,
+      max = 4000;
     const timeout = setTimeout(() => {
       setCurrentMessageIndex((prev) =>
         prev < sendingMessages.length - 1 ? prev + 1 : prev
@@ -216,97 +218,114 @@ const Selfie: React.FC<Props> = ({
     formData.append("video_data", data, filename);
 
     let videoPath = "";
-
+    const startTimeUpload = Date.now();
+    let durationUpload = 0;
     const savingStart = performance.now();
     await axios
       .post(URLS.saveVideo, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
       .then((res) => {
-      const path = res.data;
-      videoPath = path.ruta;
+        const endTimeUpload = Date.now();
+        durationUpload = endTimeUpload - startTimeUpload;
+
+        const path = res.data;
+        videoPath = path.ruta;
       });
     const savingEnd = performance.now();
-    const savingTime = (savingEnd - savingStart).toFixed(2)
+    const savingTime = (savingEnd - savingStart).toFixed(2);
 
     // Detectar si el dispositivo es móvil o desktop
-    const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    const isMobile =
+      /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+        navigator.userAgent
+      );
     const deviceType = isMobile ? "MOBILE" : "DESKTOP";
 
-    const detectStart = performance.now()
+    const startTimePruebaVida = Date.now();
+    let durationPruebaVida = 0;
+
+    const detectStart = performance.now();
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
       .then((res) => {
+        const endTimePruebaVida = Date.now();
+        durationPruebaVida = endTimePruebaVida - startTimePruebaVida;
 
-      console.log(res.data)
+        console.log(res.data);
 
-      const preview: string = res.data.photo;
+        const preview: string = res.data.photo;
 
-      const data: PruebaVida = {
-        movimiento: res.data.movimientoDetectado,
-        videoHash: videoPath,
-      };
+        const data: PruebaVida = {
+          movimiento: res.data.movimientoDetectado,
+          videoHash: videoPath,
+        };
 
-      if (counter < tries - 1) {
-        setMessages((prevMessages) => [
-        ...prevMessages,
-        ...res.data.messages,
-        ]);
-      }
-      if (counter == tries) {
-        setMessages([]);
-      }
-
-      if (res.status == 200) {
-        if (
-        !res.data.photoResult.isReal ||
-        res.data.movimientoDetectado == "!OK"
-        ) {
-        setCounter((state) => state + 1);
-        // setTriesCounter((state) => state - 1)
+        if (counter < tries - 1) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            ...res.data.messages,
+          ]);
+        }
+        if (counter == tries) {
+          setMessages([]);
         }
 
-        if (preview.length >= 1) {
-        dispatch(setFotos({ labelFoto: label, data: preview }));
-        dispatch(setIdCarpetas(data));
-        }
-        if (preview.length >= 1 && res.data.messages.length <= 0) {
-        // setContinuarBoton(true);
-        setSuccess(true);
-        setMessages([]);
-        }
-      }
+        if (res.status == 200) {
+          if (
+            !res.data.photoResult.isReal ||
+            res.data.movimientoDetectado == "!OK"
+          ) {
+            setCounter((state) => state + 1);
+            // setTriesCounter((state) => state - 1)
+          }
 
-      // if (res.status == 201) {
-      //   setIsCorrupted(true);
-      // }
+          if (preview.length >= 1) {
+            dispatch(setFotos({ labelFoto: label, data: preview }));
+            dispatch(setIdCarpetas(data));
+          }
+          if (preview.length >= 1 && res.data.messages.length <= 0) {
+            // setContinuarBoton(true);
+            setSuccess(true);
+            setMessages([]);
+          }
+        }
+
+        // if (res.status == 201) {
+        //   setIsCorrupted(true);
+        // }
       })
       .finally(() => {
-      setMostrarPreview(true);
-      setCapturarOtraVez(true);
-      setLoading(false);
+        setMostrarPreview(true);
+        setCapturarOtraVez(true);
+        setLoading(false);
       })
       .catch(() => {
-      setError(true);
+        setError(true);
       });
-    const detectEnd = performance.now()
+    const detectEnd = performance.now();
     const detectTime = (detectEnd - detectStart).toFixed(2);
 
     await axios.post(
       URLS.logs,
       {
-        message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`
+        message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`,
       },
       {
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       }
-    )
+    );
 
+    const selfieTimeData = {
+      saveVideoTime: Number((durationUpload / 1000).toFixed(2)),
+      selfieTime: Number((durationPruebaVida / 1000).toFixed(2)),
+    };
 
+    dispatch(setSelfieTime(selfieTimeData));
   };
 
   // const resetToLiveView = () => {
@@ -338,8 +357,8 @@ const Selfie: React.FC<Props> = ({
 
             {isRecording && (
               <div className="absolute top-16 left-1/2 -translate-x-1/2 text-2xl text-white rounded-md bg-black opacity-70 z-[100] px-2 py-1">
-              sonria
-            </div>
+                sonria
+              </div>
             )}
 
             <video
@@ -373,7 +392,7 @@ const Selfie: React.FC<Props> = ({
       ) : (
         <div className="flex flex-col items-center justify-center my-2">
           <Spinner />
-            <span>{sendingMessages[currentMessageIndex]}</span>
+          <span>{sendingMessages[currentMessageIndex]}</span>
         </div>
       )}
     </div>

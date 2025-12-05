@@ -67,6 +67,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   );
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
+  const timerData = useSelector((state: RootState) => state.timer);
+
+  useEffect(() => {
+    console.log(timerData)
+  },[timerData.selfieTime, timerData.frontTime, timerData.backTime])
+
   const urlParams = standalone
     ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
     : `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`;
@@ -105,18 +111,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
-  // const isIOS = useDetectOs('IOS');
-  // const isSafari = useDetectBrowser('MOBILE SAFARI')
-  // const isAndroid = useDetectOs('ANDROID')
-  // const isChrome = useDetectBrowser('CHROME')
 
   useValidationRedirect(
     validationName,
     idUsuarioParam,
     `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
   );
-
-  // useApproved()
 
   const hora = useHour();
   const fecha = useDate();
@@ -150,24 +150,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const [documentList, setDocumentList] = useState<string[]>([]);
 
-  // const [hasSent, setHasSent] = useState(false);
-
   const [useModel, setUseModel] = useState<boolean>(false);
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  // useEffect(() => {
-  //   console.log(informacion)
-  // }, [informacion])
-  // useEffect(() => {
-  //   console.log(informacionFirmador)
-  // }, [informacionFirmador])
-  useEffect(() => {
-    console.log(validacionDocumento);
-  }, [validacionDocumento]);
-  // useEffect(() => {
-  //   console.log(pruebaVida)
-  // }, [pruebaVida])
 
   useEffect(() => {
     document.title = "Validacion identidad";
@@ -352,12 +338,14 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       failed?: string;
       failedBack?: string;
       failedFront?: string;
+      times: typeof timerData
     } = {
       info: informacion,
       documentValidation: validacionDocumento,
       signInfo: informacionFirmador,
       livenessTest: pruebaVida,
       params: validationParams,
+      times: timerData
     };
 
     if (!failed) {

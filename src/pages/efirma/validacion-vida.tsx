@@ -10,6 +10,7 @@ import { setIdCarpetas } from "../../nucleo/redux/slices/pruebaVidaSlice";
 import { PruebaVida } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import faceTemplate from "../../assets/img/face_template_OK.png";
 import { useSearchParams } from "react-router-dom";
+import { setSelfieTime } from "@nucleo/redux/slices/timerSlice";
 
 interface Props {
   label: string;
@@ -157,24 +158,34 @@ export const ValidacionVida: React.FC<Props> = ({
     setVideoData((prevData) => [...prevData, JSON.stringify(xd)]);
 
     // Show the size of the video in KB
-    // setMessages((prev) => [...prev, `Tamaño del video: ${sizeKB} KB`]);
-
     let videoPath = "";
 
+    const startTimeUpload = Date.now();
+    let durationUpload = 0;
     await axios
-      .post(URLS.saveVideo, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((res) => {
-        const path = res.data;
-        videoPath = path.ruta;
-      });
+    .post(URLS.saveVideo, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => {
+      const endTimeUpload = Date.now();
+      durationUpload = endTimeUpload - startTimeUpload;
+
+
+      const path = res.data;
+      videoPath = path.ruta;
+    });
+    
+    const startTimePruebaVida = Date.now();
+    let durationPruebaVida = 0;
 
     await axios
       .post(`${URLS.pruebaVida}?path=${videoPath}`)
       .then((res) => {
+        const endTimePruebaVida = Date.now();
+        durationPruebaVida = endTimePruebaVida - startTimePruebaVida;
+
         const preview: string = res.data.photo;
 
         const data: PruebaVida = {
@@ -211,6 +222,15 @@ export const ValidacionVida: React.FC<Props> = ({
       .catch(() => {
         setError(true);
       });
+
+      const selfieTimeData = {
+        saveVideoTime: Number((durationUpload / 1000).toFixed(2)), // seconds
+        selfieTime: Number((durationPruebaVida / 1000).toFixed(2)), // seconds
+      };
+
+        console.log("SELFIE TIME DATA", selfieTimeData);
+
+        dispatch(setSelfieTime(selfieTimeData));
   };
 
   return (

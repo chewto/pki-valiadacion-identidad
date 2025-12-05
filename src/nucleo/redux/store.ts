@@ -4,6 +4,7 @@ import firmadorReducer from './slices/firmadorSlice'
 import validacionDocumentoReducer from "./slices/validacionDocumentoSlice";
 import validacionCBReducer from "./slices/validacionCB";
 import pruebaVidaReducer from "./slices/pruebaVidaSlice";
+import timerReducer from "./slices/timerSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,7 +12,8 @@ export const store = configureStore({
     firmador: firmadorReducer,
     validacionDocumento: validacionDocumentoReducer,
     cb: validacionCBReducer,
-    pruebaVida: pruebaVidaReducer
+    pruebaVida: pruebaVidaReducer,
+    timer: timerReducer
   }
 })
 
