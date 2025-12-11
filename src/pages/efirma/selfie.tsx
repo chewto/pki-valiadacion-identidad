@@ -5,11 +5,12 @@ import { setFotos } from "@nucleo/redux/slices/informacionSlice";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import axios from "axios";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "reactstrap";
 import "@styles/selfie.css";
 import { setSelfieTime } from "@nucleo/redux/slices/timerSlice";
+import { RootState } from "@nucleo/redux/store";
 
 interface Props {
   label: string;
@@ -37,6 +38,8 @@ const Selfie: React.FC<Props> = ({
   tries,
 }) => {
   const dispatch = useDispatch();
+  
+  const times = useSelector((state: RootState) => state.timer);
 
   const [params] = useSearchParams();
 
@@ -209,6 +212,11 @@ const Selfie: React.FC<Props> = ({
   };
 
   const saveMedia = async (data: Blob) => {
+    console.log(times.id)
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=inicio`).then((res) => {
+      console.log(res.data);
+    }
+    )
     setLoading(true);
     const formData = new FormData();
 
@@ -319,6 +327,11 @@ const Selfie: React.FC<Props> = ({
         },
       }
     );
+
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=fin`).then((res) => {
+      console.log(res.data);
+    }
+    )
 
     const selfieTimeData = {
       saveVideoTime: Number((durationUpload / 1000).toFixed(2)),

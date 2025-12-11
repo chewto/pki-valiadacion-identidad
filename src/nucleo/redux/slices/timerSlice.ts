@@ -13,6 +13,7 @@ interface documentTime {
 }
 
 interface TimerState {
+  id: number | string;
   totalTime: number;
   selfieTime: selfieTime[];
   frontTime: documentTime[];
@@ -20,6 +21,7 @@ interface TimerState {
 }
 
 const initialState: TimerState = {
+  id: 0,
   totalTime: 0,
   selfieTime: [],
   frontTime: [],
@@ -30,6 +32,10 @@ const timerSlice = createSlice({
   name: "timer",
   initialState,
   reducers: {
+    setColumnId(state, action: PayloadAction<number>) {
+      console.log(state, action.payload)
+      state.id = action.payload;
+    },
     setTotalTime(state, action: PayloadAction<number>) {
       state.totalTime = action.payload;
     },
@@ -45,7 +51,7 @@ const timerSlice = createSlice({
   },
 });
 
-export const { setTotalTime, setSelfieTime, setFrontTime, setBackTime } =
+export const { setColumnId,setTotalTime, setSelfieTime, setFrontTime, setBackTime } =
   timerSlice.actions;
 
 export default timerSlice.reducer;

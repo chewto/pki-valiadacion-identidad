@@ -40,6 +40,7 @@ import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 import { Spinner } from "reactstrap";
+import { setColumnId } from "@nucleo/redux/slices/timerSlice";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
@@ -191,6 +192,17 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, []);
 
   useEffect(() => {
+    axios.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`)
+      .then((res) => {
+        console.log(res.data.id);
+        dispatch(setColumnId(res.data.id));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [dispatch, idUsuarioParam]);
+
+  useEffect(() => {
     axios.get(getCountry).then((res) => {
       console.log(res.data);
       const country = res.data.country;
@@ -329,6 +341,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
+    axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
     const reqBody: {
       info: typeof informacion;
       documentValidation: typeof validacionDocumento;
@@ -348,6 +365,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       times: timerData
     };
 
+    console.log(reqBody)
+
     if (!failed) {
       setMostrar(true);
       setLoading(true);
@@ -365,6 +384,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         },
       })
         .then((res) => {
+          console.log(res)
+
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
           state = res.data.estadoVerificacion;
@@ -404,9 +425,17 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             window.location.href = newUrl;
           }
         });
-    }
 
-    console.log(formulario)
+      axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
+      axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`).then((res) => {
+      console.log(res.data);
+    }
+    )
+    }
 
     // if (failed) {
     //   // ValidadorFormdata(formulario, "failed", "OK");

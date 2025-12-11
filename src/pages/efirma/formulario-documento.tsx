@@ -61,6 +61,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const validacionDocumento = useSelector(
     (state: RootState) => state.validacionDocumento
   );
+  const times = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch();
 
   const passport = "PASAPORTE";
@@ -322,6 +323,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
+    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
     setTriesCounter((state) => state - 1);
     const start = performance.now();
     setError(false);
@@ -455,6 +461,12 @@ export const FormularioDocumento: React.FC<Props> = ({
         const end = performance.now();
         console.log(`validarDocumento tardó ${(end - start).toFixed(2)} ms`);
       });
+
+    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
 
     const validationTimeData = {
       ocrTime: Number((durationOcr / 1000).toFixed(2)),
