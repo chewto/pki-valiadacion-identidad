@@ -103,8 +103,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
-  const formulario = new FormData();
-
   const labelFoto = {
     anverso: "anverso",
     reverso: "reverso",
