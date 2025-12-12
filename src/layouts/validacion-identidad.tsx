@@ -71,8 +71,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const timerData = useSelector((state: RootState) => state.timer);
 
   useEffect(() => {
-    console.log(timerData)
-  },[timerData.selfieTime, timerData.frontTime, timerData.backTime])
+    console.log(timerData);
+  }, [timerData.selfieTime, timerData.frontTime, timerData.backTime]);
 
   const urlParams = standalone
     ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
@@ -153,7 +153,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const formRef = useRef<HTMLFormElement>(null);
 
-
   useEffect(() => {
     document.title = "Validacion identidad";
 
@@ -190,7 +189,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, []);
 
   useEffect(() => {
-    axios.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`)
+    axios
+      .post(`${URLS.timeLog}?user_id=${idUsuarioParam}`)
       .then((res) => {
         console.log(res.data.id);
         dispatch(setColumnId(res.data.id));
@@ -339,10 +339,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
-    axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`).then((res) => {
-      console.log(res.data);
-    }
-    )
+    axios
+      .post(
+        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`
+      )
+      .then((res) => {
+        console.log(res.data);
+      });
 
     const reqBody: {
       info: typeof informacion;
@@ -353,17 +356,17 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       failed?: string;
       failedBack?: string;
       failedFront?: string;
-      times: typeof timerData
+      times: typeof timerData;
     } = {
       info: informacion,
       documentValidation: validacionDocumento,
       signInfo: informacionFirmador,
       livenessTest: pruebaVida,
       params: validationParams,
-      times: timerData
+      times: timerData,
     };
 
-    console.log(reqBody)
+    console.log(reqBody);
 
     if (!failed) {
       setMostrar(true);
@@ -382,7 +385,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         },
       })
         .then((res) => {
-          console.log(res)
+          console.log(res);
 
           idValidacion = res.data.idValidacion;
           idUsuario = res.data.idUsuario;
@@ -392,7 +395,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           setLoading(false);
           setError(true);
         })
-        .finally(() => {
+        .finally(async () => {
+          try {
+            await Promise.all([
+              axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`),
+              axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`)
+            ]);
+          } catch (e) {
+            console.error("Error en logs", e);
+          }
+
           if (standalone) {
             if (formRef.current) {
               const formElement = formRef.current;
@@ -423,61 +435,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             window.location.href = newUrl;
           }
         });
-
-      axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`).then((res) => {
-      console.log(res.data);
     }
-    )
-
-      axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`).then((res) => {
-      console.log(res.data);
-    }
-    )
-    }
-
-    // if (failed) {
-    //   // ValidadorFormdata(formulario, "failed", "OK");
-
-    //   // ValidadorFormdata(
-    //   // formulario,
-    //   // "failed_back",
-    //   // validacionDocumento.sideResult.back
-    //   // );
-
-    //   // ValidadorFormdata(
-    //   // formulario,
-    //   // "failed_front",
-    //   // validacionDocumento.sideResult.front
-    //   // );
-
-    //   reqBody["failed"] = "OK";
-    //   // reqBody["failedBack"] = validacionDocumento.sideResult.back;
-    //   // reqBody["failedFront"] = validacionDocumento.sideResult.front;
-
-    //   let idValidacion = 0;
-    //   let idUsuario = 0;
-
-    //   axios({
-    //     method: "post",
-    //     url: url,
-    //     data: formulario,
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   })
-    //     .then((res) => {
-    //       idValidacion = res.data.idValidacion;
-    //       idUsuario = res.data.idUsuario;
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       setLoading(false);
-    //       setError(true);
-    //     })
-    //     .finally(() => {
-    //       window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-    //     });
-    // }
   };
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
@@ -707,20 +665,28 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             <h2 className="text-lg text-center font-semibold mb-4">
               Proceso de validación terminado.
             </h2>
-            <p className="mb-6 text-center">{loading ? "Enviando evidencias." : "Enviar evidencias." }</p>
+            <p className="mb-6 text-center">
+              {loading ? "Enviando evidencias." : "Enviar evidencias."}
+            </p>
             <form
-            className="flex justify-center items-center"
+              className="flex justify-center items-center"
               onSubmit={(e) => {
                 e.preventDefault(); // Detiene el envío nativo del HTML
                 enviar(false); // Llama a tu función de envío asíncrona
               }}
             >
-              {!loading ? (<button
-                type="submit" // 👈 Asegúrate de que el botón sea 'submit'
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Finalizar
-              </button> ): (<div className="flex items-center justify-center flex-col"><Spinner color="primary"/></div>)}
+              {!loading ? (
+                <button
+                  type="submit" // 👈 Asegúrate de que el botón sea 'submit'
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Finalizar
+                </button>
+              ) : (
+                <div className="flex items-center justify-center flex-col">
+                  <Spinner color="primary" />
+                </div>
+              )}
             </form>
           </div>
         </div>
