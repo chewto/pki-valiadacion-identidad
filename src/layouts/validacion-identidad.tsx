@@ -209,7 +209,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     if (results) {
       console.log(loadingSpeed)
-      axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, { results });
+      axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
     }
   },[results])
 
