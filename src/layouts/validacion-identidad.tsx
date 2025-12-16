@@ -41,6 +41,7 @@ import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 import { Spinner } from "reactstrap";
 import { setColumnId } from "@nucleo/redux/slices/timerSlice";
+import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
@@ -127,6 +128,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
+  const { runFullTest, loadingTest, results } = useSpeedTest();
+
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
@@ -189,16 +192,25 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, []);
 
   useEffect(() => {
-    axios
-      .post(`${URLS.timeLog}?user_id=${idUsuarioParam}`)
-      .then((res) => {
-        console.log(res.data.id);
-        dispatch(setColumnId(res.data.id));
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    const init = async () => {
+      try {
+        const req = await axios.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`);
+        const res = await req.data;
+        dispatch(setColumnId(res.id));
+        await runFullTest()
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    init();
   }, [dispatch, idUsuarioParam]);
+
+  useEffect(() => {
+    if (results) {
+      axios.post(`${URLS.logs}time-logs/update-speedtest?id=${timerData.id}`, { results });
+    }
+  },[results])
 
   useEffect(() => {
     axios.get(getCountry).then((res) => {
