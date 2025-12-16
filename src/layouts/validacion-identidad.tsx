@@ -128,7 +128,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
-  const { runFullTest, loadingTest, results } = useSpeedTest();
+  const { runFullTest, loadingSpeed, results } = useSpeedTest();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -208,6 +208,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     if (results) {
+      console.log(loadingSpeed)
       axios.post(`${URLS.logs}time-logs/update-speedtest?id=${timerData.id}`, { results });
     }
   },[results])

@@ -8,7 +8,7 @@ interface SpeedMetrics {
 }
 
 export const useSpeedTest = () => {
-  const [loading, setLoading] = useState(false);
+  const [loadingSpeed, setLoadingSpeed] = useState(false);
   const [results, setResults] = useState<SpeedMetrics | null>(null);
 
   const measurePing = async (url: string): Promise<number> => {
@@ -52,7 +52,7 @@ export const useSpeedTest = () => {
   };
 
   const runFullTest = useCallback(async () => {
-    setLoading(true);
+    setLoadingSpeed(true);
     try {
       // 1. Descarga (Asumiendo un archivo de 1MB)
       const down = await measureDownload('https://upload.wikimedia.org/wikipedia/commons/1/16/AsterNovi-belgii-flower-1mb.jpg', 1048576);
@@ -65,9 +65,9 @@ export const useSpeedTest = () => {
     } catch (err) {
       console.error("Error en el test:", err);
     } finally {
-      setLoading(false);
+      setLoadingSpeed(false);
     }
   }, []);
 
-  return { runFullTest, loading, results };
+  return { runFullTest, loadingSpeed, results };
 };

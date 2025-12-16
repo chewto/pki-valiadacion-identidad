@@ -1,16 +1,16 @@
 import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 
 const NetworkDashboard = () => {
-  const { runFullTest, loading, results } = useSpeedTest();
+  const { runFullTest, loadingSpeed, results } = useSpeedTest();
 
   return (
     <div className="p-6 bg-gray-100 rounded-xl">
       <button 
         onClick={runFullTest} 
-        disabled={loading}
+        disabled={loadingSpeed}
         className="bg-blue-600 text-white px-4 py-2 rounded"
       >
-        {loading ? 'Analizando red...' : 'Iniciar Test Completo'}
+        {loadingSpeed ? 'Analizando red...' : 'Iniciar Test Completo'}
       </button>
 
       {results && (
