@@ -339,13 +339,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
-    axios
-      .post(
+    setMostrar(true);
+    setLoading(true);
+
+    try {
+      await axios.post(
         `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`
-      )
-      .then((res) => {
-        console.log(res.data);
-      });
+      );
+    } catch (err) {
+      console.error("Error al iniciar log", err);
+    }
 
     const reqBody: {
       info: typeof informacion;
@@ -369,72 +372,50 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     console.log(reqBody);
 
     if (!failed) {
-      setMostrar(true);
-      setLoading(true);
+      try {
 
-      let state = "";
-      let idValidacion = 0;
-      let idUsuario = 0;
-
-      await axios({
-        method: "post",
-        url: url,
-        data: JSON.stringify(reqBody),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => {
-          console.log(res);
-
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-          state = res.data.estadoVerificacion;
-        })
-        .catch(() => {
-          setLoading(false);
-          setError(true);
-        })
-        .finally(async () => {
-          try {
-            await Promise.all([
-              axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`),
-              axios.post(`${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`)
-            ]);
-          } catch (e) {
-            console.error("Error en logs", e);
-          }
-
-          if (standalone) {
-            if (formRef.current) {
-              const formElement = formRef.current;
-              appendHiddenInput(
-                formElement,
-                "idValidacion",
-                idValidacion.toString()
-              );
-              appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
-              appendHiddenInput(formElement, "estadoValidacion", state);
-              appendHiddenInput(
-                formElement,
-                "tipo",
-                informacionFirmador.tipoValidacion?.toString() ?? ""
-              );
-
-              appendHiddenInput(
-                formElement,
-                "reintentoURL",
-                window.location.href
-              );
-
-              formElement.submit();
-            }
-          }
-          if (!standalone) {
-            const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-            window.location.href = newUrl;
-          }
+        const res = await axios.post(url, reqBody, {
+          headers: { "Content-Type": "application/json" },
         });
+
+        const { idValidacion, idUsuario, estadoVerificacion: state } = res.data;
+
+        await Promise.all([
+          axios.post(
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`
+          ),
+          axios.post(
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`
+          ),
+        ]).catch((e) => console.error("Error en logs finales", e));
+
+        // 4. Redirección o Submit de Formulario
+        if (standalone && formRef.current) {
+          const formElement = formRef.current;
+          appendHiddenInput(
+            formElement,
+            "idValidacion",
+            idValidacion.toString()
+          );
+          appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
+          appendHiddenInput(formElement, "estadoValidacion", state);
+          appendHiddenInput(
+            formElement,
+            "tipo",
+            informacionFirmador.tipoValidacion?.toString() ?? ""
+          );
+          appendHiddenInput(formElement, "reintentoURL", window.location.href);
+
+          formElement.submit();
+        } else if (!standalone) {
+          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+        }
+      } catch (error) {
+        // Manejo de errores de la petición principal
+        console.error("Error en la validación:", error);
+        setLoading(false);
+        setError(true);
+      }
     }
   };
 
