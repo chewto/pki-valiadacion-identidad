@@ -25,6 +25,7 @@ import { URLS } from "../../nucleo/api-urls/urls";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
+import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
 // import Camera from '@pages/efirma/nueva-camara'
 
 interface Props {
@@ -60,6 +61,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const validacionDocumento = useSelector(
     (state: RootState) => state.validacionDocumento
   );
+  const times = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch();
 
   const passport = "PASAPORTE";
@@ -321,20 +323,32 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
+    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
     setTriesCounter((state) => state - 1);
     const start = performance.now();
     setError(false);
     setLoading(true);
 
+
+    const ocrTimeStart = Date.now();
+    let durationOcr = 0;
     await axios({
       method: "post",
       url: URLS.ocr,
       data: { image: data.imagen },
     }).then((res) => {
+      const ocrTimeEnd = Date.now();
+      durationOcr = ocrTimeEnd - ocrTimeStart;
       data["ocr"] = res.data.ocr;
       data["textAngle"] = res.data.textAngle;
     });
 
+    const validationTimeStart = Date.now();
+    let durationValidation = 0
     await axios({
       method: "post",
       url:
@@ -348,6 +362,9 @@ export const FormularioDocumento: React.FC<Props> = ({
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
+        const validationTimeEnd = Date.now();
+        durationValidation = validationTimeEnd - validationTimeStart;
+
         const adviceMessages = res.data.messages;
         if (ladoDocumento === "anverso") {
           dispatch(setValidacionOCR(res.data));
@@ -444,6 +461,24 @@ export const FormularioDocumento: React.FC<Props> = ({
         const end = performance.now();
         console.log(`validarDocumento tardó ${(end - start).toFixed(2)} ms`);
       });
+
+    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin`).then((res) => {
+      console.log(res.data);
+    }
+    )
+
+
+    const validationTimeData = {
+      ocrTime: Number((durationOcr / 1000).toFixed(2)),
+      recognizeTime:  Number((durationValidation / 1000).toFixed(2)),
+      innerTimes: {}
+    };
+
+    if (ladoDocumento === "anverso") {
+      dispatch(setFrontTime(validationTimeData));
+    } else {
+      dispatch(setBackTime(validationTimeData));
+    }
   };
 
   return (

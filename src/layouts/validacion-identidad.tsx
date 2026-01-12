@@ -41,6 +41,8 @@ import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 // import FaceDetection from "./face-test";
 import { Spinner } from "reactstrap";
+import { setColumnId } from "@nucleo/redux/slices/timerSlice";
+import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
@@ -67,6 +69,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     (state: RootState) => state.validacionDocumento
   );
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
+
+  const timerData = useSelector((state: RootState) => state.timer);
+
+  useEffect(() => {
+    console.log(timerData);
+  }, [timerData.selfieTime, timerData.frontTime, timerData.backTime]);
 
   const urlParams = standalone
     ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
@@ -97,8 +105,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   //   : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`;
   //const urlUsuario = `${URLS.obtenerData}?id=${idParam}`;
 
-  const formulario = new FormData();
-
   const labelFoto = {
     anverso: "anverso",
     reverso: "reverso",
@@ -106,18 +112,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
-  // const isIOS = useDetectOs('IOS');
-  // const isSafari = useDetectBrowser('MOBILE SAFARI')
-  // const isAndroid = useDetectOs('ANDROID')
-  // const isChrome = useDetectBrowser('CHROME')
 
   useValidationRedirect(
     validationName,
     idUsuarioParam,
     `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
   );
-
-  // useApproved()
 
   const hora = useHour();
   const fecha = useDate();
@@ -128,6 +128,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   dispatch(
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
+
+  const { runFullTest, loadingSpeed, results } = useSpeedTest();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -152,8 +154,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   });
 
   const [documentList, setDocumentList] = useState<string[]>([]);
-
-  // const [hasSent, setHasSent] = useState(false);
 
   const [useModel, setUseModel] = useState<boolean>(false);
 
@@ -195,7 +195,28 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, []);
 
   useEffect(() => {
-    // agregar prefix
+    const init = async () => {
+      try {
+        const req = await axios.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`);
+        const res = await req.data;
+        dispatch(setColumnId(res.id));
+        await runFullTest()
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    init();
+  }, [dispatch, idUsuarioParam]);
+
+  useEffect(() => {
+    if (results) {
+      console.log(loadingSpeed)
+      axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
+    }
+  },[results])
+
+  useEffect(() => {
     axios.get(getCountry).then((res) => {
       console.log(res.data);
       const country = res.data.country;
@@ -337,6 +358,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const enviar = async (failed: boolean) => {
+    setMostrar(true);
+    setLoading(true);
+
+    try {
+      await axios.post(
+        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`
+      );
+    } catch (err) {
+      console.error("Error al iniciar log", err);
+    }
 
     const reqBody: {
       info: typeof informacion;
@@ -347,118 +378,64 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       failed?: string;
       failedBack?: string;
       failedFront?: string;
+      times: typeof timerData;
     } = {
       info: informacion,
       documentValidation: validacionDocumento,
       signInfo: informacionFirmador,
       livenessTest: pruebaVida,
       params: validationParams,
+      times: timerData,
     };
 
+    console.log(reqBody);
+
     if (!failed) {
-      setMostrar(true);
-      setLoading(true);
+      try {
 
-      let state = "";
-      let idValidacion = 0;
-      let idUsuario = 0;
-
-      // agregar prefix
-      await axios({
-        method: "post",
-        url: url,
-        data: JSON.stringify(reqBody),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => {
-          idValidacion = res.data.idValidacion;
-          idUsuario = res.data.idUsuario;
-          state = res.data.estadoVerificacion;
-        })
-        .catch(() => {
-          setLoading(false);
-          setError(true);
-        })
-        .finally(() => {
-          if (standalone) {
-            if (formRef.current) {
-              const formElement = formRef.current;
-              appendHiddenInput(
-                formElement,
-                "idValidacion",
-                idValidacion.toString()
-              );
-              appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
-              appendHiddenInput(formElement, "estadoValidacion", state);
-              appendHiddenInput(
-                formElement,
-                "tipo",
-                informacionFirmador.tipoValidacion?.toString() ?? ""
-              );
-
-              appendHiddenInput(
-                formElement,
-                "reintentoURL",
-                window.location.href
-              );
-
-              formElement.submit();
-            }
-          }
-          if (!standalone) {
-            const newUrl = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-            window.location.href = newUrl;
-          }
+        const res = await axios.post(url, reqBody, {
+          headers: { "Content-Type": "application/json" },
         });
+
+        const { idValidacion, idUsuario, estadoVerificacion: state } = res.data;
+
+        await Promise.all([
+          axios.post(
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`
+          ),
+          axios.post(
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`
+          ),
+        ]).catch((e) => console.error("Error en logs finales", e));
+
+        // 4. Redirección o Submit de Formulario
+        if (standalone && formRef.current) {
+          const formElement = formRef.current;
+          appendHiddenInput(
+            formElement,
+            "idValidacion",
+            idValidacion.toString()
+          );
+          appendHiddenInput(formElement, "idUsuario", idUsuario.toString());
+          appendHiddenInput(formElement, "estadoValidacion", state);
+          appendHiddenInput(
+            formElement,
+            "tipo",
+            informacionFirmador.tipoValidacion?.toString() ?? ""
+          );
+          appendHiddenInput(formElement, "reintentoURL", window.location.href);
+
+          formElement.submit();
+        } else if (!standalone) {
+          window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
+        }
+      } catch (error) {
+        // Manejo de errores de la petición principal
+        console.error("Error en la validación:", error);
+        setLoading(false);
+        setError(true);
+      }
     }
-
-    console.log(formulario)
-
-    // if (failed) {
-    //   // ValidadorFormdata(formulario, "failed", "OK");
-
-    //   // ValidadorFormdata(
-    //   // formulario,
-    //   // "failed_back",
-    //   // validacionDocumento.sideResult.back
-    //   // );
-
-    //   // ValidadorFormdata(
-    //   // formulario,
-    //   // "failed_front",
-    //   // validacionDocumento.sideResult.front
-    //   // );
-
-    //   reqBody["failed"] = "OK";
-    //   // reqBody["failedBack"] = validacionDocumento.sideResult.back;
-    //   // reqBody["failedFront"] = validacionDocumento.sideResult.front;
-
-    //   let idValidacion = 0;
-    //   let idUsuario = 0;
-
-    //   axios({
-    //     method: "post",
-    //     url: url,
-    //     data: formulario,
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   })
-    //     .then((res) => {
-    //       idValidacion = res.data.idValidacion;
-    //       idUsuario = res.data.idUsuario;
-    //     })
-    //     .catch((err) => {
-    //       console.log(err);
-    //       setLoading(false);
-    //       setError(true);
-    //     })
-    //     .finally(() => {
-    //       window.location.href = `${URLS.rejected}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
-    //     });
-    // }
   };
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
@@ -688,20 +665,28 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             <h2 className="text-lg text-center font-semibold mb-4">
               Proceso de validación terminado.
             </h2>
-            <p className="mb-6 text-center">{loading ? "Enviando evidencias." : "Enviar evidencias." }</p>
+            <p className="mb-6 text-center">
+              {loading ? "Enviando evidencias." : "Enviar evidencias."}
+            </p>
             <form
-            className="flex justify-center items-center"
+              className="flex justify-center items-center"
               onSubmit={(e) => {
                 e.preventDefault(); // Detiene el envío nativo del HTML
                 enviar(false); // Llama a tu función de envío asíncrona
               }}
             >
-              {!loading ? (<button
-                type="submit" // 👈 Asegúrate de que el botón sea 'submit'
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Finalizar
-              </button> ): (<div className="flex items-center justify-center flex-col"><Spinner color="primary"/></div>)}
+              {!loading ? (
+                <button
+                  type="submit" // 👈 Asegúrate de que el botón sea 'submit'
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Finalizar
+                </button>
+              ) : (
+                <div className="flex items-center justify-center flex-col">
+                  <Spinner color="primary" />
+                </div>
+              )}
             </form>
           </div>
         </div>
