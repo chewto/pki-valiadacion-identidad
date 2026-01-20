@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useState, SetStateAction, Dispatch } from "react";
 import * as faceapi from "face-api.js";
-import faceTemplate from "/face_template_OK.png"; // RUTA DE TU IMAGEN
+// import faceTemplate from "/face_template_OK.png"; // RUTA DE TU IMAGEN
 import axios from "axios";
 import { URLS } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
@@ -16,10 +16,10 @@ import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
 
 // --- Interfaces ---
-interface ImageDrawing {
-  img: HTMLImageElement | null;
-  isLoaded: boolean;
-}
+// interface ImageDrawing {
+//   img: HTMLImageElement | null;
+//   isLoaded: boolean;
+// }
 
 interface Styles {
   [key: string]: React.CSSProperties;
@@ -71,7 +71,7 @@ const FaceDetection: React.FC<Props> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // const maskImgRef = useRef<HTMLImageElement>(null);
   const detectionInterval = useRef<NodeJS.Timeout | null>(null);
-  const drawingImageRef = useRef<ImageDrawing>({ img: null, isLoaded: false });
+  // const drawingImageRef = useRef<ImageDrawing>({ img: null, isLoaded: false });
 
   // 2. ESTADOS
   const [isModelLoaded, setIsModelLoaded] = useState<boolean>(true);
@@ -281,10 +281,10 @@ const FaceDetection: React.FC<Props> = ({
         // Transformamos los px de la pantalla a px del video interno
         // overlaySize debe contener {x, y, rx, ry} en px de pantalla
         const ellipseInternal = {
-          cx: (overlaySize.x - vRect.left) * scaleX,
-          cy: (overlaySize.y - vRect.top) * scaleY,
-          rx: overlaySize.rx * scaleX,
-          ry: overlaySize.ry * scaleY,
+          cx: overlaySize.x != undefined ? (overlaySize.x - vRect.left) * scaleX : 0,
+          cy: overlaySize.y != undefined ? (overlaySize.y - vRect.top) * scaleY : 0,
+          rx: overlaySize.rx != undefined ? overlaySize.rx * scaleX : 0,
+          ry: overlaySize.ry != undefined ? overlaySize.ry * scaleY : 0,
         };
 
         let feedbackColor = "#FFD700"; // Amarillo (esperando/centrando)
