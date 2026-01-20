@@ -1,7 +1,10 @@
 export interface PruebaVida{
   movimiento: string;
   videoHash: string;
-  // isReal: boolean;
+  x: number;   // Centro X en px
+  y: number;    // Centro Y en px
+  rx: number;          // Radio X en px (30% de 100)
+  ry: number;   
 }
 
 export interface InformacionIdentidad {

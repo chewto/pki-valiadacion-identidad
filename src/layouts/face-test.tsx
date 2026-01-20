@@ -7,11 +7,13 @@ import axios from "axios";
 import { URLS } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "@styles/face-detection.css";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { Spinner } from "reactstrap";
+import { CameraOverlay } from "@components/validacion-identidad/recuadro";
+import { RootState } from "@nucleo/redux/store";
 
 // --- Interfaces ---
 interface ImageDrawing {
@@ -55,13 +57,19 @@ const FaceDetection: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
+  const overlaySize = useSelector((state: RootState) => state.pruebaVida);
+
+  useEffect(() => {
+    console.log(overlaySize);
+  }, [overlaySize]);
+
   const [params] = useSearchParams();
 
   const idUser = params.get("idUsuario");
   // 1. REFS
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const maskImgRef = useRef<HTMLImageElement>(null);
+  // const maskImgRef = useRef<HTMLImageElement>(null);
   const detectionInterval = useRef<NodeJS.Timeout | null>(null);
   const drawingImageRef = useRef<ImageDrawing>({ img: null, isLoaded: false });
 
@@ -77,7 +85,7 @@ const FaceDetection: React.FC<Props> = ({
 
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
+    null,
   );
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -88,6 +96,7 @@ const FaceDetection: React.FC<Props> = ({
     "validando rostro",
   ];
 
+  const adviceSeconds = 1000 * 15;
   const [showAdvice, setShowAdvice] = useState(false);
   const [enableButton, setEnableButton] = useState(false);
 
@@ -100,11 +109,14 @@ const FaceDetection: React.FC<Props> = ({
 
     const min = 1800,
       max = 4000;
-    const timeout = setTimeout(() => {
-      setCurrentMessageIndex((prev) =>
-        prev < sendingMessages.length - 1 ? prev + 1 : prev
-      );
-    }, Math.floor(Math.random() * (max - min + 1)) + min);
+    const timeout = setTimeout(
+      () => {
+        setCurrentMessageIndex((prev) =>
+          prev < sendingMessages.length - 1 ? prev + 1 : prev,
+        );
+      },
+      Math.floor(Math.random() * (max - min + 1)) + min,
+    );
 
     return () => clearTimeout(timeout);
     // eslint-disable-next-line
@@ -115,7 +127,7 @@ const FaceDetection: React.FC<Props> = ({
     if (!isCenteredAndOk) {
       setTimeout(() => {
         setShowAdvice(true);
-      }, 1000);
+      }, adviceSeconds);
     }
   }, []);
 
@@ -129,21 +141,22 @@ const FaceDetection: React.FC<Props> = ({
         ]);
 
         // Cargar imagen en memoria para el Canvas
-        const imgObj = new Image();
-        imgObj.src = faceTemplate;
-        imgObj.onload = () => {
-          drawingImageRef.current = { img: imgObj, isLoaded: true };
-          startVideo();
-        };
-        imgObj.onerror = () => {
-          drawingImageRef.current = { img: null, isLoaded: false };
-          startVideo();
-        };
+        // const imgObj = new Image();
+        // imgObj.src = faceTemplate;
+        // imgObj.onload = () => {
+        //   drawingImageRef.current = { img: imgObj, isLoaded: true };
+        //   startVideo();
+        // };
+        // imgObj.onerror = () => {
+        //   drawingImageRef.current = { img: null, isLoaded: false };
+        // };
+        startVideo();
       } catch (error) {
         console.error("Error cargando modelos:", error);
         setIsModelLoaded(false);
       }
     };
+
     init();
 
     window.addEventListener("resize", handleResize);
@@ -201,9 +214,9 @@ const FaceDetection: React.FC<Props> = ({
   const handleDetectionLoop = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    const maskImg = maskImgRef.current;
+    // const maskImg = maskImgRef.current;
 
-    if (!video || !canvas || !maskImg) return;
+    if (!video || !canvas) return;
 
     if (video.videoWidth === 0) {
       setTimeout(handleDetectionLoop, 100);
@@ -221,7 +234,7 @@ const FaceDetection: React.FC<Props> = ({
 
       const detections = await faceapi.detectAllFaces(
         video,
-        new faceapi.TinyFaceDetectorOptions()
+        new faceapi.TinyFaceDetectorOptions(),
       );
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       const ctx = canvas.getContext("2d");
@@ -231,7 +244,7 @@ const FaceDetection: React.FC<Props> = ({
       // if( resizedDetections.length === 0 ){
       //   setTimeout(() => {
       //     setShowAdvice(true);
-      //   }, 1000); 
+      //   }, 1000);
       // }
 
       if (ctx) {
@@ -259,98 +272,113 @@ const FaceDetection: React.FC<Props> = ({
         }
         ctx.clearRect(0, 0, displaySize.width, displaySize.height);
 
-        // B. LÓGICA DE COORDENADAS
+        // --- B. LÓGICA DE ALINEACIÓN CON EL OVERLAY ---
         const vRect = video.getBoundingClientRect();
-        const mRect = maskImg.getBoundingClientRect();
-        const scaleX = video.videoWidth / vRect.width;
-        const scaleY = video.videoHeight / vRect.height;
+        // Evitar división por cero si el rect no tiene tamaño
+        const scaleX = vRect.width > 0 ? video.videoWidth / vRect.width : 1;
+        const scaleY = vRect.height > 0 ? video.videoHeight / vRect.height : 1;
 
-        // Máscara estática convertida a coordenadas internas
-        const maskInternal = {
-          x: (mRect.left - vRect.left) * scaleX,
-          y: (mRect.top - vRect.top) * scaleY,
-          width: mRect.width * scaleX,
-          height: mRect.height * scaleY,
+        // Transformamos los px de la pantalla a px del video interno
+        // overlaySize debe contener {x, y, rx, ry} en px de pantalla
+        const ellipseInternal = {
+          cx: (overlaySize.x - vRect.left) * scaleX,
+          cy: (overlaySize.y - vRect.top) * scaleY,
+          rx: overlaySize.rx * scaleX,
+          ry: overlaySize.ry * scaleY,
         };
 
-        // let feedbackMessage = "🟡 Encuadra tu rostro";
-        let feedbackMessage = "";
-        let feedbackColor = "#FFD700"; // Amarillo por defecto
+        let feedbackColor = "#FFD700"; // Amarillo (esperando/centrando)
 
         if (resizedDetections.length > 0) {
           const faceBox = resizedDetections[0].box;
           const faceCenterX = faceBox.x + faceBox.width / 2;
-          const faceCenterY = faceBox.y + faceBox.height / 2;
-
-          const maskCenterX = maskInternal.x + maskInternal.width / 2;
-          const maskCenterY = maskInternal.y + maskInternal.height / 2;
-
-          const toleranceX = maskInternal.width * 0.07;
-          const toleranceY = maskInternal.height * 0.07;
+          const faceCenterY = faceBox.y + faceBox.height / 2 - 20;
 
           if (avgBrightness < BRIGHTNESS_THRESHOLD) {
-            // feedbackMessage = "🌑 Muy oscuro";
-            // feedbackColor = "red"; // Rojo para error crítico
+            setMessage("🌑 AMBIENTE MUY OSCURO");
+            feedbackColor = "#FF0000"; // Rojo
           } else {
-            const isCenteredX =
-              Math.abs(faceCenterX - maskCenterX) < toleranceX;
-            const isCenteredY =
-              Math.abs(faceCenterY - maskCenterY) < toleranceY;
-            const fillRatio = faceBox.width / maskInternal.width;
-            const isSizeOk = fillRatio > 0.45 && fillRatio < 0.85;
+            // 1. ¿Está centrado? (Fórmula de la elipse con margen de error de 1.1)
+            // Proteger contra rx/ry = 0 para evitar Infinity
+            const rx = Math.abs(ellipseInternal.rx);
+            const ry = Math.abs(ellipseInternal.ry);
 
-            if (isCenteredX && isCenteredY && isSizeOk) {
-              // feedbackMessage = "🟢 ¡Perfecto!";
+            // 1. Calcular el desplazamiento relativo para cada eje
+            // (0 = centro, 1 = borde del radio)
+            const horizontalOffset:number =
+              Math.abs(faceCenterX - ellipseInternal.cx) / rx;
+            const verticalOffset:number =
+              Math.abs(faceCenterY - ellipseInternal.cy) / ry;
 
-              setMessage("✅ VALIDANDO...");
+            // 2. Definir umbrales de tolerancia (puedes ajustar estos números)
+            // Un valor de 0.5 significa que el centro de la cara puede estar hasta a
+            // la mitad de distancia entre el centro y el borde del óvalo.
+            const horizontalTolerance = 0.5;
+            const verticalTolerance = 1.80;
+
+            // 3. Validar verticalmente primero (como solicitaste)
+            const isVerticalAligned = verticalOffset >= verticalTolerance && verticalOffset <= 2.0;
+
+            // 4. Validar horizontalmente después
+            const isHorizontalAligned = horizontalOffset <= horizontalTolerance;
+
+            // 5. Validar proximidad/tamaño (manteniendo tu lógica del 85%)
+            const minHeightRequired = ry * 2 * 1.15;
+            const isCloseEnough = faceBox.height >= minHeightRequired;
+
+
+            // Resultado final por separado o conjunto
+            const isFaceCorrect =
+              isVerticalAligned && isHorizontalAligned && isCloseEnough;
+
+            // console.log({
+            //   vOffset: verticalOffset.toFixed(2),
+            //   hOffset: horizontalOffset.toFixed(2),
+            //   isVerticalAligned,
+            //   isHorizontalAligned,
+            //   isCloseEnough,
+            // });
+            if (isFaceCorrect && isCloseEnough) {
+              setMessage("✅ ¡PERFECTO! NO TE MUEVAS");
               feedbackColor = "#00FF00"; // Verde
-              setIsCenteredAndOk((prev) => (!prev ? true : prev));
+
+              // Si todo está OK y no estamos grabando, activamos el flag
+              if (!isRecording && !loading) {
+                setIsCenteredAndOk(true);
+              }
             } else {
               setIsCenteredAndOk(false);
-              if (!isSizeOk) {
-                // feedbackMessage = fillRatio < 0.45 ? "🔴 Acércate" : "🔴 Aléjate";
-                // feedbackColor = "orange";
+              if (!isCloseEnough) {
+                setMessage("🔴 ACÉRCATE MÁS AL ÓVALO");
+                feedbackColor = "#FF4D00"; // Naranja
               } else {
-                setMessage("centra tu cara");
-                // feedbackMessage = "🟠 Centra tu cara";
-                feedbackColor = "#ff4d00";
+                setMessage("🟠 CENTRA TU ROSTRO");
+                feedbackColor = "#FFD700"; // Amarillo
               }
             }
           }
 
-          // --- C. DIBUJADO DE LA IMAGEN EN LA CARA (TINTADA) ---
-          if (drawingImageRef.current.isLoaded && drawingImageRef.current.img) {
-            const img = drawingImageRef.current.img;
+          // --- C. FEEDBACK VISUAL EN EL CANVAS ---
+          // Dibujamos el rectángulo del rostro con el color del estado
+          ctx.strokeStyle = feedbackColor;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          const centerX = faceBox.x + faceBox.width / 2;
+          const centerY = faceBox.y + faceBox.height / 2;
+          const radius = (Math.max(faceBox.width, faceBox.height) / 2) * 1.1;
+          ctx.arc(centerX, centerY - 20, radius, 0, 2 * Math.PI);
+          ctx.stroke();
 
-            // 1. Calcular tamaño de la máscara dinámica (un poco más grande que la cara real para que encaje)
-            // Multiplicamos por 1.3 para que la máscara sea un "marco" alrededor de la cara detectada
-            const scaleFactor = 1.3;
-            const drawW = faceBox.width * scaleFactor;
-            const drawH = faceBox.height * scaleFactor;
-            // Ajustar X e Y para centrar el dibujo expandido
-            const drawX = faceBox.x - (drawW - faceBox.width) / 2;
-            const drawY = faceBox.y - (drawH - faceBox.height) / 2; // Ajuste vertical a ojo
-
-            ctx.save(); // Guardar estado actual
-
-            // 2. Dibujar la imagen normal
-            ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
-            // 3. Aplicar TINTE de color (Feedback Visual)
-            // 'source-in' mantiene el dibujo solo donde ya hay píxeles (la imagen)
-            // 'source-atop' dibuja el color encima de la imagen existente
-            ctx.globalCompositeOperation = "source-atop";
-            ctx.fillStyle = feedbackColor;
-            ctx.globalAlpha = 0.4; // 40% de opacidad del color
-            ctx.fillRect(drawX, drawY, drawW, drawH);
-
-            ctx.restore(); // Restaurar para que el texto no se afecte
-          } else {
-            // Fallback si la imagen falla: dibujar cuadro
-            ctx.strokeStyle = feedbackColor;
-            ctx.lineWidth = 4;
-            ctx.strokeRect(faceBox.x, faceBox.y, faceBox.width, faceBox.height);
-          }
+          // Opcional: Dibujar la elipse interna para verificar alineación (Solo para desarrollo)
+          /*
+        ctx.beginPath();
+        ctx.ellipse(ellipseInternal.cx, ellipseInternal.cy, ellipseInternal.rx, ellipseInternal.ry, 0, 0, 2 * Math.PI);
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        */
+        } else {
+          setMessage("🔍 BUSCANDO ROSTRO...");
+          setIsCenteredAndOk(false);
         }
 
         // TEXTO
@@ -360,8 +388,8 @@ const FaceDetection: React.FC<Props> = ({
         ctx.shadowColor = "black";
         ctx.shadowBlur = 4;
         ctx.lineWidth = 2;
-        ctx.strokeText(feedbackMessage, displaySize.width / 2, 50);
-        ctx.fillText(feedbackMessage, displaySize.width / 2, 50);
+        // ctx.strokeText(feedbackMessage, displaySize.width / 2, 50);
+        // ctx.fillText(feedbackMessage, displaySize.width / 2, 50);
         ctx.shadowBlur = 0;
       }
     }, 100);
@@ -373,7 +401,7 @@ const FaceDetection: React.FC<Props> = ({
     let chunks: Blob[] = [];
     const mimeType =
       ["video/webm; codecs=vp9", "video/webm", "video/mp4"].find((type) =>
-        MediaRecorder.isTypeSupported(type)
+        MediaRecorder.isTypeSupported(type),
       ) || "";
 
     const recorder = new MediaRecorder(stream, {
@@ -458,7 +486,7 @@ const FaceDetection: React.FC<Props> = ({
     // Detectar si el dispositivo es móvil o desktop
     const isMobile =
       /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
-        navigator.userAgent
+        navigator.userAgent,
       );
     const deviceType = isMobile ? "MOBILE" : "DESKTOP";
 
@@ -529,7 +557,7 @@ const FaceDetection: React.FC<Props> = ({
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   };
 
@@ -548,7 +576,10 @@ const FaceDetection: React.FC<Props> = ({
             zIndex: 200,
             padding: 16,
           }}
-          onClick={() =>{setShowAdvice(false) ; setEnableButton(true);}}
+          onClick={() => {
+            setShowAdvice(false);
+            setEnableButton(true);
+          }}
         >
           <div
             role="dialog"
@@ -566,11 +597,15 @@ const FaceDetection: React.FC<Props> = ({
             }}
           >
             <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              Se habilitara el boton para la captura del selfie, debido a que no detectamos que su rostro este alineado con el indicador.
+              Se habilitara el boton para la captura del selfie, debido a que no
+              detectamos que su rostro este alineado con el indicador.
             </p>
             <div style={{ marginTop: 12 }}>
               <button
-                onClick={() => {setShowAdvice(false) ; setEnableButton(true);}}
+                onClick={() => {
+                  setShowAdvice(false);
+                  setEnableButton(true);
+                }}
                 style={{
                   marginTop: 8,
                   padding: "8px 14px",
@@ -618,13 +653,14 @@ const FaceDetection: React.FC<Props> = ({
             <video ref={videoRef} muted playsInline style={styles.fullSize} />
             <canvas ref={canvasRef} style={styles.fullSizeAbsolute} />/
             {/* REFERENCIA ESTÁTICA CENTRAL (SEMI-TRANSPARENTE) */}
-            <img
+            {/* <img
               ref={maskImgRef}
               src={faceTemplate}
               alt="Guía"
               className="mask-detection"
               // style={styles.maskImage}
-            />
+            /> */}
+            <CameraOverlay />
           </div>
         </div>
       ) : (
@@ -636,10 +672,13 @@ const FaceDetection: React.FC<Props> = ({
 
       {enableButton && (
         <div className="w-full flex justify-center items-center">
-            <button onClick={() => setIsCenteredAndOk(true)} className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg">
-              Grabar video
-            </button>
-          </div>
+          <button
+            onClick={() => setIsCenteredAndOk(true)}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
+          >
+            Grabar video
+          </button>
+        </div>
       )}
     </div>
   );
