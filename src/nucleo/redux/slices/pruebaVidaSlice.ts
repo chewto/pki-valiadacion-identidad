@@ -27,6 +27,8 @@ export const pruebaVidaSlice = createSlice({
       action: PayloadAction<any>
     ) => {
       const { x, y, rx, ry} = action.payload
+
+      console.log("SET FACE INDICATOR:", {x, y, rx, ry});
       state.x = x
       state.y = y
       state.rx = rx

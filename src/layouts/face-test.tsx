@@ -59,7 +59,10 @@ const FaceDetection: React.FC<Props> = ({
 
   const overlaySize = useSelector((state: RootState) => state.pruebaVida);
 
+  const overlaySizeRef = useRef(overlaySize);
+
   useEffect(() => {
+    overlaySizeRef.current = overlaySize;
     console.log(overlaySize);
   }, [overlaySize]);
 
@@ -168,7 +171,7 @@ const FaceDetection: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (isCenteredAndOk && !enableButton) recordVideo();
+    if (isCenteredAndOk) recordVideo();
   }, [isCenteredAndOk]);
 
   // 4. INICIAR CÁMARA
@@ -280,12 +283,19 @@ const FaceDetection: React.FC<Props> = ({
 
         // Transformamos los px de la pantalla a px del video interno
         // overlaySize debe contener {x, y, rx, ry} en px de pantalla
+
+
+        // --- DENTRO DEL setInterval ---
+        const currentOverlay = overlaySizeRef.current; // <--- Usamos el valor del Ref
+
         const ellipseInternal = {
-          cx: overlaySize.x != undefined ? (overlaySize.x - vRect.left) * scaleX : 0,
-          cy: overlaySize.y != undefined ? (overlaySize.y - vRect.top) * scaleY : 0,
-          rx: overlaySize.rx != undefined ? overlaySize.rx * scaleX : 0,
-          ry: overlaySize.ry != undefined ? overlaySize.ry * scaleY : 0,
+          cx: currentOverlay.x !== undefined ? (currentOverlay.x - vRect.left) * scaleX : 0,
+          cy: currentOverlay.y !== undefined ? (currentOverlay.y - vRect.top) * scaleY : 0,
+          rx: currentOverlay.rx !== undefined ? currentOverlay.rx * scaleX : 0,
+          ry: currentOverlay.ry !== undefined ? currentOverlay.ry * scaleY : 0,
         };
+
+        // console.log("ELIPSE INTERNA:", overlaySize);
 
         let feedbackColor = "#FFD700"; // Amarillo (esperando/centrando)
 
@@ -302,6 +312,11 @@ const FaceDetection: React.FC<Props> = ({
             // Proteger contra rx/ry = 0 para evitar Infinity
             const rx = Math.abs(ellipseInternal.rx);
             const ry = Math.abs(ellipseInternal.ry);
+
+            // console.log("Valores:", { 
+            //   distancia: Math.abs(faceCenterY - ellipseInternal.cy), 
+            //   ry: ry 
+            // });
 
             // 1. Calcular el desplazamiento relativo para cada eje
             // (0 = centro, 1 = borde del radio)
@@ -460,6 +475,7 @@ const FaceDetection: React.FC<Props> = ({
 
   const saveMedia = async (data: Blob) => {
     setLoading(true);
+    setEnableButton(false);
     const formData = new FormData();
 
     const blobType = data.type || "";
@@ -673,8 +689,9 @@ const FaceDetection: React.FC<Props> = ({
       {enableButton && (
         <div className="w-full flex justify-center items-center">
           <button
-            onClick={() => setIsCenteredAndOk(true)}
-            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
+            onClick={() => recordVideo()}
+            className={`mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg ${isRecording ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
+            disabled={isRecording}
           >
             Grabar video
           </button>

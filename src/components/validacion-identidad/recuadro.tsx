@@ -19,6 +19,13 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
       const { width, height, left, top } =
         containerRef.current.getBoundingClientRect();
 
+        console.log({
+          x: left + width * 0.5, // Centro X en px
+          y: top + height * 0.5, // Centro Y en px
+          rx: width * 0.3, // Radio X en px (30% de 100)
+          ry: height * 0.4, // Radio Y en px (40% de 100)
+        })
+
       dispatch(
         setFaceIndicator({
           x: left + width * 0.5, // Centro X en px
