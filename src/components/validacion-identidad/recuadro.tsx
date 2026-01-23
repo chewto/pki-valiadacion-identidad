@@ -49,7 +49,7 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
         zIndex: 10,
       }}
       ref={containerRef}
-    >
+    >{/*
       {containerRef.current ? (() => {
         const rect = containerRef.current.getBoundingClientRect();
         const x = rect.width * 0.5;
@@ -78,7 +78,7 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
             xmlns="http://www.w3.org/2000/svg"
             style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none" }}
           >
-            {/* Horizontal axis across the ellipse (center line) */}
+
             <line
               x1={hx1}
               y1={cy}
@@ -88,7 +88,7 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
               strokeWidth={0.5}
               strokeDasharray="2"
             />
-            {/* Vertical axis across the ellipse (center line) */}
+
             <line
               x1={cx}
               y1={vy1}
@@ -98,11 +98,11 @@ export const CameraOverlay: React.FC<CameraOverlayProps> = ({
               strokeWidth={0.5}
               strokeDasharray="2"
             />
-            {/* Optional small center marker */}
+    
             <circle cx={cx} cy={cy} r={0.6} fill="lime" />
           </svg>
         );
-      })() : null}
+      })() : null} */}
       <svg
         width={width}
         height={height}

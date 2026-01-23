@@ -10,7 +10,7 @@ import "@styles/face-detection.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
-import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
+import { setIdCarpetas, setMovement } from "@nucleo/redux/slices/pruebaVidaSlice";
 import { Spinner } from "reactstrap";
 import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
@@ -42,7 +42,7 @@ interface Props {
 // --- CONFIGURACIÓN ---
 const MODEL_URL = "/models";
 // const DRAWING_IMG_URL = "/face_template_OK.png"; // RUTA DE TU IMAGEN
-const BRIGHTNESS_THRESHOLD = 50;
+// const BRIGHTNESS_THRESHOLD = 50;
 
 const FaceDetection: React.FC<Props> = ({
   label,
@@ -78,12 +78,12 @@ const FaceDetection: React.FC<Props> = ({
 
   // 2. ESTADOS
   const [isModelLoaded, setIsModelLoaded] = useState<boolean>(true);
-  const [isCenteredAndOk, setIsCenteredAndOk] = useState<boolean>(false);
+  // const [isCenteredAndOk, setIsCenteredAndOk] = useState<boolean>(false);
   const [videoDimensions, setVideoDimensions] = useState({
     width: 0,
     height: 0,
   });
-  const [message, setMessage] = useState<string>("ESPERANDO ROSTRO");
+  // const [message, setMessage] = useState<string>("ESPERANDO ROSTRO");
   const [timer, setTimer] = useState<number>(4);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -99,7 +99,7 @@ const FaceDetection: React.FC<Props> = ({
     "validando rostro",
   ];
 
-  const adviceSeconds = 1000 * 15;
+  const adviceSeconds = 100 *5;
   const [showAdvice, setShowAdvice] = useState(false);
   const [enableButton, setEnableButton] = useState(false);
 
@@ -127,11 +127,11 @@ const FaceDetection: React.FC<Props> = ({
 
   // activar boton manual
   useEffect(() => {
-    if (!isCenteredAndOk) {
-      setTimeout(() => {
-        setShowAdvice(true);
-      }, adviceSeconds);
-    }
+    setTimeout(() => {
+      setShowAdvice(true);
+    }, adviceSeconds);
+    // if (!isCenteredAndOk) {
+    // }
   }, []);
 
   // 3. CARGA INICIAL
@@ -170,9 +170,9 @@ const FaceDetection: React.FC<Props> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (isCenteredAndOk) recordVideo();
-  }, [isCenteredAndOk]);
+  // useEffect(() => {
+  //   if (isCenteredAndOk) recordVideo();
+  // }, [isCenteredAndOk]);
 
   // 4. INICIAR CÁMARA
   const startVideo = () => {
@@ -213,202 +213,68 @@ const FaceDetection: React.FC<Props> = ({
     setVideoDimensions({ width: finalW, height: finalH });
   };
 
-  // 5. LOOP DE DETECCIÓN (CANVAS)
-  const handleDetectionLoop = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    // const maskImg = maskImgRef.current;
+  const prevPosRef = useRef<{ x: number; y: number } | null>(null);
 
-    if (!video || !canvas) return;
+const handleDetectionLoop = () => {
+  const video = videoRef.current;
+  const canvas = canvasRef.current;
 
-    if (video.videoWidth === 0) {
-      setTimeout(handleDetectionLoop, 100);
-      return;
-    }
+  if (!video || !canvas) return;
 
-    const displaySize = { width: video.videoWidth, height: video.videoHeight };
-    faceapi.matchDimensions(canvas, displaySize);
+  const displaySize = { width: video.videoWidth, height: video.videoHeight };
+  faceapi.matchDimensions(canvas, displaySize);
 
-    setIsModelLoaded(false);
-    if (detectionInterval.current) clearInterval(detectionInterval.current);
+  // Clear interval if it exists to avoid memory leaks
+  if (detectionInterval.current) clearInterval(detectionInterval.current);
 
-    detectionInterval.current = setInterval(async () => {
-      if (!video || video.paused || video.ended) return;
+  detectionInterval.current = setInterval(async () => {
+    if (!video || video.paused || video.ended) return;
 
-      const detections = await faceapi.detectAllFaces(
-        video,
-        new faceapi.TinyFaceDetectorOptions(),
-      );
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
-      const ctx = canvas.getContext("2d");
+    // Detect a single face
+    const detection = await faceapi.detectSingleFace(
+      video,
+      new faceapi.TinyFaceDetectorOptions()
+    );
 
-      // activar primera advertencia
+    if (detection) {
+      // 2. Map detection to display size
+      const resizedDetection = faceapi.resizeResults(detection, displaySize);
+      const { x, y, width, height } = resizedDetection.box;
 
-      // if( resizedDetections.length === 0 ){
-      //   setTimeout(() => {
-      //     setShowAdvice(true);
-      //   }, 1000);
-      // }
+      const currentCenter = {
+        x: x + width / 2,
+        y: y + height / 2,
+      };
 
-      if (ctx) {
-        // A. CÁLCULO DE BRILLO
-        ctx.drawImage(video, 0, 0, displaySize.width, displaySize.height);
-        let avgBrightness = 255;
+      if (prevPosRef.current) {
+        // 3. Calculate distance (Movement Test)
+        const distance = Math.sqrt(
+          Math.pow(currentCenter.x - prevPosRef.current.x, 2) +
+          Math.pow(currentCenter.y - prevPosRef.current.y, 2)
+        );
 
-        if (resizedDetections.length > 0) {
-          const b = resizedDetections[0].box;
-          const sx = Math.max(0, b.x);
-          const sy = Math.max(0, b.y);
-          const sw = Math.min(b.width, displaySize.width - sx);
-          const sh = Math.min(b.height, displaySize.height - sy);
-          if (sw > 0 && sh > 0) {
-            const data = ctx.getImageData(sx, sy, sw, sh).data;
-            let sum = 0,
-              count = 0;
-            for (let i = 0; i < data.length; i += 32) {
-              sum +=
-                0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-              count++;
-            }
-            avgBrightness = count ? sum / count : 0;
-          }
-        }
-        ctx.clearRect(0, 0, displaySize.width, displaySize.height);
+        // A threshold of 5-10 pixels is usually enough to filter out camera noise
+        const MOVEMENT_THRESHOLD = 7; 
 
-        // --- B. LÓGICA DE ALINEACIÓN CON EL OVERLAY ---
-        const vRect = video.getBoundingClientRect();
-        // Evitar división por cero si el rect no tiene tamaño
-        const scaleX = vRect.width > 0 ? video.videoWidth / vRect.width : 1;
-        const scaleY = vRect.height > 0 ? video.videoHeight / vRect.height : 1;
-
-        // Transformamos los px de la pantalla a px del video interno
-        // overlaySize debe contener {x, y, rx, ry} en px de pantalla
-
-
-        // --- DENTRO DEL setInterval ---
-        const currentOverlay = overlaySizeRef.current; // <--- Usamos el valor del Ref
-
-        const ellipseInternal = {
-          cx: currentOverlay.x !== undefined ? (currentOverlay.x - vRect.left) * scaleX : 0,
-          cy: currentOverlay.y !== undefined ? (currentOverlay.y - vRect.top) * scaleY : 0,
-          rx: currentOverlay.rx !== undefined ? currentOverlay.rx * scaleX : 0,
-          ry: currentOverlay.ry !== undefined ? currentOverlay.ry * scaleY : 0,
-        };
-
-        // console.log("ELIPSE INTERNA:", overlaySize);
-
-        let feedbackColor = "#FFD700"; // Amarillo (esperando/centrando)
-
-        if (resizedDetections.length > 0) {
-          const faceBox = resizedDetections[0].box;
-          const faceCenterX = faceBox.x + faceBox.width / 2;
-          const faceCenterY = faceBox.y + faceBox.height / 2 - 20;
-
-          if (avgBrightness < BRIGHTNESS_THRESHOLD) {
-            setMessage("🌑 AMBIENTE MUY OSCURO");
-            feedbackColor = "#FF0000"; // Rojo
-          } else {
-            // 1. ¿Está centrado? (Fórmula de la elipse con margen de error de 1.1)
-            // Proteger contra rx/ry = 0 para evitar Infinity
-            const rx = Math.abs(ellipseInternal.rx);
-            const ry = Math.abs(ellipseInternal.ry);
-
-            // console.log("Valores:", { 
-            //   distancia: Math.abs(faceCenterY - ellipseInternal.cy), 
-            //   ry: ry 
-            // });
-
-            // 1. Calcular el desplazamiento relativo para cada eje
-            // (0 = centro, 1 = borde del radio)
-            const horizontalOffset:number =
-              Math.abs(faceCenterX - ellipseInternal.cx) / rx;
-            const verticalOffset:number =
-              Math.abs(faceCenterY - ellipseInternal.cy) / ry;
-
-            // 2. Definir umbrales de tolerancia (puedes ajustar estos números)
-            // Un valor de 0.5 significa que el centro de la cara puede estar hasta a
-            // la mitad de distancia entre el centro y el borde del óvalo.
-            const horizontalTolerance = 0.5;
-            const verticalTolerance = 1.80;
-
-            // 3. Validar verticalmente primero (como solicitaste)
-            const isVerticalAligned = verticalOffset >= verticalTolerance && verticalOffset <= 2.0;
-
-            // 4. Validar horizontalmente después
-            const isHorizontalAligned = horizontalOffset <= horizontalTolerance;
-
-            // 5. Validar proximidad/tamaño (manteniendo tu lógica del 85%)
-            const minHeightRequired = ry * 2 * 1.15;
-            const isCloseEnough = faceBox.height >= minHeightRequired;
-
-
-            // Resultado final por separado o conjunto
-            const isFaceCorrect =
-              isVerticalAligned && isHorizontalAligned && isCloseEnough;
-
-            // console.log({
-            //   vOffset: verticalOffset.toFixed(2),
-            //   hOffset: horizontalOffset.toFixed(2),
-            //   isVerticalAligned,
-            //   isHorizontalAligned,
-            //   isCloseEnough,
-            // });
-            if (isFaceCorrect && isCloseEnough) {
-              setMessage("✅ ¡PERFECTO! NO TE MUEVAS");
-              feedbackColor = "#00FF00"; // Verde
-
-              // Si todo está OK y no estamos grabando, activamos el flag
-              if (!isRecording && !loading) {
-                setIsCenteredAndOk(true);
-              }
-            } else {
-              setIsCenteredAndOk(false);
-              if (!isCloseEnough) {
-                setMessage("🔴 ACÉRCATE MÁS AL ÓVALO");
-                feedbackColor = "#FF4D00"; // Naranja
-              } else {
-                setMessage("🟠 CENTRA TU ROSTRO");
-                feedbackColor = "#FFD700"; // Amarillo
-              }
-            }
-          }
-
-          // --- C. FEEDBACK VISUAL EN EL CANVAS ---
-          // Dibujamos el rectángulo del rostro con el color del estado
-          ctx.strokeStyle = feedbackColor;
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          const centerX = faceBox.x + faceBox.width / 2;
-          const centerY = faceBox.y + faceBox.height / 2;
-          const radius = (Math.max(faceBox.width, faceBox.height) / 2) * 1.1;
-          ctx.arc(centerX, centerY - 20, radius, 0, 2 * Math.PI);
-          ctx.stroke();
-
-          // Opcional: Dibujar la elipse interna para verificar alineación (Solo para desarrollo)
-          /*
-        ctx.beginPath();
-        ctx.ellipse(ellipseInternal.cx, ellipseInternal.cy, ellipseInternal.rx, ellipseInternal.ry, 0, 0, 2 * Math.PI);
-        ctx.setLineDash([5, 5]);
-        ctx.stroke();
-        */
+        if (distance > MOVEMENT_THRESHOLD) {
+          // setMessage("MOVIMIENTO DETECTADO ✅");
+          dispatch(setMovement("OK"));
+          // Optional: Auto-start recording if movement is detected
+          // if (!isRecording) recordVideo(); 
         } else {
-          setMessage("🔍 BUSCANDO ROSTRO...");
-          setIsCenteredAndOk(false);
-        }
 
-        // TEXTO
-        ctx.font = "bold 24px Arial";
-        ctx.fillStyle = feedbackColor;
-        ctx.textAlign = "center";
-        ctx.shadowColor = "black";
-        ctx.shadowBlur = 4;
-        ctx.lineWidth = 2;
-        // ctx.strokeText(feedbackMessage, displaySize.width / 2, 50);
-        // ctx.fillText(feedbackMessage, displaySize.width / 2, 50);
-        ctx.shadowBlur = 0;
+          // setMessage("POR FAVOR, MUEVA SU ROSTRO");
+        }
       }
-    }, 100);
-  };
+
+      prevPosRef.current = currentCenter;
+    } else {
+      // No face in frame
+      prevPosRef.current = null;
+      // setMessage("ROSTRO NO DETECTADO");
+    }
+  }, 150); // 150ms is a good balance for performance and responsiveness
+};
 
   // 6. GRABACIÓN
   useEffect(() => {
@@ -612,10 +478,14 @@ const FaceDetection: React.FC<Props> = ({
               boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
             }}
           >
-            <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              Se habilitara el boton para la captura del selfie, debido a que no
-              detectamos que su rostro este alineado con el indicador.
+            <div className="flex flex-col">
+              <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
+              Coloque su rostro dentro del recuadro y presione "Grabar video" para
+              iniciar la grabación.
             </p>
+            <img src="" alt="demostracion" className="w-full"/>
+            </div>
+
             <div style={{ marginTop: 12 }}>
               <button
                 onClick={() => {
@@ -643,12 +513,13 @@ const FaceDetection: React.FC<Props> = ({
       {!loading ? (
         <div style={styles.mainContainer}>
           {!isRecording ? (
-            <div style={styles.statusIndicator}>{message}</div>
+            // <div style={styles.statusIndicator}>{message}</div>
+            <></>
           ) : (
             <div style={styles.statusIndicator}>Mantengase quieto.</div>
           )}
 
-          {isModelLoaded && (
+          {!isModelLoaded && (
             <div style={styles.loadingOverlay}>Cargando IA...</div>
           )}
 
