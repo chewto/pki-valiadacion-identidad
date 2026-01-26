@@ -14,6 +14,7 @@ import { setIdCarpetas, setMovement } from "@nucleo/redux/slices/pruebaVidaSlice
 import { Spinner } from "reactstrap";
 import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
+import demoImg from '/demo.png'
 
 // --- Interfaces ---
 // interface ImageDrawing {
@@ -475,18 +476,18 @@ const handleDetectionLoop = () => {
               maxWidth: 420,
               width: "100%",
               textAlign: "center",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.6)"
             }}
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col items-center">
               <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
               Coloque su rostro dentro del recuadro y presione "Grabar video" para
               iniciar la grabación.
             </p>
-            <img src="" alt="demostracion" className="w-full"/>
+            <img src={demoImg} alt="demostracion" className="w-3/4 my-2 rounded-md"/>
             </div>
 
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 0 }}>
               <button
                 onClick={() => {
                   setShowAdvice(false);
