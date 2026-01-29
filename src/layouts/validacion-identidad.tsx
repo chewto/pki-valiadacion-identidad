@@ -73,8 +73,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const timerData = useSelector((state: RootState) => state.timer);
 
   useEffect(() => {
-    console.log(timerData);
-  }, [timerData.selfieTime, timerData.frontTime, timerData.backTime]);
+    console.log(validacionDocumento);
+  }, [validacionDocumento]);
 
   const urlParams = standalone
     ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
@@ -211,14 +211,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     if (results) {
-      console.log(loadingSpeed)
       axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
     }
   },[results])
 
   useEffect(() => {
     axios.get(getCountry).then((res) => {
-      console.log(res.data);
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);

@@ -59,7 +59,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
   const validacionDocumento = useSelector(
-    (state: RootState) => state.validacionDocumento
+    (state: RootState) => state.validacionDocumento,
   );
   const times = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch();
@@ -199,7 +199,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
               if (dataURLImage.length >= 1) {
                 dispatch(
-                  setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+                  setFotos({ labelFoto: ladoDocumento, data: dataURLImage }),
                 );
                 const data = {
                   id: id,
@@ -246,7 +246,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
                 if (dataURLImage.length >= 1) {
                   dispatch(
-                    setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
+                    setFotos({ labelFoto: ladoDocumento, data: dataURLImage }),
                   );
 
                   const data = {
@@ -323,16 +323,18 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
-    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`).then((res) => {
-      console.log(res.data);
-    }
-    )
+    axios
+      .post(
+        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`,
+      )
+      .then((res) => {
+        console.log(res.data);
+      });
 
     setTriesCounter((state) => state - 1);
     const start = performance.now();
     setError(false);
     setLoading(true);
-
 
     const ocrTimeStart = Date.now();
     let durationOcr = 0;
@@ -348,7 +350,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     });
 
     const validationTimeStart = Date.now();
-    let durationValidation = 0
+    let durationValidation = 0;
     await axios({
       method: "post",
       url:
@@ -357,8 +359,8 @@ export const FormularioDocumento: React.FC<Props> = ({
             ? URLS.frontValidation
             : URLS.validarDocumentoAnverso
           : useModel
-          ? URLS.backValidation
-          : URLS.validarDocumentoReverso,
+            ? URLS.backValidation
+            : URLS.validarDocumentoReverso,
       data: data,
     })
       .then((res: AxiosResponse<any>) => {
@@ -374,7 +376,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setFrontSide(res.data.document));
           dispatch(setFrontResult({ sideResult: res.data.validSide }));
           dispatch(
-            setFotos({ labelFoto: ladoDocumento, data: res.data.image })
+            setFotos({ labelFoto: ladoDocumento, data: res.data.image }),
           );
 
           if (res.data.face && res.data.faceDetected && res.data.validSide) {
@@ -398,8 +400,8 @@ export const FormularioDocumento: React.FC<Props> = ({
             setRetry(false);
             setSuccess(true);
             setTimeout(() => {
-                nextStep();
-              }, 700);
+              nextStep();
+            }, 700);
             // if(res.data.faceDetected){
             //   setTimeout(() => {
             //     nextStep();
@@ -418,7 +420,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setBackSide(res.data.document));
           dispatch(setBackResult({ sideResult: res.data.validSide }));
           dispatch(
-            setFotos({ labelFoto: ladoDocumento, data: res.data.image })
+            setFotos({ labelFoto: ladoDocumento, data: res.data.image }),
           );
 
           if (res.data.validSide) {
@@ -462,16 +464,18 @@ export const FormularioDocumento: React.FC<Props> = ({
         console.log(`validarDocumento tardó ${(end - start).toFixed(2)} ms`);
       });
 
-    axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin`).then((res) => {
-      console.log(res.data);
-    }
-    )
-
+    axios
+      .post(
+        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin`,
+      )
+      .then((res) => {
+        console.log(res.data);
+      });
 
     const validationTimeData = {
       ocrTime: Number((durationOcr / 1000).toFixed(2)),
-      recognizeTime:  Number((durationValidation / 1000).toFixed(2)),
-      innerTimes: {}
+      recognizeTime: Number((durationValidation / 1000).toFixed(2)),
+      innerTimes: {},
     };
 
     if (ladoDocumento === "anverso") {
@@ -497,7 +501,9 @@ export const FormularioDocumento: React.FC<Props> = ({
         </h2>
       )}
 
-      <div className={`${triesCounter >= 1 ? 'flex'  : 'hidden'} justify-center  mb-1`}>
+      <div
+        className={`${triesCounter >= 1 ? "flex" : "hidden"} justify-center  mb-1`}
+      >
         <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">
           Intentos restantes: {triesCounter}{" "}
         </span>

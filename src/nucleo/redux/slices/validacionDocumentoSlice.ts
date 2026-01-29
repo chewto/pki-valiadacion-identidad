@@ -14,6 +14,7 @@ const initialState: ValidacionDocumento = {
     }
   },
   face: false,
+  documentFace: null,
   confidence: 1,
   mrz: {
     code: '',
@@ -95,9 +96,10 @@ export const validacionDocumentolice = createSlice({
       state,
       action: PayloadAction<ValidacionDocumento>
     ) => {
-      const { face,confidence } = action.payload;
+      const { face,confidence, documentFace } = action.payload;
       state.confidence = confidence;
       state.face = face;
+      state.documentFace = documentFace
     },
     setBackResult:(
       state,

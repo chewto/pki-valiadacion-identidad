@@ -4,7 +4,7 @@ export interface PruebaVida{
   x?: number;   // Centro X en px
   y?: number;    // Centro Y en px
   rx?: number;          // Radio X en px (30% de 100)
-  ry?: number;   
+  ry?: number;
 }
 
 export interface InformacionIdentidad {
@@ -46,6 +46,7 @@ export interface ValidacionDocumento {
   ocr: OCR;
   face: boolean;
   confidence: number;
+  documentFace: any[] | null;
   mrz: MRZ;
   barcode: string | null;
   sideResult: {
