@@ -131,6 +131,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const { runFullTest, loadingSpeed, results } = useSpeedTest();
 
+  console.log(loadingSpeed);
+
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
