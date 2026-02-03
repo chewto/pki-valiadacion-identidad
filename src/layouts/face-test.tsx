@@ -15,6 +15,7 @@ import { Spinner } from "reactstrap";
 import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
 import demoImg from '/demo.png'
+import { useMobile } from "@nucleo/hooks/useMobile";
 
 // --- Interfaces ---
 // interface ImageDrawing {
@@ -61,6 +62,12 @@ const FaceDetection: React.FC<Props> = ({
   const overlaySize = useSelector((state: RootState) => state.pruebaVida);
 
   const overlaySizeRef = useRef(overlaySize);
+
+  const isMobile = useMobile()
+
+  useEffect(() => {
+    console.log("isMobile:", isMobile);
+  }, [isMobile]);
 
   useEffect(() => {
     overlaySizeRef.current = overlaySize;
@@ -512,7 +519,7 @@ const handleDetectionLoop = () => {
       )}
 
       {!loading ? (
-        <div style={styles.mainContainer}>
+        <div style={styles.mainContainer} className={`${!isMobile ? 'w-5/12' : 'w-full'}`}>
           {!isRecording ? (
             // <div style={styles.statusIndicator}>{message}</div>
             <></>
@@ -527,8 +534,7 @@ const handleDetectionLoop = () => {
           <div
             style={{
               ...styles.videoWrapper,
-              width: videoDimensions.width || "100%",
-              // height: videoDimensions.height || '100%',
+              // width: isMobile ? "100%" : "80%",
               opacity: videoDimensions.width ? 1 : 0,
             }}
           >
