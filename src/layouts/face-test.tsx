@@ -446,7 +446,7 @@ const handleDetectionLoop = () => {
 
   // 7. RENDER
   return (
-    <div className="my-2">
+    <div className=" pt-3 bg-white absolute inset-0 flex flex-col justify-start items-center">
       {showAdvice && (
         <div
           style={{
@@ -552,7 +552,7 @@ const handleDetectionLoop = () => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center">
+        <div className="flex flex-col justify-center items-center text-center">
           <span>{sendingMessages[currentMessageIndex]}</span>
           <Spinner color="primary" />
         </div>
