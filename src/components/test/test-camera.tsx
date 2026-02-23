@@ -14,7 +14,10 @@ const TestCamera: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
 
   const [videoPath, setVideoPath] = useState<string | null>(null);
-  const [res, setRes] = useState<TestCameraProps>([]);
+  const [res, setRes] = useState<TestCameraProps>({
+    totalTime: 0,
+    framesResults: []
+  });
   const [intervalo, setIntervalo] = useState<number>(500);
   const [tipoDocumento, setTipoDocumento] = useState<string>('CEDULA_CIUDADANIA');
   const [ladoDocumento, setLadoDocumento] = useState<string>('FRONTAL');
@@ -64,7 +67,10 @@ const TestCamera: React.FC = () => {
 
   // 2. Función para grabar y enviar
   const handleCapture = () => {
-    setRes([])
+    setRes({
+    totalTime: 0,
+    framesResults: []
+  })
 
     if (!streamRef.current) return;
 
