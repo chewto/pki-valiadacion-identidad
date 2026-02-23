@@ -21,6 +21,7 @@ const saveVideo = rutasURL['saveVideo']
 const ocr = rutasURL['ocr']
 
 export const URLS = {
+  documentTest: `${urlBase}/ocr/document`,
   ping: `${urlBase}/ping`,
   logs: `${urlBase}/log`,
   timeLog: `${urlBase}/time-logs/`,

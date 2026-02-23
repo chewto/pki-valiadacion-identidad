@@ -5,7 +5,7 @@ import BarcodeCapture from "@components/validacion-identidad/barcode-capture";
 import TestBrowser from "@components/validacion-identidad/test-browser";
 import Verify from "@pages/verify/verify";
 import NetworkDashboard from "@layouts/speed-test";
-// import { CameraView } from "@components/validacion-identidad/recuadro";
+import  TestCamera from "@components/test/test-camera";
 
 function App() {
 
@@ -30,7 +30,7 @@ function App() {
           <Route path="barcode-test" element={<BarcodeCapture/>}/>
           <Route path="deteccion" element={<TestBrowser/>}/>
           <Route path="net" element={<NetworkDashboard/>}/>
-          {/* <Route path="camera" element={<CameraView/>}/> */}
+          <Route path="camera" element={<TestCamera/>}/>
         </Route>
       </Routes>
     </Router>
