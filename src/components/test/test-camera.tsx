@@ -13,12 +13,14 @@ const TestCamera: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
 
+  const [tryCount, setTryCount] = useState(0);
+
   const [videoPath, setVideoPath] = useState<string | null>(null);
   const [res, setRes] = useState<TestCameraProps>({
     totalTime: 0,
     framesResults: []
   });
-  const [intervalo, setIntervalo] = useState<number>(500);
+  const [intervalo, setIntervalo] = useState<number>(250);
   const [tipoDocumento, setTipoDocumento] = useState<string>('CEDULA_CIUDADANIA');
   const [ladoDocumento, setLadoDocumento] = useState<string>('FRONTAL');
 
@@ -44,10 +46,15 @@ const TestCamera: React.FC = () => {
       try {
         const constraints = {
           video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
             facingMode: { ideal: window.innerWidth < 768 ? "environment" : "user" }
           }
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        const videotrack = stream.getVideoTracks()[0];
+        const {height, width} = videotrack.getSettings();
+        console.log(height, width);
         streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -72,6 +79,8 @@ const TestCamera: React.FC = () => {
     framesResults: []
   })
 
+  setTryCount(prev => prev + 1);
+
     if (!streamRef.current) return;
 
     const recorder = new MediaRecorder(streamRef.current, { mimeType: 'video/webm' });
@@ -84,7 +93,7 @@ const TestCamera: React.FC = () => {
     recorder.onstop = async () => {
       const videoBlob = new Blob(chunks, { type: 'video/webm' });
       const formData = new FormData();
-      formData.append('video', videoBlob, 'grabacion.webm');
+      formData.append('video', videoBlob, `grabacion-intento-${tryCount}.webm`);
 
       try {
         setIsUploading(true);
@@ -103,9 +112,12 @@ const TestCamera: React.FC = () => {
     // Iniciar ciclo de 3 segundos
     setIsRecording(true);
     recorder.start();
-    
+
+    // Asegurarse de que el recorder se detenga después de 3 segundos
     setTimeout(() => {
-      if (recorder.state !== "inactive") recorder.stop();
+      if (recorder.state === "recording") {
+        recorder.stop();
+      }
     }, 3000);
   };
 
@@ -167,7 +179,15 @@ const TestCamera: React.FC = () => {
           {res.framesResults.map((frame: any, index: number) => (
             <div key={index} style={{ marginTop: '10px', padding: '10px', border: `1px solid ${frame.documentDetected ? '#00ff00' : '#ff0000'}`, borderRadius: '8px'}}>
               <p><strong>frame: {frame.frame} | documento valido: {frame.documentDetected ? 'Sí' : 'No'}</strong></p> 
-              <p>{frame.classes.map((cls: any, index:number) => (<span key={index} className='mr-2'>{cls}</span>))}</p>
+              <div className='flex flex-wrap'>
+                {frame.classes.length > 0 ? frame.classes.map((cls: any, idx:number) => (
+                  <div className='flex flex-col ' key={idx}>
+                    <span >{cls.label}</span>
+                    <img src={cls.crop} className='w-3/4' alt={cls.label} />
+                  </div>
+                )) : <span>No se detectaron clases</span>}
+              </div>
+              {/* <p>{frame.classes.map((cls: any, index:number) => (<span key={index} className='mr-2'>{cls}</span>))}</p> */}
             </div>
           ))}</>
         )}
