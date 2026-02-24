@@ -110,7 +110,7 @@ const TestCamera: React.FC = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
+    <div className='flex flex-col items-center' style={{ textAlign: 'center', padding: '20px' }}>
       <div style={{ marginBottom: '15px', position: 'relative', display: 'inline-block' }}>
         <video 
           ref={videoRef} 
@@ -128,7 +128,8 @@ const TestCamera: React.FC = () => {
 
       <br />
 
-      <select name="tipoDocumento" id="tipoDocumento" onChange={(e) => setTipoDocumento(e.target.value)}>
+      <div>
+        <select name="tipoDocumento" id="tipoDocumento" onChange={(e) => setTipoDocumento(e.target.value)}>
         <option value="CEDULA_CIUDADANIA">Cedula de ciudadania</option>
         <option value="CEDULA_EXTRANJERIA">Cedula de extranjeria</option>
         <option value="CEDULA_DIGITAL">Cedula digital</option>
@@ -143,6 +144,7 @@ const TestCamera: React.FC = () => {
         <option value="1000">Intervalo 1s</option>
         <option value="2000">Intervalo 2s</option>
       </select>
+      </div>
       <br />
       <button
         onClick={handleCapture}
@@ -159,12 +161,14 @@ const TestCamera: React.FC = () => {
       >
         {isRecording ? 'Grabando (3s)...' : isUploading ? 'Subiendo...' : 'Grabar y Enviar'}
       </button>
-      <div>
+      <div className='flex flex-col items-center w-2/4'>
         {res.framesResults && (
           <>
           {res.framesResults.map((frame: any, index: number) => (
-            <div key={index} style={{ marginTop: '10px', padding: '10px', border: '1px solid #ddd', borderRadius: '8px' }}>
-              <p><strong>{frame.frame}:</strong></p> </div>
+            <div key={index} style={{ marginTop: '10px', padding: '10px', border: `1px solid ${frame.documentDetected ? '#00ff00' : '#ff0000'}`, borderRadius: '8px'}}>
+              <p><strong>frame: {frame.frame} | documento valido: {frame.documentDetected ? 'Sí' : 'No'}</strong></p> 
+              <p>{frame.classes.map((cls: any, index:number) => (<span key={index} className='mr-2'>{cls}</span>))}</p>
+            </div>
           ))}</>
         )}
       </div>
