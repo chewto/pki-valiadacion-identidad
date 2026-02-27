@@ -43,6 +43,7 @@ import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 import { Spinner } from "reactstrap";
 import { setColumnId } from "@nucleo/redux/slices/timerSlice";
 import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
+// import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
@@ -71,10 +72,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
 
   const timerData = useSelector((state: RootState) => state.timer);
-
-  useEffect(() => {
-    console.log(validacionDocumento);
-  }, [validacionDocumento]);
 
   const urlParams = standalone
     ? `id=${informacionFirmador.idValidacion}&idUsuario=${informacionFirmador.idUsuario}&tipo=${informacionFirmador.tipoValidacion}&hash=${hash}`
@@ -129,9 +126,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setDispostivoNavegador({ dispositivo: dispositivo, navegador: navegador })
   );
 
-  const { runFullTest, loadingSpeed, results } = useSpeedTest();
-
-  console.log(loadingSpeed);
+  const { runFullTest, results } = useSpeedTest();
 
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
@@ -169,7 +164,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: userDataUrl,
     })
       .then((res) => {
-        console.log(res);
 
         if (res.data.dato == null) {
           setGenerated(false);
@@ -264,7 +258,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       )
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
-        console.log(res);
         if (estadoValidacion.length >= 1) {
           const textList = [
             "se requiere nueva validación",
@@ -388,7 +381,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       times: timerData,
     };
 
-    console.log(reqBody);
 
     if (!failed) {
       try {
@@ -507,6 +499,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
           />,
           <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
+          // <Demo side="face" handleNext={handleNext}/>,
           <FormularioFotoPersona
             key="formulario-foto-persona"
             setContinuarBoton={setContinuarBoton}
@@ -516,6 +509,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
             tries={validationParams.documentsTries}
           />,
+          // <Demo side="frontal"  handleNext={handleNext}/>,
           <FormularioDocumento
             key="formulario-anverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -531,6 +525,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             nextStep={handleNext}
             returnStep={handleReturn}
           />,
+          // <Demo side="reverso"  handleNext={handleNext}/>,
           <FormularioDocumento
             key="formulario-reverso"
             id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
@@ -602,7 +597,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const handleContextMenu = (e: React.MouseEvent<any>) => {
     if (!isDevMode) {
-      console.log(isDevMode);
       e.preventDefault();
     }
   };

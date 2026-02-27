@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 680">
+  <defs>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <linearGradient id="cedula-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fdfce9;stop-opacity:1" /> <stop offset="30%" style="stop-color:#f7f3c6;stop-opacity:1" /> <stop offset="60%" style="stop-color:#eaf7ce;stop-opacity:1" /> <stop offset="100%" style="stop-color:#e1f3c9;stop-opacity:1" /> </linearGradient>
+    
+    <pattern id="guilloche-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 10 Q 5 0, 10 10 Q 15 20, 20 10" stroke="#dce775" stroke-width="0.5" fill="none" opacity="0.5"/>
+      <path d="M10 0 Q 20 5, 10 10 Q 0 15, 10 20" stroke="#cddc39" stroke-width="0.5" fill="none" opacity="0.5"/>
+    </pattern>
+    
+    <linearGradient id="hologram-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0" />
+        <stop offset="20%" style="stop-color:#00ffff;stop-opacity:0.2" />
+        <stop offset="40%" style="stop-color:#ff00ff;stop-opacity:0.2" />
+        <stop offset="60%" style="stop-color:#ffff00;stop-opacity:0.2" />
+        <stop offset="80%" style="stop-color:#00ff00;stop-opacity:0.2" />
+        <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </linearGradient>
+
+    <style>
+      /* Animación de línea de escaneo sobre la foto */
+      .scan-line { animation: scan 2s infinite ease-in-out; }
+      @keyframes scan { 0%, 100% { transform: translateY(0); opacity: 0; } 50% { transform: translateY(80px); opacity: 1; } }
+
+      /* Animación de la barra de progreso */
+      .progress { animation: load 3s linear infinite; transform-origin: left; }
+      @keyframes load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      
+      /* Animación del holograma */
+      .hologram-shimmer { animation: shimmer 3s infinite linear; }
+      @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+    </style>
+  </defs>
+
+  <rect width="400" height="680" fill="#f4f7f9" rx="20"/>
+
+  <g text-anchor="middle" font-family="sans-serif">
+    <text x="200" y="45" font-size="22" font-weight="bold" fill="#2c3e50">Muestra el ANVERSO</text>
+    <text x="200" y="72" font-size="16" fill="#e74c3c" font-weight="bold">(Lado con tu FOTO y FIRMA)</text>
+  </g>
+
+  <g transform="translate(40, 105)">
+    <rect width="320" height="300" rx="15" fill="#ffffff" stroke="#cfd8dc" stroke-width="2"/>
+    
+    <g fill="none" stroke="#4a90e2" stroke-width="5" stroke-linecap="round" opacity="0.5">
+      <path d="M30 40 L 10 40 L 10 60" /> <path d="M290 40 L 310 40 L 310 60" />
+      <path d="M30 260 L 10 260 L 10 240" /> <path d="M290 260 L 310 260 L 310 240" />
+    </g>
+
+    <g transform="translate(45, 75)" filter="url(#soft-shadow)">
+      <rect width="230" height="150" rx="10" fill="url(#cedula-gradient)" stroke="#bdc3c7" stroke-width="1"/>
+      <rect width="230" height="150" rx="10" fill="url(#guilloche-pattern)"/>
+      
+      <g transform="translate(75, 35)" opacity="0.1" fill="#aabb00">
+        <circle cx="40" cy="40" r="35"/>
+        <path d="M20 40 L 60 40 M 40 20 L 40 60" stroke="#aabb00" stroke-width="5"/>
+      </g>
+
+      <g font-family="sans-serif" fill="#263238">
+        <text x="15" y="20" font-size="7" font-weight="bold">REPUBLICA DE COLOMBIA</text>
+        <text x="15" y="28" font-size="6">IDENTIFICACION PERSONAL</text>
+        <text x="15" y="36" font-size="6">CEDULA DE CIUDADANIA</text>
+
+        <text x="15" y="55" font-size="5" fill="#546e7a">NUMERO</text>
+        <text x="40" y="55" font-size="10" font-weight="bold">9.999.999.999</text>
+
+        <text x="15" y="75" font-size="5" fill="#546e7a">APELLIDOS</text>
+        <text x="15" y="85" font-size="9" font-weight="bold">APELLIDO1 APELLIDO2</text>
+
+        <text x="15" y="105" font-size="5" fill="#546e7a">NOMBRES</text>
+        <text x="15" y="115" font-size="9" font-weight="bold">NOMBRE1 NOMBRE2</text>
+      </g>
+
+      <g transform="translate(25, 130)">
+        <path d="M0 0 C 10 -5, 20 5, 30 0 C 40 -5, 50 5, 60 0" stroke="#263238" stroke-width="1.5" fill="none"/>
+        <text x="30" y="10" font-size="5" fill="#546e7a" text-anchor="middle">FIRMA</text>
+      </g>
+      
+      <g transform="translate(145, 30)">
+        <rect width="70" height="90" rx="5" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+        <g fill="#78909c">
+            <ellipse cx="35" cy="35" rx="18" ry="22"/>
+            <path d="M5 90 C 5 65, 20 60, 35 60 C 50 60, 65 65, 65 90 Z"/>
+            <path d="M25 90 L 35 70 L 45 90 Z" fill="#cfd8dc"/> </g>
+        <rect width="70" height="90" rx="5" fill="url(#hologram-gradient)" opacity="0.3"/>
+        <rect width="70" height="2" fill="#4a90e2" opacity="0.6" class="scan-line"/>
+      </g>
+
+      <rect x="5" y="5" width="15" height="140" rx="2" fill="url(#hologram-gradient)" opacity="0.4">
+        <animateTransform attributeName="transform" type="translate" from="-150 0" to="150 0" dur="3s" repeatCount="indefinite" />
+      </rect>
+
+    </g>
+
+    <g transform="translate(20, 20)">
+      <circle cx="8" cy="8" r="6" fill="#e74c3c">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+      </circle>
+      <text x="22" y="13" font-family="sans-serif" font-size="14" fill="#e74c3c" font-weight="bold">VIDEO: 3s</text>
+      <rect x="0" y="25" width="280" height="5" fill="#eee" rx="2.5"/>
+      <rect x="0" y="25" width="280" height="5" fill="#e74c3c" rx="2.5" class="progress"/>
+    </g>
+  </g>
+
+  <g transform="translate(200, 440)" text-anchor="middle" font-family="sans-serif">
+    <text font-size="15" fill="#34495e" font-weight="bold">
+      Cuando veas el documento <tspan fill="#4a90e2">ENFOCADO</tspan>,
+    </text>
+    <text y="22" font-size="15" fill="#34495e" font-weight="bold">
+      pulsa el botón de grabar
+    </text>
+  </g>
+
+  <g transform="translate(200, 505)" font-family="sans-serif" font-size="14" fill="#7f8c8d" text-anchor="middle">
+    <text y="0" font-weight="500">• Sostenlo firme por 3 segundos</text>
+    <text y="25" font-weight="500">• Evita reflejos de luz sobre la foto</text>
+  </g>
+
+  <g transform="translate(50, 580)" cursor="pointer">
+    <rect width="300" height="55" rx="12" fill="#4a90e2" filter="url(#soft-shadow)"/>
+    <text x="150" y="34" font-family="sans-serif" font-size="18" fill="white" text-anchor="middle" font-weight="bold">CONTINUAR</text>
+  </g>
+</svg>

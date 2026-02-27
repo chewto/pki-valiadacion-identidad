@@ -13,7 +13,7 @@ interface SpeedMetrics {
 }
 
 export const useSpeedTest = () => {
-  const [loadingSpeed, setLoadingSpeed] = useState(false);
+  // const [loadingSpeed, setLoadingSpeed] = useState(false);
   const [results, setResults] = useState<SpeedMetrics | null>(null);
 
   const measurePing = async (url: string): Promise<number> => {
@@ -102,7 +102,7 @@ export const useSpeedTest = () => {
   };
 
   const runFullTest = useCallback(async () => {
-    setLoadingSpeed(true);
+    // setLoadingSpeed(true);
     try {
       // 1. Descarga (Asumiendo un archivo de 1MB)
       const { down, secsDown } = await measureDownload('https://cdn.jsdelivr.net/npm/pdfjs-dist@2.6.347/build/pdf.worker.min.js');
@@ -115,9 +115,9 @@ export const useSpeedTest = () => {
     } catch (err) {
       console.error("Error en el test:", err);
     } finally {
-      setLoadingSpeed(false);
+      // setLoadingSpeed(false);
     }
   }, []);
 
-  return { runFullTest, loadingSpeed, results };
+  return { runFullTest, results };
 };

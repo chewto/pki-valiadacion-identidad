@@ -1,18 +1,18 @@
-import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
+// import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 
 const NetworkDashboard = () => {
-  const { runFullTest, loadingSpeed, results } = useSpeedTest();
+  // const { runFullTest, results } = useSpeedTest();
 
   return (
     <div className="p-6 bg-gray-100 rounded-xl">
-      <button 
+      {/* <button 
         onClick={runFullTest} 
         disabled={loadingSpeed}
         className="bg-blue-600 text-white px-4 py-2 rounded"
       >
         {loadingSpeed ? 'Analizando red...' : 'Iniciar Test Completo'}
-      </button>
-
+      </button> */}
+{/* 
       {results && (
         <div>
           
@@ -27,7 +27,7 @@ const NetworkDashboard = () => {
         //     <p className="text-2xl font-bold">{results.uploadMbps} Mbps</p>
         //   </div>
         // </div>
-      )}
+      )} */}
     </div>
   );
 };

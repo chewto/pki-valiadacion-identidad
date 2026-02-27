@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 680">
+  <defs>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <linearGradient id="ce-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e3f2fd;stop-opacity:1" /> <stop offset="50%" style="stop-color:#bbdefb;stop-opacity:1" /> <stop offset="100%" style="stop-color:#c8e6c9;stop-opacity:0.6" /> </linearGradient>
+
+    <pattern id="ce-guilloche" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 20 Q 10 0, 20 20 Q 30 40, 40 20" stroke="#90caf9" stroke-width="0.5" fill="none" opacity="0.4"/>
+      <path d="M20 0 Q 30 20, 20 40 Q 10 20, 20 0" stroke="#81c784" stroke-width="0.5" fill="none" opacity="0.4"/>
+      <circle cx="20" cy="20" r="15" stroke="#64b5f6" stroke-width="0.3" fill="none" opacity="0.3"/>
+    </pattern>
+    
+    <pattern id="building-watermark" x="0" y="0" width="230" height="150" patternUnits="userSpaceOnUse">
+         <g opacity="0.1" fill="#78909c">
+            <rect x="160" y="50" width="60" height="100"/>
+            <rect x="170" y="60" width="10" height="15"/>
+            <rect x="190" y="60" width="10" height="15"/>
+            <rect x="210" y="60" width="10" height="15"/>
+            <polygon points="160,50 190,30 220,50"/>
+         </g>
+    </pattern>
+
+    <style>
+      /* Animación de línea de escaneo sobre la foto */
+      .scan-line { animation: scan 2s infinite ease-in-out; }
+      @keyframes scan { 0%, 100% { transform: translateY(0); opacity: 0; } 50% { transform: translateY(80px); opacity: 1; } }
+
+      /* Animación de la barra de progreso */
+      .progress { animation: load 3s linear infinite; transform-origin: left; }
+      @keyframes load { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    </style>
+  </defs>
+
+  <rect width="400" height="680" fill="#f4f7f9" rx="20"/>
+
+  <g text-anchor="middle" font-family="sans-serif">
+    <text x="200" y="45" font-size="22" font-weight="bold" fill="#2c3e50">Muestra el ANVERSO</text>
+    <text x="200" y="72" font-size="16" fill="#e74c3c" font-weight="bold">(Lado con tu FOTO y DATOS)</text>
+  </g>
+
+  <g transform="translate(40, 105)">
+    <rect width="320" height="300" rx="15" fill="#ffffff" stroke="#cfd8dc" stroke-width="2"/>
+    
+    <g fill="none" stroke="#4a90e2" stroke-width="5" stroke-linecap="round" opacity="0.5">
+      <path d="M30 40 L 10 40 L 10 60" /> <path d="M290 40 L 310 40 L 310 60" />
+      <path d="M30 260 L 10 260 L 10 240" /> <path d="M290 260 L 310 260 L 310 240" />
+    </g>
+
+    <g transform="translate(45, 75)" filter="url(#soft-shadow)">
+      <rect width="230" height="150" rx="8" fill="url(#ce-gradient)" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect width="230" height="150" rx="8" fill="url(#ce-guilloche)"/>
+      <rect width="230" height="150" rx="8" fill="url(#building-watermark)"/>
+
+      <g font-family="sans-serif">
+        <text x="15" y="20" font-size="14" font-weight="bold" fill="#5d4037">COL</text>
+        <text x="115" y="15" font-size="9" font-weight="bold" fill="#263238" text-anchor="middle">REPÚBLICA DE COLOMBIA</text>
+        <text x="115" y="25" font-size="8" fill="#263238" text-anchor="middle">Cédula de Extranjería</text>
+        
+        <g transform="translate(190, 10)" opacity="0.7">
+            <circle cx="15" cy="15" r="12" fill="url(#ce-gradient)"/>
+            <path d="M15 3 C 8 3, 3 8, 3 15 C 3 22, 8 27, 15 27 C 22 27, 27 22, 27 15 C 27 8, 22 3, 15 3 Z" stroke="#fff" stroke-width="0.5" fill="none"/>
+            <text x="15" y="18" font-size="5" fill="#fff" text-anchor="middle">000000</text>
+        </g>
+      </g>
+
+      <g transform="translate(15, 40)">
+        <path d="M10 70 C 10 50, 20 45, 35 45 C 50 45, 60 50, 60 70 L 65 85 L 5 85 L 10 70 Z M 35 45 C 45 45, 52 35, 52 25 C 52 12, 45 5, 35 5 C 25 5, 18 12, 18 25 C 18 35, 25 45, 35 45 Z" fill="#263238"/>
+        <rect y="5" width="70" height="2" fill="#4a90e2" opacity="0.6" class="scan-line"/>
+      </g>
+
+      <g transform="translate(90, 40)" font-family="sans-serif" fill="#263238">
+        <text x="0" y="0" font-size="10" font-weight="bold">RESIDENTE</text>
+        <text x="60" y="0" font-size="10" font-weight="bold">No. 0000000</text>
+
+        <text x="0" y="14" font-size="6" fill="#546e7a">APELLIDOS:</text>
+        <text x="35" y="14" font-size="9">BARROW LASS</text>
+
+        <text x="0" y="28" font-size="6" fill="#546e7a">NOMBRES:</text>
+        <text x="35" y="28" font-size="9">MELDA MARIE</text>
+
+        <text x="0" y="42" font-size="6" fill="#546e7a">NACIONALIDAD:</text>
+        <text x="48" y="42" font-size="9">USA</text>
+
+        <text x="0" y="56" font-size="6" fill="#546e7a">FECHA DE NACIMIENTO:</text>
+        <text x="68" y="56" font-size="9">1981/06/15</text>
+        
+        <g transform="translate(0, 70)">
+            <text x="0" y="0" font-size="6" fill="#546e7a">SEXO:</text>
+            <text x="20" y="0" font-size="9">F</text>
+            <text x="50" y="0" font-size="6" fill="#546e7a">RH:</text>
+            <text x="64" y="0" font-size="9">A+</text>
+        </g>
+
+        <g transform="translate(30, 86)">
+            <text x="0" y="0" font-size="6" fill="#546e7a" text-anchor="end">F. EXPEDICIÓN:</text>
+            <text x="5" y="0" font-size="9">2016/10/13</text>
+            <text x="0" y="14" font-size="6" fill="#546e7a" text-anchor="end">VENCE:</text>
+            <text x="5" y="14" font-size="9">2021/10/15</text>
+        </g>
+      </g>
+
+      <g transform="translate(15, 135)">
+         <text x="35" y="8" font-size="5" fill="#546e7a" text-anchor="middle" font-family="sans-serif">FIRMA</text>
+        <path d="M20 0 C 25 -5, 30 5, 35 0 C 40 -5, 45 5, 50 0" stroke="#263238" stroke-width="1" fill="none" font-style="italic"/>
+        
+        <g transform="translate(185, -32)" opacity="0.8">
+            <ellipse cx="15" cy="20" rx="12" ry="18" fill="#263238"/>
+            <path d="M15 5 C 8 5, 5 12, 5 20 C 5 28, 8 35, 15 35 C 22 35, 25 28, 25 20 C 25 12, 22 5, 15 5 Z M 15 8 C 20 8, 22 12, 22 20 C 22 28, 20 32, 15 32 C 10 32, 8 28, 8 20 C 8 12, 10 8, 15 8 Z" fill="none" stroke="#fff" stroke-width="0.5"/>
+            <text x="15" y="42" font-size="4" fill="#546e7a" text-anchor="middle" font-family="sans-serif">INDICE DERECHO</text>
+        </g>
+      </g>
+      
+    </g>
+
+    <g transform="translate(20, 20)">
+      <circle cx="8" cy="8" r="6" fill="#e74c3c">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1.5s" repeatCount="indefinite" />
+      </circle>
+      <text x="22" y="13" font-family="sans-serif" font-size="14" fill="#e74c3c" font-weight="bold">VIDEO: 3s</text>
+      <rect x="0" y="25" width="280" height="5" fill="#eee" rx="2.5"/>
+      <rect x="0" y="25" width="280" height="5" fill="#e74c3c" rx="2.5" class="progress"/>
+    </g>
+  </g>
+
+  <g transform="translate(200, 440)" text-anchor="middle" font-family="sans-serif">
+    <text font-size="15" fill="#34495e" font-weight="bold">
+      Cuando veas el documento <tspan fill="#4a90e2">ENFOCADO</tspan>,
+    </text>
+    <text y="22" font-size="15" fill="#34495e" font-weight="bold">
+      pulsa el botón de grabar
+    </text>
+  </g>
+
+  <g transform="translate(200, 505)" font-family="sans-serif" font-size="14" fill="#7f8c8d" text-anchor="middle">
+    <text y="0" font-weight="500">• Sostenlo firme por 3 segundos</text>
+    <text y="25" font-weight="500">• Evita reflejos de luz sobre la foto</text>
+  </g>
+
+  <g transform="translate(50, 580)" cursor="pointer">
+    <rect width="300" height="55" rx="12" fill="#4a90e2" filter="url(#soft-shadow)"/>
+    <text x="150" y="34" font-family="sans-serif" font-size="18" fill="white" text-anchor="middle" font-weight="bold">CONTINUAR</text>
+  </g>
+</svg>

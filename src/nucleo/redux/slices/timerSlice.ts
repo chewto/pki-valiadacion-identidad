@@ -33,7 +33,6 @@ const timerSlice = createSlice({
   initialState,
   reducers: {
     setColumnId(state, action: PayloadAction<number>) {
-      console.log(state, action.payload)
       state.id = action.payload;
     },
     setTotalTime(state, action: PayloadAction<number>) {

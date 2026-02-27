@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <path id="eye-open" d="M10,15 Q20,5 30,15 Q20,25 10,15 Z M13,15 A3,3 0 1,1 19,15 A3,3 0 0,1 13,15 Z" fill="#546e7a"/>
+    <path id="eye-closed" d="M10,18 Q20,10 30,18" fill="none" stroke="#546e7a" stroke-width="2" stroke-linecap="round"/>
+
+    <style>
+      /* Animación del parpadeo del rostro */
+      .blink-eyes {
+        animation: blinkAnimation 4s infinite;
+      }
+      @keyframes blinkAnimation {
+        0%, 90%, 100% { opacity: 1; }
+        92%, 98% { opacity: 0; }
+      }
+      .blink-closed {
+        opacity: 0;
+        animation: blinkClosedAnimation 4s infinite;
+      }
+      @keyframes blinkClosedAnimation {
+        0%, 90%, 100% { opacity: 0; }
+        92%, 98% { opacity: 1; }
+      }
+
+      /* Animación de la barra de progreso de video (3 segundos) */
+      .video-progress {
+        animation: progressAnimation 3s linear infinite;
+        transform-origin: left;
+      }
+      @keyframes progressAnimation {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
+      }
+      
+      /* Animación sutil del indicador de grabación */
+      .rec-dot {
+         animation: pulseRed 1s infinite alternate;
+      }
+      @keyframes pulseRed {
+        from { fill: #e74c3c; opacity: 1; }
+        to { fill: #c0392b; opacity: 0.7; }
+      }
+
+      /* NUEVA: Animación de latido para el texto ANVERSO central */
+      .anverso-pulse {
+        animation: pulseText 1.5s infinite alternate ease-in-out;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+      @keyframes pulseText {
+        from { transform: scale(1); opacity: 0.85; }
+        to { transform: scale(1.08); opacity: 1; }
+      }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="400" height="500" fill="#f8fafd"/>
+
+  <text x="200" y="40" font-family="sans-serif" font-size="16" fill="#2c3e50" text-anchor="middle" font-weight="bold">
+    <tspan x="200" dy="0">Muestra delante de la cámara el ANVERSO</tspan>
+    <tspan x="200" dy="22">mientras se graba un video de 3 segundos</tspan>
+  </text>
+
+  <g transform="translate(50, 90)">
+    <rect x="0" y="0" width="300" height="320" rx="15" fill="#eef2f7" stroke="#cfd8dc" stroke-width="2"/>
+    
+    <g transform="translate(20, 20)">
+        <circle cx="10" cy="10" r="6" class="rec-dot"/>
+        <text x="25" y="15" font-family="sans-serif" font-size="14" fill="#e74c3c" font-weight="bold">REC 0:03s</text>
+        <rect x="0" y="25" width="260" height="4" fill="#dce4ec" rx="2"/>
+        <rect x="0" y="25" width="260" height="4" fill="#e74c3c" rx="2" class="video-progress"/>
+    </g>
+
+    <g transform="translate(25, 60)" filter="url(#soft-shadow)">
+      <rect width="250" height="160" rx="8" fill="#ffffff" stroke="#bdc3c7" stroke-width="1"/>
+      
+      <rect width="250" height="25" rx="8" fill="#4a90e2" clip-path="inset(0 0 70% 0)"/>
+      <text x="240" y="18" font-family="sans-serif" font-size="10" fill="#ffffff" text-anchor="end" font-weight="bold" opacity="0.8">DOCUMENTO DE IDENTIDAD</text>
+
+      <rect x="15" y="40" width="80" height="100" rx="4" fill="#e1e8ee" stroke="#4a90e2" stroke-width="2" stroke-dasharray="4 2"/>
+      
+      <g transform="translate(15, 40)">
+        <path d="M40 75 C 25 75, 15 85, 15 95 L 65 95 C 65 85, 55 75, 40 75 Z" fill="#cfd8dc"/>
+        <path d="M40 15 C 28 15, 18 25, 18 42 C 18 58, 28 68, 40 68 C 52 68, 62 58, 62 42 C 62 25, 52 15, 40 15 Z" fill="#cfd8dc"/>
+        <g transform="translate(8, 32) scale(0.6)">
+             <g transform="translate(0,0)">
+                 <use href="#eye-open" class="blink-eyes"/>
+                 <use href="#eye-closed" class="blink-closed"/>
+            </g>
+            <g transform="translate(40,0)">
+                 <use href="#eye-open" class="blink-eyes"/>
+                 <use href="#eye-closed" class="blink-closed"/>
+            </g>
+        </g>
+      </g>
+
+      <rect x="105" y="50" width="120" height="12" rx="2" fill="#dce4ec"/>
+      <rect x="105" y="75" width="80" height="8" rx="2" fill="#eceff1"/>
+      <rect x="105" y="95" width="100" height="8" rx="2" fill="#eceff1"/>
+      <rect x="105" y="115" width="60" height="8" rx="2" fill="#eceff1"/>
+
+      <text x="165" y="95" font-family="sans-serif" font-size="22" fill="#e74c3c" text-anchor="middle" font-weight="900" letter-spacing="2" class="anverso-pulse">ANVERSO</text>
+    </g>
+
+    <g fill="none" stroke="#4a90e2" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <path d="M35 50 L 15 50 L 15 70" /> <path d="M265 50 L 285 50 L 285 70" /> <path d="M35 230 L 15 230 L 15 210" /> <path d="M265 230 L 285 230 L 285 210" /> </g>
+
+    <g transform="translate(10, 260)">
+        <g transform="translate(0,0)">
+             <circle cx="15" cy="15" r="15" fill="#e8f5e9"/>
+             <path d="M8 15 L 13 20 L 22 11" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+             <text x="38" y="20" font-family="sans-serif" font-size="12" fill="#2c3e50">Bien enfocado</text>
+        </g>
+        <g transform="translate(130,0)">
+             <circle cx="15" cy="15" r="15" fill="#fff3e0"/>
+             <path d="M15 5 L 15 25 M 5 15 L 25 15 M 8 8 L 22 22 M 8 22 L 22 8" stroke="#e67e22" stroke-width="2" opacity="0.3"/>
+             <path d="M5 25 L 25 5" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+             <text x="38" y="20" font-family="sans-serif" font-size="12" fill="#2c3e50">Sin hologramas/brillo</text>
+        </g>
+    </g>
+
+  </g>
+</svg>

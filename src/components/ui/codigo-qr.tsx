@@ -1,34 +1,38 @@
 import {useEffect, useState} from 'react'
 import QRCode from "react-qr-code";
 import '../../styles/qr.component.css'
-import * as CryptoJS from 'crypto-js';
+import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
+import { URLS } from '@nucleo/api-urls/urls';
+import { Spinner } from 'reactstrap';
+
+const URL = import.meta.env.VITE_QR_BASE_URL
+
+interface resProp{
+  enlace: string;
+}
 
 export const CodigoQR: React.FC = () => {
 
-  const secretKey = 'test';
+  const [params] = useSearchParams();
+  
+  const idSigner = params.get("idUsuario");
 
-  const [direccion, setDireccion] = useState<string>('');
-
-  useEffect(() => {
-    // Get the current URL
-    const currentUrl = `${window.location.href}&aprobado=positivo`;
-
-    // Encrypt the current URL
-    const encryptedData = CryptoJS.AES.encrypt(currentUrl, secretKey).toString();
-
-    // Build the URL that points to the Verify component route
-    const newUrl = `${window.location.origin}/validacion/#/verify/${encodeURIComponent(encryptedData)}`;
-    setDireccion(newUrl);
-  }, []);
+  const [qrValue, setQrValue] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    console.log(direccion);
-  }, [direccion]);
+    axios.get(`${URLS.getLink}?id=${idSigner}`)
+    .then((res: {data: resProp}) => {
+      setLoading(false);
+      setQrValue(`${URL}/${res.data.enlace}`);
+    })
+  }, [])
 
   return (
-    <div className="bg-white absolute shadow-xl rounded-lg left-0 bottom-0 mx-2 my-2 p-3 h-auto qr-container">
+    <div className="bg-white absolute shadow-xl rounded-lg left-0 bottom-0 mx-2 my-2 p-3 h-auto qr-container flex flex-col items-center">
       <p className='text-center text-xs'>Si desea continuar en su dispositivo móvil, escanee el siguiente código QR</p>
-      <QRCode value={direccion} className="w-full h-auto" id="codigo-qr"/>
+      {loading ? <Spinner color='primary' /> :<QRCode value={qrValue} className="w-full h-auto" id="codigo-qr"/>}
     </div>
   );
 };
