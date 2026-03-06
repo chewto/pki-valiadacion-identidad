@@ -15,13 +15,13 @@ export default function Demo({ side, handleNext }: Props) {
     console.log(side)
   }, [informacion])
 
+  const svgPath = side === 'face' ?  `/svg/${side}.svg` : `/svg/${side}_${informacion.tipoDocumento.replace(/\s+/g, '_').toLowerCase()}.svg`;
   // return (<div>demo funcionando {side} {informacion.tipoDocumento}</div>)
 
-  const svgPath = `/svg/${side}.svg`;
 
 return (
-  <div onClick={() => {handleNext(); console.log("demo click")}}>
-    {/* demo funcionando {side} {informacion.tipoDocumento */}
-    <img src={svgPath} alt={`SVG for ${side}`} />
+  <div className="border-2 border-red-600 flex items-center justify-center"  onClick={() => {handleNext(); console.log("demo click")}}>
+    demo funcionando {svgPath} 
+    <img className="w-7/12" src={svgPath} alt={`SVG for ${side}`} />
   </div>
 );}
