@@ -527,7 +527,7 @@ const conversor = (document: DocumentType) => {
         </span>
       </div>
 
-      {!showModal && (
+      {showModal && (
         <Advertencia
           titulo="Advertencia"
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
