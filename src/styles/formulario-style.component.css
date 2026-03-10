@@ -66,6 +66,33 @@
   background: #167a21;
 }
 
+.loading-grid{
+  display: grid;
+  /* Definimos dos columnas: 
+     1. 'max-content' para que el texto ocupe solo lo necesario.
+     2. '1fr' o un ancho fijo para el estado. */
+  grid-template-columns: max-content 150px; 
+  column-gap: 20px;
+  row-gap: 15px;
+  align-items: center; /* Alinea verticalmente el texto con el spinner */
+  justify-content:space-evenly; /* Centra todo el bloque en pantalla */
+  margin: 20px 0;
+}
+
+.loading-indicator {
+  display: contents; 
+  /* grid-template-columns: max-content 50px; */
+}
+
+.status-area {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+
 @media screen and (max-width: 768px) {
   .img-container{
     left: 20%;

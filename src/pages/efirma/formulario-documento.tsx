@@ -69,8 +69,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(1);
+  // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
-
+  const [showModal, setShowModal] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
@@ -78,6 +79,39 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [retry, setRetry] = useState<boolean>(false);
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
+
+  // 1. Definimos el mapeo fuera para que sea una constante única
+const DOCUMENT_MAPPING = {
+  "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
+  "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
+  "CEDULA DIGITAL": "CEDULA_DIGITAL",
+  "PASAPORTE": "PASAPORTE",
+} as const; // 'as const' hace que los valores sean literales, no solo strings
+
+// 2. Extraemos el tipo de las llaves automáticamente
+type DocumentType = keyof typeof DOCUMENT_MAPPING;
+
+const conversor = (document: DocumentType) => {
+  return DOCUMENT_MAPPING[document];
+};
+
+
+  const [ocrReq, setOcrReq] = useState<{
+    loading: boolean;
+    error: boolean;
+    success: boolean | null;
+  }>({ loading: true, error: false, success: null });
+  const [detectionReq, setDetectionReq] = useState<{
+    loading: boolean;
+    error: boolean;
+    success: boolean | null;
+    data: any;
+  }>({ loading: true, error: false, success: null, data: {} });
+  const [validationReq, setValidationReq] = useState<{
+    loading: boolean;
+    error: boolean;
+    success: boolean | null;
+  }>({ loading: true, error: false, success: null });
 
   const mobile: boolean = useMobile();
 
@@ -113,6 +147,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     } else {
       setLoadingMessageIndex(0);
       setReqMessage("");
+      console.log(reqMessage);
     }
     return () => {
       if (interval) clearInterval(interval);
@@ -276,42 +311,6 @@ export const FormularioDocumento: React.FC<Props> = ({
                 }
               }
             }
-            // const canvas = document.createElement("canvas");
-            //   const ctx = canvas.getContext("2d");
-            //   canvas.width = img.width;
-            //   canvas.height = img.height;
-            //   ctx?.drawImage(img, 0, 0, img.width, img.height);
-            //   const dataURLImage = canvas.toDataURL("image/jpeg", 1.0);
-
-            //   if (dataURLImage.length >= 1) {
-            //     dispatch(
-            //       setFotos({ labelFoto: ladoDocumento, data: dataURLImage })
-            //     );
-            //     const data = {
-            //       id: id,
-            //       imagen: dataURLImage,
-            //       nombre:
-            //         informacionFirmador.nombre != null
-            //           ? informacionFirmador.nombre
-            //           : validacionDocumento.ocr.data.name,
-            //       apellido:
-            //         informacionFirmador.apellido != null
-            //           ? informacionFirmador.apellido
-            //           : validacionDocumento.ocr.data.lastName,
-            //       documento:
-            //         informacionFirmador.documento != null
-            //           ? informacionFirmador.documento
-            //           : validacionDocumento.ocr.data.ID,
-            //       ladoDocumento: ladoDocumento,
-            //       tipoDocumento: tipoDocumento,
-            //       imagenPersona: informacion.foto_persona,
-            //       country: informacionFirmador.pais,
-            //       tries: conteo,
-            //     };
-            //     validarDocumento(data);
-            //   } else {
-            //     setIsCorrupted(true);
-            //   }
           }
         };
 
@@ -322,155 +321,174 @@ export const FormularioDocumento: React.FC<Props> = ({
     event.target.value = "";
   };
 
-  const validarDocumento = async (data: any) => {
-    axios
-      .post(
-        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`,
-      )
-      .then((res) => {
-        console.log(res.data);
-      });
 
+  
+
+  const validarDocumento = async (data: any) => {
+
+    const type = conversor(data.tipoDocumento)
+    // 1. Registro de inicio (Log)
+    try {
+      await axios.post(
+        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio`,
+      );
+    } catch (e) {
+      console.error("Error logging start:", e);
+    }
+
+    // 2. Estado inicial
     setTriesCounter((state) => state - 1);
-    const start = performance.now();
+    const startPerformance = performance.now();
     setError(false);
     setLoading(true);
 
+    // --- BLOQUE OCR ---
     const ocrTimeStart = Date.now();
     let durationOcr = 0;
-    await axios({
-      method: "post",
-      url: URLS.ocr,
-      data: { image: data.imagen },
-    }).then((res) => {
-      const ocrTimeEnd = Date.now();
-      durationOcr = ocrTimeEnd - ocrTimeStart;
-      data["ocr"] = res.data.ocr;
-      data["textAngle"] = res.data.textAngle;
-    });
 
+    try {
+      const resOcr = await axios.post(URLS.ocr, { image: data.imagen });
+      durationOcr = Date.now() - ocrTimeStart;
+      data["ocr"] = resOcr.data.ocr;
+      data["textAngle"] = resOcr.data.textAngle;
+      setOcrReq({ ...ocrReq, loading: false, success: true });
+    } catch (error) {
+      console.error("OCR Error:", error);
+      setOcrReq({ ...ocrReq, error: true, success: false });
+      // Si el OCR es crítico, podrías poner un return aquí
+    }
+
+    // --- BLOQUE DETECTION (El que fallaba) ---
+    try {
+
+      const resDetection = await axios.post(
+        `${URLS.detection}?documento=${type}&lado=${placeholder.toUpperCase()}`,
+        { image: data.imagen, country: data.country },
+      );
+
+      const resData = resDetection.data;
+
+      setConteo((prev) => prev + 1);
+      setMainCounter((prev) => prev + 1);
+
+      if (!resData.documentoValido) {
+        setDetectionReq({ ...detectionReq, loading: false, success: false, data: resData });
+        const triesDetect = tries - 1;
+        if (conteo <= triesDetect) {
+          setLoading(false);
+          setRetry(true)
+          setOcrReq({ loading: true, error: false, success: null });
+          setDetectionReq({ loading: true, error: false, success: null, data: {} });
+          setShowModal(true)
+          return; // <--- AHORA SÍ FINALIZA LA FUNCIÓN AQUÍ
+        }
+      }
+
+      setDetectionReq({ ...detectionReq, loading: false, success: true });
+    } catch (error) {
+      console.error("Detection Error:", error);
+      setDetectionReq({ ...detectionReq, error: true, success: false });
+      // setLoading(false);
+      return; // Si falla la detección, no tiene sentido seguir
+    }
+
+    // --- BLOQUE VALIDACIÓN ---
     const validationTimeStart = Date.now();
     let durationValidation = 0;
-    await axios({
-      method: "post",
-      url:
-        ladoDocumento == "anverso"
-          ? useModel
-            ? URLS.frontValidation
-            : URLS.validarDocumentoAnverso
-          : useModel
-            ? URLS.backValidation
-            : URLS.validarDocumentoReverso,
-      data: data,
-    })
-      .then((res: AxiosResponse<any>) => {
-        const validationTimeEnd = Date.now();
-        durationValidation = validationTimeEnd - validationTimeStart;
 
-        const adviceMessages = res.data.messages;
-        if (ladoDocumento === "anverso") {
-          dispatch(setValidacionOCR(res.data));
-          dispatch(setValidacionCodigoBarras(res.data));
-          dispatch(setValidacionMRZ(res.data.mrz));
-          dispatch(setValidacionRostro(res.data));
-          dispatch(setFrontSide(res.data.document));
-          dispatch(setFrontResult({ sideResult: res.data.validSide }));
-          dispatch(
-            setFotos({ labelFoto: ladoDocumento, data: res.data.image }),
-          );
+    const urlValidacion =
+      ladoDocumento === "anverso"
+        ? useModel
+          ? URLS.frontValidation
+          : URLS.validarDocumentoAnverso
+        : useModel
+          ? URLS.backValidation
+          : URLS.validarDocumentoReverso;
 
-          if (res.data.face && res.data.faceDetected && res.data.validSide) {
-            console.log("valido");
-            setSuccess(true);
-            setTimeout(() => {
-              nextStep();
-            }, 700);
-          }
+    try {
+      const resValidacion = await axios.post(urlValidacion, data);
+      durationValidation = Date.now() - validationTimeStart;
 
-          if (!res.data.validSide && conteo < tries) {
-            console.log("invalido");
-            setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
-            setConteo((prev) => prev + 1);
-            setRetry(true);
-          }
+      const resData = resValidacion.data;
+      // const adviceMessages = resData.messages;
 
-          if (!res.data.validSide && conteo == tries) {
-            console.log("valido por intentos");
-            setMessages([]);
-            setRetry(false);
-            setSuccess(true);
-            setTimeout(() => {
-              nextStep();
-            }, 700);
-            // if(res.data.faceDetected){
-            //   setTimeout(() => {
-            //     nextStep();
-            //   }, 700);
-            // }else{
-            //   setTimeout(() => {
-            //     returnStep()
-            //   })
-            // }
-          }
-        }
+      // Lógica para ANVERSO
+      if (ladoDocumento === "anverso") {
+        dispatch(setValidacionOCR(resData));
+        dispatch(setValidacionCodigoBarras(resData));
+        dispatch(setValidacionMRZ(resData.mrz));
+        dispatch(setValidacionRostro(resData));
+        dispatch(setFrontSide(resData.document));
+        dispatch(setFrontResult({ sideResult: resData.validSide }));
+        dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-        if (ladoDocumento === "reverso") {
-          dispatch(setValidacionCodigoBarras(res.data));
-          dispatch(setValidacionMRZ(res.data.mrz));
-          dispatch(setBackSide(res.data.document));
-          dispatch(setBackResult({ sideResult: res.data.validSide }));
-          dispatch(
-            setFotos({ labelFoto: ladoDocumento, data: res.data.image }),
-          );
+        setTimeout(() => nextStep(), 700);
+        setSuccess(true);
 
-          if (res.data.validSide) {
-            console.log("valido");
-            setSuccess(true);
-            setContinuarBoton(true);
-            setTimeout(() => {
-              nextStep();
-            }, 700);
-          }
+        // if (resData.face && resData.faceDetected && resData.validSide) {
+        //   setTimeout(() => nextStep(), 700);
+        // } else if (!resData.validSide && conteo < tries) {
+        //   // setMessages((prev) => [...prev, ...adviceMessages]);
+        //   // setConteo((prev) => prev + 1);
+        //   setRetry(true);
+        // } else if (!resData.validSide && conteo == tries) {
+        //   setMessages([]);
+        //   setRetry(false);
+        //   setSuccess(true);
+        //   setTimeout(() => nextStep(), 700);
+        // }
+      }
 
-          if (!res.data.validSide && conteo < tries) {
-            console.log("invalido");
-            setMessages((prevMessages) => [...prevMessages, ...adviceMessages]);
-            setRetry(true);
-            setConteo((prev) => prev + 1);
-            setMainCounter((prev) => prev + 1);
-          }
+      // Lógica para REVERSO
+      if (ladoDocumento === "reverso") {
+        dispatch(setValidacionCodigoBarras(resData));
+        dispatch(setValidacionMRZ(resData.mrz));
+        dispatch(setBackSide(resData.document));
+        dispatch(setBackResult({ sideResult: resData.validSide }));
+        dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-          if (!res.data.validSide && conteo == tries) {
-            console.log("valido por intentos");
-            setMessages([]);
-            setRetry(false);
-            setSuccess(true);
-            setContinuarBoton(true);
-            setTimeout(() => {
-              nextStep();
-            }, 700);
-          }
-        }
-      })
-      .catch((error) => {
-        setError(true);
-        setLoading(false);
-        setRetry(true);
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-        const end = performance.now();
-        console.log(`validarDocumento tardó ${(end - start).toFixed(2)} ms`);
-      });
+        setTimeout(() => nextStep(), 700);
+        setSuccess(true);
+        setContinuarBoton(true);
 
-    axios
-      .post(
+        // if (resData.validSide) {
+        //   setContinuarBoton(true);
+        //   setTimeout(() => nextStep(), 700);
+        // } else if (!resData.validSide && conteo < tries) {
+        //   // setMessages((prev) => [...prev, ...adviceMessages]);
+        //   setRetry(true);
+        //   // setConteo((prev) => prev + 1);
+        //   // setMainCounter((prev) => prev + 1);
+        // } else if (!resData.validSide && conteo == tries) {
+        //   setMessages([]);
+        //   setRetry(false);
+        //   setSuccess(true);
+        //   setTimeout(() => nextStep(), 700);
+        // }
+      }
+
+      setValidationReq({ ...validationReq, loading: false });
+    } catch (error) {
+      console.error("Validation Error:", error);
+      setValidationReq({ ...validationReq, error: true });
+      setError(true);
+      setRetry(true);
+    } finally {
+      setLoading(false);
+      const endPerformance = performance.now();
+      console.log(
+        `validarDocumento finalizó en ${(endPerformance - startPerformance).toFixed(2)} ms`,
+      );
+    }
+
+    // 3. Registro de fin y tiempos finales
+    try {
+      await axios.post(
         `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin`,
-      )
-      .then((res) => {
-        console.log(res.data);
-      });
+      );
+    } catch (e) {
+      console.error("Error logging end:", e);
+    }
 
     const validationTimeData = {
       ocrTime: Number((durationOcr / 1000).toFixed(2)),
@@ -509,28 +527,16 @@ export const FormularioDocumento: React.FC<Props> = ({
         </span>
       </div>
 
-      {messages.length >= 1 && (
+      {!showModal && (
         <Advertencia
           titulo="Advertencia"
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
             <div>
               <ul className="text-left p-0">
-                {messages.map((message: string, index: number) => (
-                  <li
-                    key={index}
-                    className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
-                  >
-                    {message}
-                  </li>
-                ))}
-
-                {/* <li className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200">
-                  Por favor, se requiere una foto del documento con mejor
-                  resolución, inténtelo nuevamente.
-                </li> */}
+                 test 
               </ul>
-              <button onClick={() => setMessages([])} className="stepper-btn">
+              <button onClick={() => setShowModal(false)} className="stepper-btn">
                 cerrar
               </button>
             </div>
@@ -565,9 +571,72 @@ export const FormularioDocumento: React.FC<Props> = ({
             margin: "20px 0",
           }}
         >
-          <div className="flex flex-col justify-center items-center">
-            <span>{reqMessage}</span>
-            <Spinner></Spinner>
+          <div className="loading-grid">
+            {/* Fila 1 */}
+            <div className="loading-indicator">
+              <span>Alineando documento</span>
+              <div className="status-area">
+                {ocrReq.loading && <Spinner />}
+                {ocrReq.success && (
+                  <span>
+                    <svg
+                      className="bg-green-700 rounded-xl"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 -960 960 960"
+                      width="24px"
+                      fill="#e3e3e3"
+                    >
+                      <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Fila 2 */}
+            <div className="loading-indicator">
+              <span>Identificando tipo de documento</span>
+              <div className="status-area">
+                {detectionReq.loading && <Spinner />}
+                {detectionReq.success && (
+                  <span>
+                    <svg
+                      className="bg-green-700 rounded-xl"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 -960 960 960"
+                      width="24px"
+                      fill="#e3e3e3"
+                    >
+                      <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Fila 3 */}
+            <div className="loading-indicator">
+              <span>Procesando documento</span>
+              <div className="status-area">
+                {validationReq.loading && <Spinner />}
+                {validationReq.success && (
+                  <span>
+                    <svg
+                      className="bg-green-700 rounded-xl"
+                      xmlns="http://www.w3.org/2000/svg"
+                      height="24px"
+                      viewBox="0 -960 960 960"
+                      width="24px"
+                      fill="#e3e3e3"
+                    >
+                      <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                    </svg>
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -651,6 +720,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                     {preview.length <= 0 &&
                       `Subir foto del ${placeholder} de su ${tipoDocumento}`}
                     {retry && "Reintentar subir documento"}
+                    {!detectionReq.success && "Por favor, subir la imagen de su documento correctamente." }
                     {loading && <Spinner></Spinner>}
                   </label>
                 </div>
