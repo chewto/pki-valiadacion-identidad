@@ -8,7 +8,7 @@ import { useMobile } from "../../nucleo/hooks/useMobile";
 import { useDispatch, useSelector } from "react-redux";
 import { setFotos } from "../../nucleo/redux/slices/informacionSlice";
 import { RootState } from "../../nucleo/redux/store";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import {
   setValidacionOCR,
   setValidacionCodigoBarras,
@@ -75,7 +75,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
-  const [messages, setMessages] = useState<string[]>([]);
+  // const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -206,7 +206,7 @@ const conversor = (document: DocumentType) => {
   const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault();
 
-    setMessages([]);
+    // setMessages([]);
     setContinuarBoton(false);
     setRetry(false);
     setIsCorrupted(false);
