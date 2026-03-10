@@ -534,7 +534,7 @@ const conversor = (document: DocumentType) => {
           elemento={
             <div>
               <ul className="text-left p-0">
-                 test 
+                 Hemos detectado que el documento subido anteriormente no corresponde con el documento seleccionado. Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su <strong>{tipoDocumento}</strong> para poder continuar con el proceso.
               </ul>
               <button onClick={() => setShowModal(false)} className="stepper-btn">
                 cerrar
