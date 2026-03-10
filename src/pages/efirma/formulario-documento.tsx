@@ -533,9 +533,9 @@ const conversor = (document: DocumentType) => {
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
             <div>
-              <ul className="text-left p-0">
-                 Hemos detectado que el documento subido anteriormente no corresponde con el documento seleccionado. Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su <strong>{tipoDocumento}</strong> para poder continuar con el proceso.
-              </ul>
+              <p className="text-justify p-0 bg-slate-100 rounded-lg px-3 py-3">
+                 Hemos detectado que el documento subido anteriormente no corresponde con el documento seleccionado. Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder continuar con el proceso.
+              </p>
               <button onClick={() => setShowModal(false)} className="stepper-btn">
                 cerrar
               </button>
