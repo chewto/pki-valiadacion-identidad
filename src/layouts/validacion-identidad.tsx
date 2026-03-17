@@ -148,6 +148,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationAttendance: "",
     validationPercent: "",
     documentsTries: 0,
+    detectionTries: 0
   });
 
   const [documentList, setDocumentList] = useState<string[]>([]);
@@ -247,6 +248,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
 
+      useEffect(() => {
+      console.log(validationParams)
+    },[validationParams])
+
   useEffect(() => {
 
     // usar prefix
@@ -275,13 +280,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         }
       });
 
-    // usar prefix
+
     axios({
       method: "get",
       url: validationParamsUrl,
     })
       .then((res) => {
-        const { validationPercent, validationAttendance, documentsTries } =
+        const { validationPercent, validationAttendance, documentsTries,detectionTries  } =
           res.data;
 
         setValidationParams({
@@ -292,6 +297,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           validationPercent:
             validationPercent === null ? "60" : `${validationPercent}`,
           documentsTries: documentsTries === null ? 2 : documentsTries,
+          detectionTries: detectionTries ?? 1
         });
       })
       .catch(() => {
@@ -299,6 +305,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           validationAttendance: "AUTOMATICA",
           validationPercent: "60",
           documentsTries: 2,
+          detectionTries: 1
         });
       });
     geolocation();
@@ -467,6 +474,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             setContinuarBoton={setContinuarBoton}
             ladoDocumento={labelFoto.anverso}
             useModel={useModel}
+            detectionTries={validationParams.detectionTries}
             tries={validationParams.documentsTries}
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
@@ -481,6 +489,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             continuarBoton={continuarBoton}
             setContinuarBoton={setContinuarBoton}
             ladoDocumento={labelFoto.reverso}
+            detectionTries={validationParams.detectionTries}
             useModel={useModel}
             tries={validationParams.documentsTries}
             attendance={validationParams.validationAttendance}
@@ -520,6 +529,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             ladoDocumento={labelFoto.anverso}
             useModel={useModel}
             tries={validationParams.documentsTries}
+            detectionTries={validationParams.detectionTries}
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
             nextStep={handleNext}
@@ -536,6 +546,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             ladoDocumento={labelFoto.reverso}
             useModel={useModel}
             tries={validationParams.documentsTries}
+            detectionTries={validationParams.detectionTries}
             attendance={validationParams.validationAttendance}
             setMainCounter={setMainCounter}
             nextStep={handleNext}

@@ -36,6 +36,7 @@ interface Props {
   setContinuarBoton: Dispatch<SetStateAction<boolean>>;
   ladoDocumento: string;
   tries: number;
+  detectionTries: number;
   attendance: string;
   useModel: boolean;
   setMainCounter: Dispatch<SetStateAction<number>>;
@@ -52,6 +53,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   ladoDocumento,
   useModel,
   tries,
+  detectionTries,
   setMainCounter,
   nextStep,
   // returnStep
@@ -69,6 +71,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(1);
+  const publicPath = '/svg/' + `${placeholder}_${tipoDocumento.toLocaleLowerCase().replace(' ', '_').replace(' ', '_' )}.png`
   // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
   const [showModal, setShowModal] = useState<boolean>(false)
@@ -389,7 +392,7 @@ const conversor = (document: DocumentType) => {
       console.error("Detection Error:", error);
       setDetectionReq({ ...detectionReq, error: true, success: false });
       // setLoading(false);
-      return; // Si falla la detección, no tiene sentido seguir
+      // return; // Si falla la detección, no tiene sentido seguir
     }
 
     // --- BLOQUE VALIDACIÓN ---
@@ -406,6 +409,8 @@ const conversor = (document: DocumentType) => {
           : URLS.validarDocumentoReverso;
 
     try {
+
+
       const resValidacion = await axios.post(urlValidacion, data);
       durationValidation = Date.now() - validationTimeStart;
 
@@ -422,21 +427,19 @@ const conversor = (document: DocumentType) => {
         dispatch(setFrontResult({ sideResult: resData.validSide }));
         dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-        setTimeout(() => nextStep(), 700);
-        setSuccess(true);
 
-        // if (resData.face && resData.faceDetected && resData.validSide) {
-        //   setTimeout(() => nextStep(), 700);
-        // } else if (!resData.validSide && conteo < tries) {
-        //   // setMessages((prev) => [...prev, ...adviceMessages]);
-        //   // setConteo((prev) => prev + 1);
-        //   setRetry(true);
-        // } else if (!resData.validSide && conteo == tries) {
-        //   setMessages([]);
-        //   setRetry(false);
-        //   setSuccess(true);
-        //   setTimeout(() => nextStep(), 700);
-        // }
+        if (resData.face && resData.faceDetected && resData.validSide) {
+          setTimeout(() => nextStep(), 700);
+        } else if (!resData.validSide && conteo < detectionTries) {
+          // setMessages((prev) => [...prev, ...adviceMessages]);
+          setConteo((prev) => prev + 1);
+          setRetry(true);
+        } else if (!resData.validSide && conteo >= detectionTries) {
+          // setMessages([]);
+          setRetry(false);
+          setSuccess(true);
+          setTimeout(() => nextStep(), 700);
+        }
       }
 
       // Lógica para REVERSO
@@ -447,24 +450,22 @@ const conversor = (document: DocumentType) => {
         dispatch(setBackResult({ sideResult: resData.validSide }));
         dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-        setTimeout(() => nextStep(), 700);
-        setSuccess(true);
-        setContinuarBoton(true);
 
-        // if (resData.validSide) {
-        //   setContinuarBoton(true);
-        //   setTimeout(() => nextStep(), 700);
-        // } else if (!resData.validSide && conteo < tries) {
-        //   // setMessages((prev) => [...prev, ...adviceMessages]);
-        //   setRetry(true);
-        //   // setConteo((prev) => prev + 1);
-        //   // setMainCounter((prev) => prev + 1);
-        // } else if (!resData.validSide && conteo == tries) {
-        //   setMessages([]);
-        //   setRetry(false);
-        //   setSuccess(true);
-        //   setTimeout(() => nextStep(), 700);
-        // }
+        if (resData.validSide) {
+          setContinuarBoton(true);
+          setTimeout(() => nextStep(), 700);
+        } else if (!resData.validSide && conteo < detectionTries) {
+          // setMessages((prev) => [...prev, ...adviceMessages]);
+          setRetry(true);
+          setConteo((prev) => prev + 1);
+          setMainCounter((prev) => prev + 1);
+        } else if (!resData.validSide && conteo >= detectionTries) {
+          // setMessages([]);
+          setRetry(false);
+          setSuccess(true);
+          setContinuarBoton(true)
+          setTimeout(() => nextStep(), 700);
+        }
       }
 
       setValidationReq({ ...validationReq, loading: false });
@@ -532,10 +533,14 @@ const conversor = (document: DocumentType) => {
           titulo="Advertencia"
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
-            <div>
-              <p className="text-justify p-0 bg-slate-100 rounded-lg px-3 py-3">
+            <div className="flex flex-col items-center justify-center ">
+              <p className="text-justify p-0 bg-slate-100 rounded-lg px-3 py-3 xsm:text-sm md:w-2/4">
                  Hemos detectado que el documento subido anteriormente no corresponde con el documento seleccionado. Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder continuar con el proceso.
               </p>
+              <div className="flex flex-col justify-center items-center mb-2">
+                <p><strong>Imange de referencia</strong></p>
+                <img src={publicPath} alt="" className=" xsm:w-3/4 md:w-2/4" />
+              </div>
               <button onClick={() => setShowModal(false)} className="stepper-btn">
                 cerrar
               </button>
