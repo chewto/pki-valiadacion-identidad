@@ -1,0 +1,56 @@
+<svg width="350" height="300" viewBox="0 0 350 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="1" dy="1"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <linearGradient id="ce-back-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f4f8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d9e2ec;stop-opacity:1" />
+    </linearGradient>
+
+    <pattern id="pdf417-sim" x="0" y="0" width="10" height="5" patternUnits="userSpaceOnUse">
+      <rect width="2" height="5" fill="#263238" />
+      <rect x="4" width="4" height="5" fill="#263238" />
+      <rect x="9" width="1" height="5" fill="#263238" />
+    </pattern>
+  </defs>
+
+  <g transform="translate(45, 75)" filter="url(#soft-shadow)">
+    <rect width="230" height="150" rx="8" fill="#ffffff" stroke="#b0bec5" stroke-width="0.5"/>
+    <path d="M 8 0 H 222 A 8 8 0 0 1 230 8 V 70 H 0 V 8 A 8 8 0 0 1 8 0 Z" fill="url(#ce-back-gradient)"/>
+
+    <g transform="translate(10, 15)">
+      <text x="3" y="0" font-family="sans-serif" font-size="5" fill="#263238" transform="rotate(-90)">M000001</text>
+      <rect x="8" y="0" width="6" height="60" fill="#263238"/>
+      <rect x="15" y="0" width="2" height="60" fill="#263238"/>
+    </g>
+
+    <g transform="translate(35, 15)">
+      <rect width="160" height="60" fill="url(#pdf417-sim)" stroke="#263238" stroke-width="0.5"/>
+    </g>
+
+    <g transform="translate(35, 85)" font-family="sans-serif" fill="#37474f">
+      <text x="0" y="0" font-size="4">El titular de este documento debe notificar a MIGRACIÓN COLOMBIA cualquier cambio</text>
+      <text x="0" y="5" font-size="4">en la condición o información migratoria.</text>
+      <text x="0" y="11" font-size="4" font-style="italic">The holder of this document must notify MIGRACIÓN COLOMBIA any change of</text>
+      <text x="0" y="16" font-size="4" font-style="italic">information or immigration status.</text>
+      <text x="0" y="24" font-size="4" fill="#1976d2" font-weight="bold">www.migracioncolombia.gov.co</text>
+
+      <g transform="translate(130, -5)">
+        <path d="M0 10 C 10 5, 20 15, 30 5 C 35 10, 40 0, 50 10" stroke="#263238" stroke-width="0.8" fill="none"/>
+        <text x="25" y="15" font-size="3" text-anchor="middle">Director Migración Colombia</text>
+        <text x="25" y="20" font-size="3.5" font-weight="bold" text-anchor="middle">Christian Krüger Sarmiento</text>
+      </g>
+    </g>
+
+    <g transform="translate(15, 120)" font-family="monospace" font-size="8" fill="#263238" letter-spacing="1">
+      <text y="0">I&lt;COL965874&lt;&lt;&lt;7&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
+      <text y="10">8702207F1610095VEN&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;4</text>
+      <text y="20">LEPERVA&lt;RIVERA&lt;&lt;ANDREINIWI&lt;&lt;&lt;&lt;</text>
+    </g>
+  </g>
+</svg>
