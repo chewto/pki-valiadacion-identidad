@@ -249,8 +249,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
 
       useEffect(() => {
-      console.log(validationParams)
-    },[validationParams])
+      console.log(validacionDocumento)
+    },[validacionDocumento])
 
   useEffect(() => {
 

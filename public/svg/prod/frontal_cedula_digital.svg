@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg width="350" height="450" viewBox="2.877 0 237.788 314.195" xmlns="http://www.w3.org/2000/svg">
+<svg width="350" height="450" viewBox="2.877 0 237.788 158.945" xmlns="http://www.w3.org/2000/svg">
   <defs>
+    <view id="view-1" viewBox="379.22 303.836 2.877 0.575">
+      <title>View 1</title>
+    </view>
     <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
       <feOffset dx="1" dy="1"/>
@@ -12,18 +15,6 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <linearGradient id="cedula-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0" style="stop-color:#e3f2fd;stop-opacity:1"/>
-      <stop offset="1" style="stop-color:#bbdefb;stop-opacity:1"/>
-    </linearGradient>
-    <linearGradient id="hologram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0" style="stop-color:#fff;stop-opacity:0.1"/>
-      <stop offset="0.5" style="stop-color:#00e5ff;stop-opacity:0.4"/>
-      <stop offset="1" style="stop-color:#fff;stop-opacity:0.1"/>
-    </linearGradient>
-    <pattern id="guilloche-pattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-      <path d="M0 10 L10 0 M5 15 L15 5 M-5 5 L5 -5" stroke="#90caf9" stroke-width="0.1" fill="none"/>
-    </pattern>
     <linearGradient id="digital-cedula-bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0" style="stop-color:#ffffff;stop-opacity:1"/>
       <stop offset="1" style="stop-color:#f0f4f8;stop-opacity:1"/>
@@ -35,43 +26,8 @@
     <pattern id="butterfly-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
       <path d="M10 10 Q 15 5, 20 10 Q 25 15, 15 20 Q 5 15, 10 10" fill="#e1f5fe" opacity="0.4"/>
     </pattern>
-    <view id="view-1" viewBox="379.22 303.836 2.877 0.575">
-      <title>View 1</title>
-    </view>
   </defs>
-  <g transform="matrix(1, 0, 0, 1, 6.445011, 4.462915)" filter="url(#soft-shadow)">
-    <rect width="230" height="150" rx="10" fill="url(#cedula-gradient)" stroke="#bdc3c7" stroke-width="1"/>
-    <rect width="230" height="150" rx="10" fill="url(#guilloche-pattern)"/>
-    <g transform="translate(75, 35)" opacity="0.1" fill="#aabb00">
-      <circle cx="40" cy="40" r="35"/>
-      <path d="M20 40 L 60 40 M 40 20 L 40 60" stroke="#aabb00" stroke-width="5"/>
-    </g>
-    <g font-family="sans-serif" fill="#263238">
-      <text x="15" y="20" font-size="7" font-weight="bold" style="white-space: pre;">REPUBLICA DE COLOMBIA</text>
-      <text x="15" y="28" font-size="6" style="white-space: pre;">IDENTIFICACION PERSONAL</text>
-      <text x="15" y="36" font-size="6" style="white-space: pre;">CEDULA DE CIUDADANIA</text>
-      <text x="15" y="55" font-size="5" fill="#546e7a" style="white-space: pre;">NUMERO</text>
-      <text x="40" y="55" font-size="10" font-weight="bold" style="white-space: pre;">9.999.999.999</text>
-      <text x="15" y="75" font-size="5" fill="#546e7a" style="white-space: pre;">APELLIDOS</text>
-      <text x="15" y="85" font-size="9" font-weight="bold" style="white-space: pre;">APELLIDO1 APELLIDO2</text>
-      <text x="15" y="105" font-size="5" fill="#546e7a" style="white-space: pre;">NOMBRES</text>
-      <text x="15" y="115" font-size="9" font-weight="bold" style="white-space: pre;">NOMBRE1 NOMBRE2</text>
-    </g>
-    <g transform="translate(25, 130)">
-      <path d="M0 0 C 10 -5, 20 5, 30 0 C 40 -5, 50 5, 60 0" stroke="#263238" stroke-width="1.5" fill="none"/>
-      <text x="30" y="10" font-size="5" fill="#546e7a" text-anchor="middle" style="white-space: pre;">FIRMA</text>
-    </g>
-    <g transform="translate(145, 30)">
-      <rect width="70" height="90" rx="5" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
-      <g fill="#78909c">
-        <ellipse cx="35" cy="35" rx="18" ry="22"/>
-        <path d="M5 90 C 5 65, 20 60, 35 60 C 50 60, 65 65, 65 90 Z"/>
-        <path d="M25 90 L 35 70 L 45 90 Z" fill="#cfd8dc"/>
-      </g>
-      <rect width="70" height="90" rx="5" fill="url(#hologram-gradient)" opacity="0.3"/>
-    </g>
-  </g>
-  <g transform="matrix(1, 0, 0, 1, 7.020459, 159.143219)" filter="url(#soft-shadow)">
+  <g transform="matrix(1, 0, 0, 1, 6.948928, 5.257195)" filter="url(#soft-shadow)">
     <rect width="230" height="150" rx="10" fill="url(#digital-cedula-bg)" stroke="#bdc3c7" stroke-width="0.5"/>
     <rect width="230" height="150" rx="10" fill="url(#butterfly-pattern)"/>
     <g font-family="sans-serif">

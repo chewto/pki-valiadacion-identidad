@@ -81,6 +81,7 @@ export interface DocumentData{
   typeCheck: boolean;
   isExpired: boolean | null;
   tries: number;
+  detection: number;
 }
 
 interface CorrespondingSide{

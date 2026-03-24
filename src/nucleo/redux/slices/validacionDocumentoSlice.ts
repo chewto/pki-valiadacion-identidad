@@ -40,7 +40,8 @@ const initialState: ValidacionDocumento = {
       type: '',
       typeCheck: false,
       isExpired: null,
-      tries: 0
+      tries: 0,
+      detection: 0
     },
     back: {
       code:'',
@@ -49,7 +50,8 @@ const initialState: ValidacionDocumento = {
       type: '',
       typeCheck: false,
       isExpired: null,
-      tries: 0
+      tries: 0,
+      detection: 0
     },
   }
 };
@@ -117,27 +119,31 @@ export const validacionDocumentolice = createSlice({
     },
     setFrontSide: (state, action: PayloadAction<DocumentData>) => {
       const { code, country, countryCheck, type, typeCheck, isExpired } = action.payload;
-      state.sides.front = {
-        code: code,
-        country: country,
-        countryCheck: countryCheck,
-        type: type,
-        typeCheck: typeCheck,
-        isExpired: isExpired,
-        tries: state.sides.front.tries + 1
-      }
+
+      state.sides.front.code = code,
+        state.sides.front.country = country,
+        state.sides.front.countryCheck = countryCheck,
+        state.sides.front.type = type,
+        state.sides.front.typeCheck = typeCheck,
+        state.sides.front.isExpired = isExpired,
+        state.sides.front.tries = state.sides.front.tries + 1
     },
     setBackSide: (state, action: PayloadAction<DocumentData>) => {
       const { code, country, countryCheck, type, typeCheck, isExpired } = action.payload;
-      state.sides.back = {
-        code: code,
-        country: country,
-        countryCheck: countryCheck,
-        type: type,
-        typeCheck: typeCheck,
-        isExpired: isExpired,
-        tries: state.sides.back.tries + 1
-      }
+      
+      state.sides.back.code = code,
+        state.sides.back.country = country,
+        state.sides.back.countryCheck = countryCheck,
+        state.sides.back.type = type,
+        state.sides.back.typeCheck = typeCheck,
+        state.sides.back.isExpired = isExpired,
+        state.sides.back.tries = state.sides.back.tries + 1
+    },
+    setFrontDetection: (state) => {
+      state.sides.front.detection = state.sides.front.detection + 1
+    },
+    setBackDetection: (state) => {
+      state.sides.back.detection = state.sides.back.detection + 1
     }
   },
 });
@@ -150,7 +156,9 @@ export const {
   setFrontSide,
   setBackSide,
   setFrontResult,
-  setBackResult
+  setBackResult,
+  setFrontDetection,
+  setBackDetection
 } = validacionDocumentolice.actions;
 
 export default validacionDocumentolice.reducer;

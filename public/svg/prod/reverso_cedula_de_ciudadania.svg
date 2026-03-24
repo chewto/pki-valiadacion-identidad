@@ -1,15 +1,23 @@
-<svg width="350" height="450" viewBox="0 0 350 450" xmlns="http://www.w3.org/2000/svg">
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="350" height="450" viewBox="2.877 0 237.788 314.195" xmlns="http://www.w3.org/2000/svg">
   <defs>
+    <view id="view-1" viewBox="379.22 303.836 2.877 0.575">
+      <title>View 1</title>
+    </view>
     <filter id="soft-shadow" x="-10%" y="-10%" width="120%" height="120%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
       <feOffset dx="1" dy="1"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
-      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
-
     <linearGradient id="card-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f5f7f9;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#cfd8dc;stop-opacity:1" />
+      <stop offset="0" style="stop-color:#f5f7f9;stop-opacity:1"/>
+      <stop offset="1" style="stop-color:#cfd8dc;stop-opacity:1"/>
     </linearGradient>
     <pattern id="pdf417-pattern" x="0" y="0" width="20" height="10" patternUnits="userSpaceOnUse">
       <rect width="2" height="10" fill="#000"/>
@@ -17,56 +25,48 @@
       <rect x="10" width="1" height="10" fill="#000"/>
       <rect x="15" width="4" height="10" fill="#000"/>
     </pattern>
-
     <linearGradient id="digital-cedula-bg-back" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e1f5fe;stop-opacity:1" />
+      <stop offset="0" style="stop-color:#ffffff;stop-opacity:1"/>
+      <stop offset="1" style="stop-color:#e1f5fe;stop-opacity:1"/>
     </linearGradient>
     <pattern id="qr-pattern" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
       <rect width="2" height="2" fill="#000"/>
       <rect x="2" y="2" width="2" height="2" fill="#000"/>
     </pattern>
   </defs>
-
-  <g transform="translate(45, 20)" filter="url(#soft-shadow)">
+  <g transform="matrix(1, 0, 0, 1, 7.226291, 5.596371)" filter="url(#soft-shadow)">
     <rect width="230" height="150" rx="10" fill="url(#card-gradient)" stroke="#bdc3c7" stroke-width="1"/>
-    <text x="115" y="15" font-family="sans-serif" font-size="6" fill="#b0bec5" text-anchor="middle" opacity="0.8">IMAGEN NO VALIDA COMO DOCUMENTO DE IDENTIFICACION</text>
-    
+    <text x="115" y="15" font-family="sans-serif" font-size="6" fill="#b0bec5" text-anchor="middle" opacity="0.8" style="white-space: pre;">IMAGEN NO VALIDA COMO DOCUMENTO DE IDENTIFICACION</text>
     <g transform="translate(20, 25)">
       <ellipse cx="25" cy="30" rx="20" ry="25" fill="#e0e0e0" opacity="0.5"/>
       <path d="M25 5 C 15 5, 5 15, 5 30 C 5 45, 15 55, 25 55 C 35 55, 45 45, 45 30 C 45 15, 35 5, 25 5 Z" fill="none" stroke="#78909c" stroke-width="1"/>
       <path d="M25 10 C 32 10, 38 16, 38 30 C 38 44, 32 50, 25 50 C 18 50, 12 44, 12 30" fill="none" stroke="#78909c" stroke-width="1"/>
-      <text x="25" y="65" font-family="sans-serif" font-size="6" fill="#546e7a" text-anchor="middle">ÍNDICE DERECHO</text>
+      <text x="25" y="65" font-family="sans-serif" font-size="6" fill="#546e7a" text-anchor="middle" style="white-space: pre;">ÍNDICE DERECHO</text>
     </g>
-
     <g transform="translate(85, 30)" font-family="sans-serif">
-      <text x="0" y="0" font-size="6" fill="#546e7a">FECHA DE NACIMIENTO</text>
-      <text x="0" y="9" font-size="8" fill="#263238" font-weight="bold">15-JUN-1985</text>
-      <text x="0" y="22" font-size="6" fill="#546e7a">LUGAR DE NACIMIENTO</text>
-      <text x="0" y="31" font-size="8" fill="#263238" font-weight="bold">BOGOTÁ D.C. (CUND.)</text>
+      <text x="0" y="0" font-size="6" fill="#546e7a" style="white-space: pre;">FECHA DE NACIMIENTO</text>
+      <text x="0" y="9" font-size="8" fill="#263238" font-weight="bold" style="white-space: pre;">15-JUN-1985</text>
+      <text x="0" y="22" font-size="6" fill="#546e7a" style="white-space: pre;">LUGAR DE NACIMIENTO</text>
+      <text x="0" y="31" font-size="8" fill="#263238" font-weight="bold" style="white-space: pre;">BOGOTÁ D.C. (CUND.)</text>
       <g transform="translate(0, 48)">
-          <text x="0" y="0" font-size="6" fill="#546e7a">ESTATURA 1.75</text>
-          <text x="55" y="0" font-size="6" fill="#546e7a">G.S. RH O+</text>
-          <text x="95" y="0" font-size="6" fill="#546e7a">SEXO M</text>
+        <text x="0" y="0" font-size="6" fill="#546e7a" style="white-space: pre;">ESTATURA 1.75</text>
+        <text x="55" y="0" font-size="6" fill="#546e7a" style="white-space: pre;">G.S. RH O+</text>
+        <text x="95" y="0" font-size="6" fill="#546e7a" style="white-space: pre;">SEXO M</text>
       </g>
     </g>
-
     <g transform="translate(15, 95)">
       <rect width="200" height="40" fill="#fff" stroke="#cfd8dc" stroke-width="0.5"/>
       <rect x="0" y="0" width="5" height="40" fill="#263238"/>
       <rect x="195" y="0" width="5" height="40" fill="#263238"/>
       <rect x="7" y="0" width="186" height="40" fill="url(#pdf417-pattern)" opacity="0.8"/>
-      <text x="100" y="50" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle">7-928341-102938-4-001928374</text>
+      <text x="100" y="50" font-family="monospace" font-size="5" fill="#546e7a" text-anchor="middle" style="white-space: pre;">7-928341-102938-4-001928374</text>
     </g>
   </g>
-
-  <g transform="translate(45, 210)" filter="url(#soft-shadow)">
+  <g transform="matrix(1, 0, 0, 1, 6.586886, 159.790756)" filter="url(#soft-shadow)">
     <rect width="230" height="150" rx="10" fill="url(#digital-cedula-bg-back)" stroke="#bdc3c7" stroke-width="0.5"/>
-    
     <g transform="translate(20, 20)" opacity="0.1" fill="#90a4ae">
       <path d="M10 60 L 10 30 L 30 10 L 50 30 L 50 60 L 130 60 L 130 10 L 160 10 L 160 60 Z"/>
     </g>
-
     <g transform="translate(170, 15)">
       <rect width="50" height="50" fill="#ffffff" stroke="#cfd8dc" stroke-width="0.5"/>
       <rect x="2" y="2" width="46" height="46" fill="url(#qr-pattern)"/>
@@ -74,16 +74,14 @@
       <rect x="39" y="3" width="8" height="8" fill="none" stroke="#000" stroke-width="1.5"/>
       <rect x="3" y="39" width="8" height="8" fill="none" stroke="#000" stroke-width="1.5"/>
     </g>
-
     <g transform="translate(115, 80)" font-family="sans-serif" text-anchor="middle">
-      <text font-size="5" font-weight="bold" fill="#37474f">REGISTRADOR NACIONAL</text>
-      <text y="7" font-size="6" fill="#546e7a" font-style="italic">Hernán Penagos Giraldo</text>
+      <text font-size="5" font-weight="bold" fill="#37474f" style="white-space: pre;">REGISTRADOR NACIONAL</text>
+      <text y="7" font-size="6" fill="#546e7a" font-style="italic" style="white-space: pre;">Hernán Penagos Giraldo</text>
     </g>
-
     <g transform="translate(15, 105)" font-family="monospace" font-size="7" fill="#37474f" letter-spacing="0.5">
-      <text y="10">ICCOL000000012&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
-      <text y="20">8808213F3101300COL1234567890&lt;9</text>
-      <text y="30">VELEZ&lt;RUIZ&lt;&lt;GERONIMO&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
+      <text y="10" style="white-space: pre;">ICCOL000000012&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
+      <text y="20" style="white-space: pre;">8808213F3101300COL1234567890&lt;9</text>
+      <text y="30" style="white-space: pre;">VELEZ&lt;RUIZ&lt;&lt;GERONIMO&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</text>
     </g>
   </g>
 </svg>

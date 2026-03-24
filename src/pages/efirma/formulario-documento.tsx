@@ -18,6 +18,8 @@ import {
   setBackSide,
   setFrontResult,
   setBackResult,
+  setFrontDetection,
+  setBackDetection,
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
@@ -374,6 +376,14 @@ const conversor = (document: DocumentType) => {
       setConteo((prev) => prev + 1);
       setMainCounter((prev) => prev + 1);
 
+      if(ladoDocumento === "anverso"){
+        dispatch(setFrontDetection())
+      }
+
+      if(ladoDocumento === "reverso"){
+        dispatch(setBackDetection())
+      }
+
       if (!resData.documentoValido) {
         setDetectionReq({ ...detectionReq, loading: false, success: false, data: resData });
         const triesDetect = tries - 1;
@@ -427,14 +437,13 @@ const conversor = (document: DocumentType) => {
         dispatch(setFrontResult({ sideResult: resData.validSide }));
         dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-
         if (resData.face && resData.faceDetected && resData.validSide) {
           setTimeout(() => nextStep(), 700);
         } else if (!resData.validSide && conteo < detectionTries) {
           // setMessages((prev) => [...prev, ...adviceMessages]);
           setConteo((prev) => prev + 1);
           setRetry(true);
-        } else if (!resData.validSide && conteo >= detectionTries) {
+        } else if (conteo >= detectionTries) {
           // setMessages([]);
           setRetry(false);
           setSuccess(true);
@@ -459,7 +468,7 @@ const conversor = (document: DocumentType) => {
           setRetry(true);
           setConteo((prev) => prev + 1);
           setMainCounter((prev) => prev + 1);
-        } else if (!resData.validSide && conteo >= detectionTries) {
+        } else if (conteo >= detectionTries) {
           // setMessages([]);
           setRetry(false);
           setSuccess(true);
