@@ -73,10 +73,12 @@ export const FormularioDocumento: React.FC<Props> = ({
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(1);
-  const publicPath = '/svg/prod/' + `${placeholder}_${tipoDocumento.toLocaleLowerCase().replace(' ', '_').replace(' ', '_' )}.svg`
+  const publicPath =
+    "/svg/prod/" +
+    `${placeholder}_${tipoDocumento.toLocaleLowerCase().replace(" ", "_").replace(" ", "_")}.svg`;
   // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
-  const [showModal, setShowModal] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
@@ -85,21 +87,45 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
 
+  const [seconds, setSeconds] = useState<number>(5);
+  const [disabled, setDisabled] = useState(true);
+
+  useEffect(() => {
+    // Si el modal no está visible, reseteamos todo y no ejecutamos el timer
+    if (!showModal) {
+      setSeconds(5);
+      setDisabled(true);
+      return;
+    }
+
+    // Si el modal está abierto y aún hay segundos, ejecutamos el intervalo
+    if (seconds > 0) {
+      const timer = setInterval(() => {
+        setSeconds((prev) => prev - 1);
+      }, 1000);
+
+      // Limpieza del intervalo
+      return () => clearInterval(timer);
+    } else {
+      // Cuando llega a 0, habilitamos el botón
+      setDisabled(false);
+    }
+  }, [showModal, seconds]);
+
   // 1. Definimos el mapeo fuera para que sea una constante única
-const DOCUMENT_MAPPING = {
-  "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
-  "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
-  "CEDULA DIGITAL": "CEDULA_DIGITAL",
-  "PASAPORTE": "PASAPORTE",
-} as const; // 'as const' hace que los valores sean literales, no solo strings
+  const DOCUMENT_MAPPING = {
+    "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
+    "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
+    "CEDULA DIGITAL": "CEDULA_DIGITAL",
+    PASAPORTE: "PASAPORTE",
+  } as const; // 'as const' hace que los valores sean literales, no solo strings
 
-// 2. Extraemos el tipo de las llaves automáticamente
-type DocumentType = keyof typeof DOCUMENT_MAPPING;
+  // 2. Extraemos el tipo de las llaves automáticamente
+  type DocumentType = keyof typeof DOCUMENT_MAPPING;
 
-const conversor = (document: DocumentType) => {
-  return DOCUMENT_MAPPING[document];
-};
-
+  const conversor = (document: DocumentType) => {
+    return DOCUMENT_MAPPING[document];
+  };
 
   const [ocrReq, setOcrReq] = useState<{
     loading: boolean;
@@ -326,12 +352,8 @@ const conversor = (document: DocumentType) => {
     event.target.value = "";
   };
 
-
-  
-
   const validarDocumento = async (data: any) => {
-
-    const type = conversor(data.tipoDocumento)
+    const type = conversor(data.tipoDocumento);
     // 1. Registro de inicio (Log)
     try {
       await axios.post(
@@ -365,7 +387,6 @@ const conversor = (document: DocumentType) => {
 
     // --- BLOQUE DETECTION (El que fallaba) ---
     try {
-
       const resDetection = await axios.post(
         `${URLS.detection}?documento=${type}&lado=${placeholder.toUpperCase()}`,
         { image: data.imagen, country: data.country },
@@ -376,23 +397,33 @@ const conversor = (document: DocumentType) => {
       setConteo((prev) => prev + 1);
       setMainCounter((prev) => prev + 1);
 
-      if(ladoDocumento === "anverso"){
-        dispatch(setFrontDetection())
+      if (ladoDocumento === "anverso") {
+        dispatch(setFrontDetection());
       }
 
-      if(ladoDocumento === "reverso"){
-        dispatch(setBackDetection())
+      if (ladoDocumento === "reverso") {
+        dispatch(setBackDetection());
       }
 
       if (!resData.documentoValido) {
-        setDetectionReq({ ...detectionReq, loading: false, success: false, data: resData });
+        setDetectionReq({
+          ...detectionReq,
+          loading: false,
+          success: false,
+          data: resData,
+        });
         const triesDetect = tries - 1;
         if (conteo <= triesDetect) {
           setLoading(false);
-          setRetry(true)
+          setRetry(true);
           setOcrReq({ loading: true, error: false, success: null });
-          setDetectionReq({ loading: true, error: false, success: null, data: {} });
-          setShowModal(true)
+          setDetectionReq({
+            loading: true,
+            error: false,
+            success: null,
+            data: {},
+          });
+          setShowModal(true);
           return; // <--- AHORA SÍ FINALIZA LA FUNCIÓN AQUÍ
         }
       }
@@ -419,8 +450,6 @@ const conversor = (document: DocumentType) => {
           : URLS.validarDocumentoReverso;
 
     try {
-
-
       const resValidacion = await axios.post(urlValidacion, data);
       durationValidation = Date.now() - validationTimeStart;
 
@@ -459,7 +488,6 @@ const conversor = (document: DocumentType) => {
         dispatch(setBackResult({ sideResult: resData.validSide }));
         dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
 
-
         if (resData.validSide) {
           setContinuarBoton(true);
           setTimeout(() => nextStep(), 700);
@@ -472,7 +500,7 @@ const conversor = (document: DocumentType) => {
           // setMessages([]);
           setRetry(false);
           setSuccess(true);
-          setContinuarBoton(true)
+          setContinuarBoton(true);
           setTimeout(() => nextStep(), 700);
         }
       }
@@ -544,16 +572,26 @@ const conversor = (document: DocumentType) => {
           elemento={
             <div className="flex flex-col items-center justify-center ">
               <p className="text-justify p-0 bg-slate-100 rounded-lg px-3 py-3 xsm:text-sm md:w-2/4">
-                 Hemos detectado que el documento subido anteriormente no corresponde con el documento seleccionado. Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder continuar con el proceso.
+                Hemos detectado que el documento subido anteriormente no
+                corresponde con el documento seleccionado. Por favor, asegúrese
+                de subir el <strong>{placeholder}</strong> de su{" "}
+                <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder
+                continuar con el proceso.
               </p>
               {!(tipoDocumento === passport) && (
                 <div className="flex flex-col justify-center items-center mb-2">
-                <p><strong>Imagen de referencia</strong></p>
-                <img src={publicPath} alt="" className=" xsm:w-5/6 md:w-96" />
-              </div>
+                  <p>
+                    <strong>Imagen de referencia</strong>
+                  </p>
+                  <img src={publicPath} alt="" className=" xsm:w-5/6 md:w-96" />
+                </div>
               )}
-              <button onClick={() => setShowModal(false)} className="stepper-btn">
-                cerrar
+              <button
+                onClick={() => setShowModal(false)}
+                className="stepper-btn"
+                disabled={disabled}
+              >
+                cerrar {disabled && <span>({seconds}s)</span>}
               </button>
             </div>
           }
@@ -736,7 +774,8 @@ const conversor = (document: DocumentType) => {
                     {preview.length <= 0 &&
                       `Subir foto del ${placeholder} de su ${tipoDocumento}`}
                     {retry && "Reintentar subir documento"}
-                    {!detectionReq.success && "Por favor, subir la imagen de su documento correctamente." }
+                    {!detectionReq.success &&
+                      "Por favor, subir la imagen de su documento correctamente."}
                     {loading && <Spinner></Spinner>}
                   </label>
                 </div>

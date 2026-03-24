@@ -248,10 +248,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
   }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
 
-      useEffect(() => {
-      console.log(validacionDocumento)
-    },[validacionDocumento])
-
   useEffect(() => {
 
     // usar prefix
