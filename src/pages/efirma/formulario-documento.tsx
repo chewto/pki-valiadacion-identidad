@@ -74,7 +74,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(1);
   const publicPath =
-    "/svg/prod/" +
+    "./svg/prod/" +
     `${placeholder}_${tipoDocumento.toLocaleLowerCase().replace(" ", "_").replace(" ", "_")}.svg`;
   // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
@@ -565,19 +565,23 @@ export const FormularioDocumento: React.FC<Props> = ({
         </span>
       </div>
 
-      {showModal && (
+      {!showModal && (
         <Advertencia
           titulo="Advertencia"
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
             <div className="flex flex-col items-center justify-center ">
-              <p className="text-justify p-0 bg-slate-100 rounded-lg px-3 py-3 xsm:text-sm md:w-2/4">
+
+              <Alert color="warning">
+              <p className="xsm:text-sm md:text-lg text-justify">
                 Hemos detectado que el documento subido anteriormente no
                 corresponde con el documento seleccionado. Por favor, asegúrese
                 de subir el <strong>{placeholder}</strong> de su{" "}
                 <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder
                 continuar con el proceso.
               </p>
+                
+              </Alert>
               {!(tipoDocumento === passport) && (
                 <div className="flex flex-col justify-center items-center mb-2">
                   <p>
