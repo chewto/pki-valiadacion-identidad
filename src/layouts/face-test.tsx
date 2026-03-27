@@ -10,11 +10,14 @@ import "@styles/face-detection.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
-import { setIdCarpetas, setMovement } from "@nucleo/redux/slices/pruebaVidaSlice";
-import { Spinner } from "reactstrap";
+import {
+  setIdCarpetas,
+  setMovement,
+} from "@nucleo/redux/slices/pruebaVidaSlice";
+import { Alert, Spinner } from "reactstrap";
 import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
-import demoImg from '/demo.png'
+import demoImg from "/demo.png";
 import { useMobile } from "@nucleo/hooks/useMobile";
 
 // --- Interfaces ---
@@ -63,7 +66,7 @@ const FaceDetection: React.FC<Props> = ({
 
   const overlaySizeRef = useRef(overlaySize);
 
-  const isMobile = useMobile()
+  const isMobile = useMobile();
 
   useEffect(() => {
     console.log("isMobile:", isMobile);
@@ -107,7 +110,7 @@ const FaceDetection: React.FC<Props> = ({
     "validando rostro",
   ];
 
-  const adviceSeconds = 100 *5;
+  const adviceSeconds = 100 * 5;
   const [showAdvice, setShowAdvice] = useState(false);
   const [enableButton, setEnableButton] = useState(false);
 
@@ -223,66 +226,65 @@ const FaceDetection: React.FC<Props> = ({
 
   const prevPosRef = useRef<{ x: number; y: number } | null>(null);
 
-const handleDetectionLoop = () => {
-  const video = videoRef.current;
-  const canvas = canvasRef.current;
+  const handleDetectionLoop = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
 
-  if (!video || !canvas) return;
+    if (!video || !canvas) return;
 
-  const displaySize = { width: video.videoWidth, height: video.videoHeight };
-  faceapi.matchDimensions(canvas, displaySize);
+    const displaySize = { width: video.videoWidth, height: video.videoHeight };
+    faceapi.matchDimensions(canvas, displaySize);
 
-  // Clear interval if it exists to avoid memory leaks
-  if (detectionInterval.current) clearInterval(detectionInterval.current);
+    // Clear interval if it exists to avoid memory leaks
+    if (detectionInterval.current) clearInterval(detectionInterval.current);
 
-  detectionInterval.current = setInterval(async () => {
-    if (!video || video.paused || video.ended) return;
+    detectionInterval.current = setInterval(async () => {
+      if (!video || video.paused || video.ended) return;
 
-    // Detect a single face
-    const detection = await faceapi.detectSingleFace(
-      video,
-      new faceapi.TinyFaceDetectorOptions()
-    );
+      // Detect a single face
+      const detection = await faceapi.detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions(),
+      );
 
-    if (detection) {
-      // 2. Map detection to display size
-      const resizedDetection = faceapi.resizeResults(detection, displaySize);
-      const { x, y, width, height } = resizedDetection.box;
+      if (detection) {
+        // 2. Map detection to display size
+        const resizedDetection = faceapi.resizeResults(detection, displaySize);
+        const { x, y, width, height } = resizedDetection.box;
 
-      const currentCenter = {
-        x: x + width / 2,
-        y: y + height / 2,
-      };
+        const currentCenter = {
+          x: x + width / 2,
+          y: y + height / 2,
+        };
 
-      if (prevPosRef.current) {
-        // 3. Calculate distance (Movement Test)
-        const distance = Math.sqrt(
-          Math.pow(currentCenter.x - prevPosRef.current.x, 2) +
-          Math.pow(currentCenter.y - prevPosRef.current.y, 2)
-        );
+        if (prevPosRef.current) {
+          // 3. Calculate distance (Movement Test)
+          const distance = Math.sqrt(
+            Math.pow(currentCenter.x - prevPosRef.current.x, 2) +
+              Math.pow(currentCenter.y - prevPosRef.current.y, 2),
+          );
 
-        // A threshold of 5-10 pixels is usually enough to filter out camera noise
-        const MOVEMENT_THRESHOLD = 7; 
+          // A threshold of 5-10 pixels is usually enough to filter out camera noise
+          const MOVEMENT_THRESHOLD = 7;
 
-        if (distance > MOVEMENT_THRESHOLD) {
-          // setMessage("MOVIMIENTO DETECTADO ✅");
-          dispatch(setMovement("OK"));
-          // Optional: Auto-start recording if movement is detected
-          // if (!isRecording) recordVideo(); 
-        } else {
-
-          // setMessage("POR FAVOR, MUEVA SU ROSTRO");
+          if (distance > MOVEMENT_THRESHOLD) {
+            // setMessage("MOVIMIENTO DETECTADO ✅");
+            dispatch(setMovement("OK"));
+            // Optional: Auto-start recording if movement is detected
+            // if (!isRecording) recordVideo();
+          } else {
+            // setMessage("POR FAVOR, MUEVA SU ROSTRO");
+          }
         }
-      }
 
-      prevPosRef.current = currentCenter;
-    } else {
-      // No face in frame
-      prevPosRef.current = null;
-      // setMessage("ROSTRO NO DETECTADO");
-    }
-  }, 150); // 150ms is a good balance for performance and responsiveness
-};
+        prevPosRef.current = currentCenter;
+      } else {
+        // No face in frame
+        prevPosRef.current = null;
+        // setMessage("ROSTRO NO DETECTADO");
+      }
+    }, 150); // 150ms is a good balance for performance and responsiveness
+  };
 
   // 6. GRABACIÓN
   useEffect(() => {
@@ -453,16 +455,17 @@ const handleDetectionLoop = () => {
 
   // 7. RENDER
   return (
-    <div className="py-2 mt-2 bg-white border-slate-200 border-2 rounded-lg shadow-lg  absolute inset-x-0 top-0 flex flex-col justify-start items-center" style={{ height: "auto", bottom: "unset" }}>
+    <div
+      className="py-2 mt-2 bg-white border-slate-200 border-2 rounded-lg shadow-lg  absolute inset-x-0 top-0 flex flex-col justify-start items-center"
+      style={{ height: "auto", bottom: "unset" }}
+    >
       {showAdvice && (
         <div
+        className="flex justify-center md:items-center xsm:items-start"
           style={{
             position: "fixed",
             inset: 0,
             backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
             zIndex: 200,
             padding: 16,
           }}
@@ -476,50 +479,60 @@ const handleDetectionLoop = () => {
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "rgba(17,17,17,0.95)",
-              color: "#fff",
+              background: "#fff",
+              color: "#000",
               padding: "20px 24px",
               borderRadius: 12,
               maxWidth: 420,
               width: "100%",
-              textAlign: "center",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.6)"
+              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
             }}
           >
-            <div className="flex flex-col items-center">
-              <p style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-              Coloque su rostro dentro del recuadro y presione "Grabar video" para
-              iniciar la grabación.
-            </p>
-            <img src={demoImg} alt="demostracion" className="w-3/4 my-2 rounded-md"/>
-            </div>
-
-            <div style={{ marginTop: 0 }}>
-              <button
-                onClick={() => {
-                  setShowAdvice(false);
-                  setEnableButton(true);
-                }}
-                style={{
-                  marginTop: 8,
-                  padding: "8px 14px",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "#fff",
-                  color: "#111",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
-              >
-                Entendido
-              </button>
+            <div className="flex flex-col items-center py-2">
+              <Alert color="info" className="md:text-sm xsm:text-base text-center">
+                <strong>Recomendaciones Clave</strong> para una Validación
+                Exitosa
+              </Alert>
+              <ul className="text-justify flex flex-col gap-1 md:px-3 xsm:px-1 m-0 list-disc xsm:text-xs md:text-sm font-bold">
+                <li>
+                  Coloque su rostro dentro del recuadro y presione "Grabar
+                  video" para iniciar la grabación.
+                </li>
+                <li>
+                  Evita la luz solar directa o lámparas muy potentes cerca de la
+                  cara.
+                </li>
+                <li>
+                  Mantenga el teléfono firme y limpie el lente de la cámara.
+                </li>
+                <li>Ubíquese en un área con buena iluminación frontal.</li>
+              </ul>
+              <img
+                src={demoImg}
+                alt="demostracion"
+                className="md:w-8/12 xsm:w-11/12 my-3 xsm:my-5 rounded-md"
+              />
+              <div>
+                <button
+                  onClick={() => {
+                    setShowAdvice(false);
+                    setEnableButton(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-400 transition-all text-white px-3 py-2 rounded-lg"
+                >
+                  Entendido
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {!loading ? (
-        <div style={styles.mainContainer} className={`${!isMobile ? 'w-5/12' : 'w-full'}`}>
+        <div
+          style={styles.mainContainer}
+          className={`${!isMobile ? "w-5/12" : "w-full"}`}
+        >
           {!isRecording ? (
             // <div style={styles.statusIndicator}>{message}</div>
             <></>

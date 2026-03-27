@@ -92,15 +92,15 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       >
         <p style={{ margin: "0" }}>Realice un selfie para la verificación </p>
         {!mostrarCamara && cameraOpens <= 0 && (
-          <>
-            <span className="advertencia">
+          <Alert color="warning" className="z-0">
+            {/* <span className="advertencia">
               Por favor, quítese la gafas o gorra para realizar la verificación.
-            </span>
-            <p className="advertencia" style={{ margin: "15px 0 0 0" }}>
+            </span> */}
+            <p className="xsm:text-sm md:text-xl text-center p-0 m-0">
               Presione el botón para abrir su camara y prosiga. La selfie tarda
               4 segundos en ser capturada.
             </p>
-          </>
+          </Alert>
         )}
       </div>
 
@@ -167,19 +167,6 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       )}
 
       {mostrarCamara && !capturarOtraVez && (
-        // <Selfie
-        //   setSuccess={setSuccess}
-        //   setContinuarBoton={setContinuarBoton}
-        //   setMostrarPreview={setMostrarPreview}
-        //   setCapturarOtraVez={setCapturarOtravez}
-        //   setError={setError}
-        //   label={selfie}
-        //   idUsuarioFi={id}
-        //   setMessages={setMessages}
-        //   counter={counter}
-        //   setCounter={setCounter}
-        //   tries={tries}
-        // />
 
         <FaceDetection
           setSuccess={setSuccess}

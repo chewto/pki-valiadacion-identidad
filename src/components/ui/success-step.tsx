@@ -4,7 +4,7 @@ interface Props {
 
 export default function SuccessStep({ show }: Props) {
   return (
-    <div className={`bg-white border-1 border-slate-300 ${show ? 'flex animate-fadeIn' : 'hidden'} flex-col justify-center items-center gap-1 rounded-lg py-3.5  absolute left-2/4  transform -translate-x-1/2 md:w-1/4 xsm:w-48`}>
+    <div className={`bg-white border-1 border-slate-300 ${show ? 'flex animate-fadeIn' : 'hidden'} flex-col justify-center items-center gap-1 rounded-lg py-3.5  absolute left-2/4  transform -translate-x-1/2 md:w-1/4 xsm:w-48 z-50`}>
       <span className="text-slate-900">Paso completado</span>
       <div>
         <svg
