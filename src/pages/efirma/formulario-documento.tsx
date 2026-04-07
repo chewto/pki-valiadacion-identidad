@@ -114,6 +114,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   // 1. Definimos el mapeo fuera para que sea una constante única
   const DOCUMENT_MAPPING = {
+    "DNI": "DNI",
     "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
     "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
     "CEDULA DIGITAL": "CEDULA_DIGITAL",
