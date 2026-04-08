@@ -82,7 +82,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
-  // const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<string[]>([]);
   const [retry, setRetry] = useState<boolean>(false);
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -114,7 +114,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   // 1. Definimos el mapeo fuera para que sea una constante única
   const DOCUMENT_MAPPING = {
-    "DNI": "DNI",
+    DNI: "DNI",
     "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
     "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
     "CEDULA DIGITAL": "CEDULA_DIGITAL",
@@ -406,6 +406,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         dispatch(setBackDetection());
       }
 
+
       if (!resData.documentoValido) {
         setDetectionReq({
           ...detectionReq,
@@ -455,7 +456,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       durationValidation = Date.now() - validationTimeStart;
 
       const resData = resValidacion.data;
-      // const adviceMessages = resData.messages;
+      const adviceMessages = resData.messages;
 
       // Lógica para ANVERSO
       if (ladoDocumento === "anverso") {
@@ -470,11 +471,11 @@ export const FormularioDocumento: React.FC<Props> = ({
         if (resData.face && resData.faceDetected && resData.validSide) {
           setTimeout(() => nextStep(), 700);
         } else if (!resData.validSide && conteo < detectionTries) {
-          // setMessages((prev) => [...prev, ...adviceMessages]);
+          setMessages((prev) => [...prev, ...adviceMessages]);
           setConteo((prev) => prev + 1);
           setRetry(true);
         } else if (conteo >= detectionTries) {
-          // setMessages([]);
+          setMessages([]);
           setRetry(false);
           setSuccess(true);
           setTimeout(() => nextStep(), 700);
@@ -493,12 +494,12 @@ export const FormularioDocumento: React.FC<Props> = ({
           setContinuarBoton(true);
           setTimeout(() => nextStep(), 700);
         } else if (!resData.validSide && conteo < detectionTries) {
-          // setMessages((prev) => [...prev, ...adviceMessages]);
+          setMessages((prev) => [...prev, ...adviceMessages]);
           setRetry(true);
           setConteo((prev) => prev + 1);
           setMainCounter((prev) => prev + 1);
         } else if (conteo >= detectionTries) {
-          // setMessages([]);
+          setMessages([]);
           setRetry(false);
           setSuccess(true);
           setContinuarBoton(true);
@@ -565,6 +566,31 @@ export const FormularioDocumento: React.FC<Props> = ({
           Intentos restantes: {triesCounter}{" "}
         </span>
       </div>
+      {/*       
+      {messages.length >= 1 && (
+        <Advertencia
+          titulo="Advertencia"
+          contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
+          elemento={
+            <div>
+              <ul className="text-left p-0">
+                {messages.map((message: string, index: number) => (
+                  <li
+                    key={index}
+                    className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
+                  >
+                    {message}
+                  </li>
+                ))}
+
+              </ul>
+              <button onClick={() => setMessages([])} className="stepper-btn">
+                cerrar
+              </button>
+            </div>
+          }
+        />
+      )} */}
 
       {showModal && (
         <Advertencia
@@ -572,16 +598,14 @@ export const FormularioDocumento: React.FC<Props> = ({
           contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
           elemento={
             <div className="flex flex-col items-center justify-center ">
-
               <Alert color="warning">
-              <p className="xsm:text-sm md:text-lg text-justify">
-                Hemos detectado que el documento subido anteriormente no
-                corresponde con el documento seleccionado. Por favor, asegúrese
-                de subir el <strong>{placeholder}</strong> de su{" "}
-                <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para poder
-                continuar con el proceso.
-              </p>
-                
+                <p className="xsm:text-sm md:text-lg text-justify">
+                  Hemos detectado que el documento subido anteriormente no
+                  corresponde con el documento seleccionado. Por favor,
+                  asegúrese de subir el <strong>{placeholder}</strong> de su{" "}
+                  <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para
+                  poder continuar con el proceso.
+                </p>
               </Alert>
               {!(tipoDocumento === passport) && (
                 <div className="flex flex-col justify-center items-center mb-2">
@@ -654,26 +678,28 @@ export const FormularioDocumento: React.FC<Props> = ({
             </div>
 
             {/* Fila 2 */}
-            <div className="loading-indicator">
-              <span>Identificando tipo de documento</span>
-              <div className="status-area">
-                {detectionReq.loading && <Spinner />}
-                {detectionReq.success && (
-                  <span>
-                    <svg
-                      className="bg-green-700 rounded-xl"
-                      xmlns="http://www.w3.org/2000/svg"
-                      height="24px"
-                      viewBox="0 -960 960 960"
-                      width="24px"
-                      fill="#e3e3e3"
-                    >
-                      <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
-                    </svg>
-                  </span>
-                )}
+            {tipoDocumento !== passport && (
+              <div className="loading-indicator">
+                <span>Identificando tipo de documento</span>
+                <div className="status-area">
+                  {detectionReq.loading && <Spinner />}
+                  {detectionReq.success && (
+                    <span>
+                      <svg
+                        className="bg-green-700 rounded-xl"
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="24px"
+                        viewBox="0 -960 960 960"
+                        width="24px"
+                        fill="#e3e3e3"
+                      >
+                        <path d="m424-296 282-282-56-56-226 226-114-114-56 56 170 170Zm56 216q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+                      </svg>
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Fila 3 */}
             <div className="loading-indicator">
