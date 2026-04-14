@@ -236,79 +236,81 @@ export const FormularioDocumento: React.FC<Props> = ({
   }, [ladoDocumento]);
 
   const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const archivo = event.target.files?.[0];
-  if (!archivo) return;
+    const archivo = event.target.files?.[0];
+    if (!archivo) return;
 
-  setContinuarBoton(false);
-  setRetry(false);
-  setIsCorrupted(false);
-  setLoading(true);
+    // Bloqueamos inmediatamente para evitar múltiples clicks/procesos
+    setLoading(true);
+    setContinuarBoton(false);
+    setRetry(false);
+    setIsCorrupted(false);
 
-  // 1. Usamos URL temporal en lugar de FileReader (mucho más rápido y ligero)
-  const objectUrl = URL.createObjectURL(archivo);
-  const img = new Image();
+    const objectUrl = URL.createObjectURL(archivo);
+    const img = new Image();
 
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    
-    // 2. Definimos un límite de resolución razonable para eKYC (OCR/Face)
-    // No necesitamos los 12MP originales de la cámara del iPhone
-    const MAX_WIDTH = 1280; 
-    let width = img.width;
-    let height = img.height;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
 
-    if (width > MAX_WIDTH) {
-      height = (MAX_WIDTH * height) / width;
-      width = MAX_WIDTH;
-    }
+      // Límite de resolución razonable para eKYC
+      const MAX_WIDTH = 1200;
+      let width = img.width;
+      let height = img.height;
 
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(img, 0, 0, width, height);
-      
-      // 3. Bajamos el quality a 0.8. La diferencia visual es nula para el OCR, 
-      // pero el peso del string resultante baja drásticamente.
-      const dataURLImage = canvas.toDataURL("image/jpeg", 0.8);
-
-      if (dataURLImage.length > 10) {
-        dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
-        
-        const data = {
-          id: id,
-          imagen: dataURLImage,
-          nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
-          apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
-          documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
-          ladoDocumento,
-          tipoDocumento,
-          imagenPersona: informacion.foto_persona,
-          country: informacionFirmador.pais,
-          tries: conteo,
-        };
-
-        validarDocumento(data);
-      } else {
-        setIsCorrupted(true);
-        setLoading(false);
+      if (width > MAX_WIDTH) {
+        height = (MAX_WIDTH * height) / width;
+        width = MAX_WIDTH;
       }
-    }
-    
-    // 4. IMPORTANTE: Liberamos la memoria del objectUrl
-    URL.revokeObjectURL(objectUrl);
-  };
 
-  img.onerror = () => {
-    setLoading(false);
-    setIsCorrupted(true);
-    URL.revokeObjectURL(objectUrl);
-  };
+      canvas.width = width;
+      canvas.height = height;
 
-  img.src = objectUrl;
-  event.target.value = ""; // Limpiamos el input
-};
+      const ctx = canvas.getContext("2d", { alpha: false }); // Deshabilitamos alpha para ahorrar memoria
+      if (ctx) {
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 3. Bajamos el quality a 0.8. La diferencia visual es nula para el OCR, 
+        // pero el peso del string resultante baja drásticamente.
+        const dataURLImage = canvas.toDataURL("image/jpeg", 0.8);
+
+        if (dataURLImage.length > 10) {
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
+
+          const data = {
+            id: id,
+            imagen: dataURLImage,
+            nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
+            apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
+            documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
+            ladoDocumento,
+            tipoDocumento,
+            imagenPersona: informacion.foto_persona,
+            country: informacionFirmador.pais,
+            tries: conteo,
+          };
+
+          validarDocumento(data);
+        } else {
+          setIsCorrupted(true);
+          setLoading(false);
+        }
+      }
+
+      // 4. IMPORTANTE: Liberamos la memoria del objectUrl
+      URL.revokeObjectURL(objectUrl);
+      event.target.value = ""; // Limpiamos el input después de procesar
+    };
+
+    img.onerror = () => {
+      setLoading(false);
+      setIsCorrupted(true);
+      URL.revokeObjectURL(objectUrl);
+      event.target.value = ""; // Limpiamos el input si hay error
+    };
+
+    img.src = objectUrl;
+  };
 
   const validarDocumento = async (data: any) => {
     const type = conversor(data.tipoDocumento);
