@@ -149,8 +149,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const mobile: boolean = useMobile();
 
   const [horizontal, setHorizontal] = useState<boolean>(false);
-  const [takePhoto, setTakePhoto] = useState<boolean>(false);
-  setTakePhoto(false)
+
 
   const loadingMessages = [
     "Estamos verificando tu identidad, por favor espera un momento...",
@@ -742,7 +741,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                 </div>
               )}
 
-              {!horizontal && takePhoto && (
+              {/* {!horizontal && takePhoto && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col`}>
                   <span className="text-center font-bold text-sm m-0 ">
                     La foto debe mostrar el documento completo, todos los textos
@@ -771,7 +770,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                     {loading && <Spinner></Spinner>}
                   </label>
                 </div>
-              )}
+              )} */}
             </>
 
             // <Camera
