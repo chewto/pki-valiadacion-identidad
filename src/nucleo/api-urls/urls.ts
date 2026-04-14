@@ -4,7 +4,8 @@ const URL = import.meta.env.VITE_BASE_URL
 
 const rutasURL = {
       validacion: `${URL}/validacion-back`,
-      fe: `${URL}/fe-back/api/Firmador`,
+      // fe: `${URL}/fe-back/api/Firmador`,
+      fe: `https://honducert.firma.e-custodia.com/fe-back/api/Firmador`,
       resultados: `${URL}/efirma.php/`,
       rejected: `${URL}/resultado_validacion_fallida`,
       validacionVida: `${URL}/validacion-vida`,
