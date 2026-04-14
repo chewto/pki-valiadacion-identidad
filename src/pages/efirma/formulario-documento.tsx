@@ -83,6 +83,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
   const [messages, setMessages] = useState<string[]>([]);
+  console.log(messages)
   const [retry, setRetry] = useState<boolean>(false);
   const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
@@ -149,6 +150,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [horizontal, setHorizontal] = useState<boolean>(false);
   const [takePhoto, setTakePhoto] = useState<boolean>(false);
+  setTakePhoto(false)
 
   const loadingMessages = [
     "Estamos verificando tu identidad, por favor espera un momento...",
