@@ -691,7 +691,7 @@ export const FormularioDocumento: React.FC<Props> = ({
         <>
           {mobile && (
             <>
-              {!horizontal && !takePhoto && (
+              {/* {!horizontal && !takePhoto && (
                 <div className="text-justify flex flex-col border-gray-300 border-1 bg-slate-100 gap-2 rounded-md p-2">
                   <p className="m-0 text-sm">
                     Por favor, gira tu teléfono en modo horizontal para tomar la
@@ -708,9 +708,9 @@ export const FormularioDocumento: React.FC<Props> = ({
                     Pulse aqui si no gira el dispositivo
                   </button>
                 </div>
-              )}
+              )} */}
 
-              {horizontal && (
+              {!horizontal && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col `}>
                   <span className="text-center font-bold text-xs md:text-sm  m-0 ">
                     La foto debe mostrar el documento completo, todos los textos
