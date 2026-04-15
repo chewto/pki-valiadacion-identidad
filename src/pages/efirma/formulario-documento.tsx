@@ -606,14 +606,7 @@ export const FormularioDocumento: React.FC<Props> = ({
       )}
 
       {loading && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignContent: "center",
-            margin: "20px 0",
-          }}
-        >
+        <div className="flex justify-center w-full">
           <div className="loading-grid">
             {/* Fila 1 */}
             <div className="loading-indicator">
@@ -692,24 +685,6 @@ export const FormularioDocumento: React.FC<Props> = ({
         <>
           {mobile && (
             <>
-              {/* {!horizontal && !takePhoto && (
-                <div className="text-justify flex flex-col border-gray-300 border-1 bg-slate-100 gap-2 rounded-md p-2">
-                  <p className="m-0 text-sm">
-                    Por favor, gira tu teléfono en modo horizontal para tomar la
-                    foto del documento.
-                  </p>
-                  <p className="m-0 text-sm">
-                    Si el dispositivo no gira automaticamente verifica en
-                    ajustes que la rotación de pantalla esté habilitada.
-                  </p>
-                  <button
-                    onClick={() => setTakePhoto(true)}
-                    className="text-sm border-1 border-gray-200 "
-                  >
-                    Pulse aqui si no gira el dispositivo
-                  </button>
-                </div>
-              )} */}
 
               {!horizontal && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col `}>
@@ -740,63 +715,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                   </label>
                 </div>
               )}
-
-              {/* {!horizontal && takePhoto && (
-                <div className={`${loading ? "hidden" : "flex"} flex-col`}>
-                  <span className="text-center font-bold text-sm m-0 ">
-                    La foto debe mostrar el documento completo, todos los textos
-                    completamente enfocados y sin ningún tipo de sombra, de
-                    forma que se puedan reconocer todos los datos.
-                  </span>
-                  <label
-                    className="file-input text-center"
-                    style={{
-                      background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
-                    }}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="environment"
-                      onChange={handleCapture}
-                      className="opacity-0 w-0"
-                      disabled={loading}
-                    />
-                    {preview.length <= 0 &&
-                      `Subir foto del ${placeholder} de su ${tipoDocumento}`}
-                    {retry && "Reintentar subir documento"}
-                    {!detectionReq.success &&
-                      "Por favor, subir la imagen de su documento correctamente."}
-                    {loading && <Spinner></Spinner>}
-                  </label>
-                </div>
-              )} */}
             </>
-
-            // <Camera
-            // preview={preview}
-            // ladoDocumento={ladoDocumento}
-            // placeholder={placeholder}
-            // retry={retry}
-            // tipoDocumento={tipoDocumento}
-            // loading={loading}
-            // setIsCorrupted={setIsCorrupted}
-            // setMessages={setMessages}
-            // setRetry={setRetry}
-            // sendDocument={() => {
-            //   validarDocumento(
-            //     id,
-            //     preview,
-            //     informacionFirmador.nombre != null ? informacionFirmador.nombre : validacionDocumento.ocr.data.name,
-            //     informacionFirmador.apellido != null ? informacionFirmador.apellido : validacionDocumento.ocr.data.lastName,
-            //     informacionFirmador.documento != null ? informacionFirmador.documento : validacionDocumento.ocr.data.ID,
-            //     ladoDocumento,
-            //     tipoDocumento,
-            //     informacion.foto_persona,
-            //     informacionFirmador.pais
-            //   );
-            // }}
-            // />
           )}
 
           {!mobile && !success && (

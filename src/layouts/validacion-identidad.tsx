@@ -210,7 +210,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     if (results) {
       axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
     }
-  },[results])
+  }, [results])
 
   useEffect(() => {
     axios.get(getCountry).then((res) => {
@@ -282,7 +282,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       url: validationParamsUrl,
     })
       .then((res) => {
-        const { validationPercent, validationAttendance, documentsTries,detectionTries  } =
+        const { validationPercent, validationAttendance, documentsTries, detectionTries } =
           res.data;
         console.log(detectionTries, documentsTries)
 
@@ -296,7 +296,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           // documentsTries: documentsTries === null ? 2 : documentsTries,
           // detectionTries: detectionTries ?? 1
           documentsTries: 2,
-          detectionTries:  1
+          detectionTries: 1
         });
       })
       .catch(() => {
@@ -455,103 +455,103 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = useMemo(() => {
     return informacionFirmador.validacionVida
       ? [
-          <DocumentSelector
-            key="document-selector"
-            tipoDocumento={informacion.tipoDocumento}
-            documentList={documentList}
-            continuarBoton={continuarBoton}
-            useModel={standalone ? useModel : false}
-            nextStep={handleNext}
-          />,
-          <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
-          <FormularioDocumento
-            key="formulario-anverso"
-            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-            tipoDocumento={informacion.tipoDocumento}
-            preview={informacion.anverso}
-            continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
-            ladoDocumento={labelFoto.anverso}
-            useModel={useModel}
-            detectionTries={validationParams.detectionTries}
-            tries={validationParams.documentsTries}
-            attendance={validationParams.validationAttendance}
-            setMainCounter={setMainCounter}
-            nextStep={handleNext}
-            returnStep={handleReturn}
-          />,
-          <FormularioDocumento
-            key="formulario-reverso"
-            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-            tipoDocumento={informacion.tipoDocumento}
-            preview={informacion.reverso}
-            continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
-            ladoDocumento={labelFoto.reverso}
-            detectionTries={validationParams.detectionTries}
-            useModel={useModel}
-            tries={validationParams.documentsTries}
-            attendance={validationParams.validationAttendance}
-            setMainCounter={setMainCounter}
-            returnStep={handleReturn}
-            nextStep={handleNext}
-          />,
-        ]
+        <DocumentSelector
+          key="document-selector"
+          tipoDocumento={informacion.tipoDocumento}
+          documentList={documentList}
+          continuarBoton={continuarBoton}
+          useModel={standalone ? useModel : false}
+          nextStep={handleNext}
+        />,
+        <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
+        <FormularioDocumento
+          key="formulario-anverso"
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.anverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.anverso}
+          useModel={useModel}
+          detectionTries={validationParams.detectionTries}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+          nextStep={handleNext}
+          returnStep={handleReturn}
+        />,
+        <FormularioDocumento
+          key="formulario-reverso"
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.reverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.reverso}
+          detectionTries={validationParams.detectionTries}
+          useModel={useModel}
+          tries={validationParams.documentsTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+          returnStep={handleReturn}
+          nextStep={handleNext}
+        />,
+      ]
       : [
-          <DocumentSelector
-            key="document-selector"
-            tipoDocumento={informacion.tipoDocumento}
-            documentList={documentList}
-            continuarBoton={continuarBoton}
-            useModel={standalone ? useModel : false}
-            nextStep={handleNext}
-          />,
-          <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
-          // <Demo side="face" handleNext={handleNext}/>,
-          <FormularioFotoPersona
-            key="formulario-foto-persona"
-            setContinuarBoton={setContinuarBoton}
-            preview={informacion.foto_persona}
-            selfie={labelFoto.foto_persona}
-            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-            nextStep={handleNext}
-            tries={validationParams.detectionTries}
-          />,
-          // <Demo side="frontal"  handleNext={handleNext}/>,
-          <FormularioDocumento
-            key="formulario-anverso"
-            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-            tipoDocumento={informacion.tipoDocumento}
-            preview={informacion.anverso}
-            continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
-            ladoDocumento={labelFoto.anverso}
-            useModel={useModel}
-            tries={validationParams.documentsTries}
-            detectionTries={validationParams.detectionTries}
-            attendance={validationParams.validationAttendance}
-            setMainCounter={setMainCounter}
-            nextStep={handleNext}
-            returnStep={handleReturn}
-          />,
-          // <Demo side="reverso"  handleNext={handleNext}/>,
-          <FormularioDocumento
-            key="formulario-reverso"
-            id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
-            tipoDocumento={informacion.tipoDocumento}
-            preview={informacion.reverso}
-            continuarBoton={continuarBoton}
-            setContinuarBoton={setContinuarBoton}
-            ladoDocumento={labelFoto.reverso}
-            useModel={useModel}
-            tries={validationParams.documentsTries}
-            detectionTries={validationParams.detectionTries}
-            attendance={validationParams.validationAttendance}
-            setMainCounter={setMainCounter}
-            nextStep={handleNext}
-            returnStep={handleReturn}
-          />,
-        ];
+        <DocumentSelector
+          key="document-selector"
+          tipoDocumento={informacion.tipoDocumento}
+          documentList={documentList}
+          continuarBoton={continuarBoton}
+          useModel={standalone ? useModel : false}
+          nextStep={handleNext}
+        />,
+        <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
+        // <Demo side="face" handleNext={handleNext}/>,
+        <FormularioFotoPersona
+          key="formulario-foto-persona"
+          setContinuarBoton={setContinuarBoton}
+          preview={informacion.foto_persona}
+          selfie={labelFoto.foto_persona}
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          nextStep={handleNext}
+          tries={validationParams.detectionTries}
+        />,
+        // <Demo side="frontal"  handleNext={handleNext}/>,
+        <FormularioDocumento
+          key="formulario-anverso"
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.anverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.anverso}
+          useModel={useModel}
+          tries={validationParams.documentsTries}
+          detectionTries={validationParams.detectionTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+          nextStep={handleNext}
+          returnStep={handleReturn}
+        />,
+        // <Demo side="reverso"  handleNext={handleNext}/>,
+        <FormularioDocumento
+          key="formulario-reverso"
+          id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
+          tipoDocumento={informacion.tipoDocumento}
+          preview={informacion.reverso}
+          continuarBoton={continuarBoton}
+          setContinuarBoton={setContinuarBoton}
+          ladoDocumento={labelFoto.reverso}
+          useModel={useModel}
+          tries={validationParams.documentsTries}
+          detectionTries={validationParams.detectionTries}
+          attendance={validationParams.validationAttendance}
+          setMainCounter={setMainCounter}
+          nextStep={handleNext}
+          returnStep={handleReturn}
+        />,
+      ];
   }, [
     continuarBoton,
     documentList,
