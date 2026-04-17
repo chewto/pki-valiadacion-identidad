@@ -58,49 +58,71 @@ export const DocumentSelector: React.FC<Props> = ({
   return (
     <div className="flex flex-col">
       <SuccessStep show={successStep} />
-      
-      <p className="text-left text-slate-800 sm:text-2xl text-lg font-semibold mb-0">
-        Seleccione un documento para la verificación
-      </p>
 
-      <div className="m-0">
-        {visibleOptions.map((opcion:string) => {
+      {/* fieldset + legend: grupo semántico ARIA para los radio buttons */}
+      <fieldset className="border-0 p-0 m-0">
+        <legend className="text-left text-slate-800 sm:text-2xl text-lg font-semibold mb-2 float-none w-full">
+          Seleccione un documento para la verificación
+        </legend>
+
+        <div className="flex flex-col gap-1 mt-1">
+          {visibleOptions.map((opcion: string) => {
             const isSelected = tipoDocumento === opcion;
             const isPreviousSelection = opcion === userData.tipoDocumento;
+            const optionId = `doc-option-${opcion.replace(/\s+/g, '-').toLowerCase()}`
 
             return (
-              <label 
-                // Usar el valor único como key es mejor práctica que el index
-                key={opcion} 
-                className="my-2 flex gap-1 hover:cursor-pointer items-center"
+              <label
+                key={opcion}
+                htmlFor={optionId}
+                className={`
+                  flex items-center gap-3 px-4 py-3 rounded-lg border-2 cursor-pointer
+                  transition-all duration-200
+                  ${isSelected
+                    ? 'border-blue-500 bg-blue-50 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
+                  }
+                  ${tipoDocumento.length > 0 && !isSelected ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
               >
                 <input
+                  id={optionId}
                   type="radio"
                   name="tipo_documento"
                   value={opcion}
                   onChange={onChange}
                   checked={isSelected}
-                  // Ya no necesitamos la lógica de 'hidden' ni 'disabled' aquí
-                  // porque filtramos la opción en 'visibleOptions'
-                  className={`text-slate-800 font-semibold focus:ring-slate-800`}
                   disabled={tipoDocumento.length > 0}
+                  className="accent-blue-600 w-4 h-4 flex-shrink-0"
+                  aria-describedby={isPreviousSelection ? `${optionId}-prev` : undefined}
                 />
 
-                <div className={`w-full flex flex-row gap-2 items-center ml-2 ${isSelected ? '': ''}`} >
-                  <span className="text-slate-800 font-medium">
+                <div className="flex flex-row gap-2 items-center flex-1 min-w-0">
+                  <span className={`font-medium ${isSelected ? 'text-blue-700' : 'text-slate-800'}`}>
                     {opcion}
                   </span>
 
                   {isPreviousSelection && (
-                    <span className="text-xs font-bold text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
-                      Opcion seleccionada previamente.
+                    <span
+                      id={`${optionId}-prev`}
+                      className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full whitespace-nowrap"
+                    >
+                      Selección previa
                     </span>
                   )}
                 </div>
+
+                {/* Checkmark visual cuando está seleccionado */}
+                {isSelected && (
+                  <svg aria-hidden="true" className="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                )}
               </label>
             );
-        })}
-      </div>
+          })}
+        </div>
+      </fieldset>
     </div>
   );
 };

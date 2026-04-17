@@ -605,6 +605,13 @@ export const FormularioDocumento: React.FC<Props> = ({
         </Alert>
       )}
 
+      {/* aria-live="polite": el lector de pantalla anuncia cambios de estado sin interrumpir */}
+      <div aria-live="polite" role="status" className="sr-only">
+        {loading && 'Verificando documento, por favor espere.'}
+        {!loading && success && 'Documento verificado correctamente.'}
+        {error && 'Error al verificar el documento. Por favor intente de nuevo.'}
+      </div>
+
       {loading && (
         <div className="flex justify-center w-full">
           <div className="loading-grid">
@@ -612,10 +619,11 @@ export const FormularioDocumento: React.FC<Props> = ({
             <div className="loading-indicator">
               <span>Alineando documento</span>
               <div className="status-area">
-                {ocrReq.loading && <Spinner />}
+                {ocrReq.loading && <Spinner aria-label="Alineando documento" />}
                 {ocrReq.success && (
-                  <span>
+                  <span aria-label="Alineación completada">
                     <svg
+                      aria-hidden="true"
                       className="bg-green-700 rounded-xl"
                       xmlns="http://www.w3.org/2000/svg"
                       height="24px"
@@ -635,10 +643,11 @@ export const FormularioDocumento: React.FC<Props> = ({
               <div className="loading-indicator">
                 <span>Identificando tipo de documento</span>
                 <div className="status-area">
-                  {detectionReq.loading && <Spinner />}
+                  {detectionReq.loading && <Spinner aria-label="Identificando tipo de documento" />}
                   {detectionReq.success && (
-                    <span>
+                    <span aria-label="Identificación completada">
                       <svg
+                        aria-hidden="true"
                         className="bg-green-700 rounded-xl"
                         xmlns="http://www.w3.org/2000/svg"
                         height="24px"
@@ -658,10 +667,11 @@ export const FormularioDocumento: React.FC<Props> = ({
             <div className="loading-indicator">
               <span>Procesando documento</span>
               <div className="status-area">
-                {validationReq.loading && <Spinner />}
+                {validationReq.loading && <Spinner aria-label="Procesando documento" />}
                 {validationReq.success && (
-                  <span>
+                  <span aria-label="Procesamiento completado">
                     <svg
+                      aria-hidden="true"
                       className="bg-green-700 rounded-xl"
                       xmlns="http://www.w3.org/2000/svg"
                       height="24px"
@@ -688,7 +698,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
               {!horizontal && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col `}>
-                  <span className="text-center font-bold text-xs md:text-sm  m-0 ">
+                  <span className="text-center font-bold text-sm md:text-base m-0">
                     La foto debe mostrar el documento completo, todos los textos
                     completamente enfocados y sin ningún tipo de sombra, de
                     forma que se puedan reconocer todos los datos.
@@ -696,6 +706,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
                   <label
                     className="file-input text-center text-sm md:text-sm"
+                    aria-label={`${retry ? 'Reintentar subir' : 'Subir'} foto del ${placeholder} de su ${tipoDocumento}`}
                     style={{
                       background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
                     }}
@@ -707,6 +718,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                       onChange={handleCapture}
                       className="opacity-0 w-0"
                       disabled={loading}
+                      aria-hidden="true"
                     />
                     {preview.length <= 0 &&
                       `Subir foto del ${placeholder} de su ${tipoDocumento}`}
@@ -721,6 +733,13 @@ export const FormularioDocumento: React.FC<Props> = ({
           {!mobile && !success && (
             <label
               className="file-input"
+              aria-label={
+                retry && !continuarBoton
+                  ? `Reintentar subir foto del ${placeholder} de su ${tipoDocumento}`
+                  : continuarBoton
+                  ? `Subir una nueva foto del ${placeholder} de su ${tipoDocumento}`
+                  : `Subir foto del ${placeholder} de su ${tipoDocumento}`
+              }
               style={{
                 background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
               }}
@@ -732,6 +751,7 @@ export const FormularioDocumento: React.FC<Props> = ({
                 onChange={handleCapture}
                 style={{ display: "none" }}
                 disabled={loading}
+                aria-hidden="true"
               />
               {preview.length <= 0 &&
                 `Subir foto del ${placeholder} de su ${tipoDocumento}`}
@@ -739,11 +759,11 @@ export const FormularioDocumento: React.FC<Props> = ({
               {loading && <Spinner></Spinner>}
               {continuarBoton &&
                 ladoDocumento === "anverso" &&
-                "Pulse aqui para subir una nueva foto"}
-              {error && "El servidor ha fallado"}
+                "Subir nueva foto"}
+              {error && "Error — intente de nuevo"}
               {continuarBoton &&
                 ladoDocumento === "reverso" &&
-                "Pulse aqui para subir una nueva foto"}
+                "Subir nueva foto"}
             </label>
           )}
         </>

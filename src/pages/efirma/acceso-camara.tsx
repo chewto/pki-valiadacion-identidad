@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "reactstrap";
 import accesoCamara from '../../assets/img/acceso-camara.jpg'
 import { useMobile } from "@nucleo/hooks/useMobile";
 
@@ -57,30 +56,49 @@ export const AccesoCamara: React.FC<Props> = ({ nextStep }) => {
 
       {desplegarCamara == 0 && (
         <>
-          <h3 className="text-lg font-bold text-slate-800 ">Permítenos usar su cámara</h3>
-          <p className="xsm:text-sm md:text-base text-center text-slate-800">
-            Si ve una ventana emergente que pida acceso a su cámara. Por
-            favor, asegurate de hacer click en permitir.
+          <h3 className="text-lg font-bold text-slate-800">Permítenos usar su cámara</h3>
+          <p className="xsm:text-sm md:text-base text-center text-slate-700 my-2">
+            Si ve una ventana emergente que pida acceso a su cámara, por
+            favor asegúrate de hacer clic en <strong>Permitir</strong>.
           </p>
 
-          {!esMobile && <img src={accesoCamara} alt="acceso ejemplo" className="my-2" />}
-          <Button color="success" onClick={iniciarCamara}>
+          {!esMobile && (
+            <img
+              src={accesoCamara}
+              alt="Ejemplo de la ventana emergente del navegador solicitando permiso de acceso a la cámara"
+              className="my-2 rounded-md border border-slate-200 shadow-sm"
+            />
+          )}
+
+          <button
+            type="button"
+            onClick={iniciarCamara}
+            aria-label="Permitir que la aplicación acceda a la cámara de tu dispositivo"
+            className="
+              mt-3 px-6 py-2.5 rounded-lg font-semibold text-white
+              bg-green-600 hover:bg-green-700 active:bg-green-800
+              transition-colors duration-200
+              focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-500
+            "
+          >
             Permitir acceso a la cámara
-          </Button>
+          </button>
         </>
       )}
 
       {desplegarCamara == 1 && (
         <>
-          <h3 className="text-lg font-bold text-slate-800">El acceso a la cámara concedido</h3>
-          <p className="text-center text-slate-800">Puede continuar con la verificación</p>
+          <h3 className="text-lg font-bold text-slate-800">Acceso a la cámara concedido</h3>
+          <p className="text-center text-slate-700">Puede continuar con la verificación.</p>
         </>
       )}
 
-      {desplegarCamara == 2 &&  (
+      {desplegarCamara == 2 && (
         <>
-          <h3 className="text-lg font-bold text-slate-800">El acceso a la cámara fue denegado</h3>
-          <p className="text-center text-slate-800">Por favor recargue la página</p>
+          <h3 className="text-lg font-bold text-red-700">Acceso a la cámara denegado</h3>
+          <p className="text-center text-slate-700">
+            Por favor, recargue la página y otorgue permiso de cámara cuando se solicite.
+          </p>
         </>
       )}
     </div>

@@ -261,7 +261,7 @@ const FaceDetection: React.FC<Props> = ({
           // 3. Calculate distance (Movement Test)
           const distance = Math.sqrt(
             Math.pow(currentCenter.x - prevPosRef.current.x, 2) +
-              Math.pow(currentCenter.y - prevPosRef.current.y, 2),
+            Math.pow(currentCenter.y - prevPosRef.current.y, 2),
           );
 
           // A threshold of 5-10 pixels is usually enough to filter out camera noise
@@ -456,81 +456,81 @@ const FaceDetection: React.FC<Props> = ({
   // 7. RENDER
   return (
     <div
-      className="py-2 mt-2 bg-white border-slate-200 border-2 rounded-lg shadow-lg  absolute inset-x-0 top-0 flex flex-col justify-start items-center"
+      className="py-2 mt-2 bg-white border-slate-200 border-2 rounded-lg shadow-lg  absolute inset-x-0 top-0 flex flex-col justify-start items-center z-100"
       style={{ height: "auto", bottom: "unset" }}
     >
       {showAdvice && (
-  <div
-    className="flex justify-center md:items-center xsm:items-start md:p-16 xsm:p-2" // Se agrega scroll al contenedor externo
-    style={{
-      position: "fixed",
-      inset: 0,
-      backgroundColor: "rgba(0,0,0,0.6)",
-      zIndex: 200
-    }}
-    onClick={() => {
-      setShowAdvice(false);
-      setEnableButton(true);
-    }}
-  >
-    <div
-      role="dialog"
-      aria-modal="true"
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        background: "#fff",
-        color: "#000",
-        padding: "20px 24px",
-        borderRadius: 12,
-        maxWidth: 420,
-        width: "100%",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
-        // --- CAMBIOS PARA SCROLL INTERNO ---
-        maxHeight: "calc(100vh - 40px)", // Evita que sea más alto que la pantalla
-        overflowY: "auto",               // Habilita el scroll interno
-        display: "flex",                 // Asegura que el contenido fluya bien
-        flexDirection: "column"
-      }}
-    >
-      <div className="flex flex-col items-center md:p-3 xsm:px-1 xsm:py-0">
-        <Alert color="info" className="md:text-sm xsm:text-base text-center w-full">
-          <strong>Recomendaciones Clave</strong> para una Validación
-          Exitosa
-        </Alert>
-        <ul className="text-justify flex flex-col gap-1 md:px-3 xsm:px-1 m-0 list-disc xsm:text-xs md:text-sm font-bold">
-          <li>
-            Coloque su rostro dentro del recuadro y presione "Grabar
-            video" para iniciar la grabación.
-          </li>
-          <li>
-            Evita la luz solar directa o lámparas muy potentes cerca de la
-            cara.
-          </li>
-          <li>
-            Mantenga el teléfono firme y limpie el lente de la cámara.
-          </li>
-          <li>Ubíquese en un área con buena iluminación frontal.</li>
-        </ul>
-        <img
-          src={demoImg}
-          alt="demostracion"
-          className="md:w-8/12 xsm:w-9/12 my-2 xsm:my-3 rounded-md object-contain"
-        />
-        <div className="mt-auto"> {/* mt-auto empuja el botón al final si hay espacio */}
-          <button
-            onClick={() => {
-              setShowAdvice(false);
-              setEnableButton(true);
+        <div
+          className="flex justify-center md:items-center xsm:items-start md:p-16 xsm:p-2" // Se agrega scroll al contenedor externo
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            zIndex: 200
+          }}
+          onClick={() => {
+            setShowAdvice(false);
+            setEnableButton(true);
+          }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#fff",
+              color: "#000",
+              padding: "20px 24px",
+              borderRadius: 12,
+              maxWidth: 420,
+              width: "100%",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+              // --- CAMBIOS PARA SCROLL INTERNO ---
+              maxHeight: "calc(100vh - 40px)", // Evita que sea más alto que la pantalla
+              overflowY: "auto",               // Habilita el scroll interno
+              display: "flex",                 // Asegura que el contenido fluya bien
+              flexDirection: "column"
             }}
-            className="bg-blue-600 hover:bg-blue-400 transition-all text-white px-3 py-2 rounded-lg"
           >
-            Entendido
-          </button>
+            <div className="flex flex-col items-center md:p-3 xsm:px-1 xsm:py-0">
+              <Alert color="info" className="md:text-sm xsm:text-base text-center w-full">
+                <strong>Recomendaciones Clave</strong> para una Validación
+                Exitosa
+              </Alert>
+              <ul className="text-justify flex flex-col gap-1 md:px-3 xsm:px-1 m-0 list-disc xsm:text-xs md:text-sm font-bold">
+                <li>
+                  Coloque su rostro dentro del recuadro y presione "Grabar
+                  video" para iniciar la grabación.
+                </li>
+                <li>
+                  Evita la luz solar directa o lámparas muy potentes cerca de la
+                  cara.
+                </li>
+                <li>
+                  Mantenga el teléfono firme y limpie el lente de la cámara.
+                </li>
+                <li>Ubíquese en un área con buena iluminación frontal.</li>
+              </ul>
+              <img
+                src={demoImg}
+                alt="demostracion"
+                className="md:w-8/12 xsm:w-9/12 my-2 xsm:my-3 rounded-md object-contain"
+              />
+              <div className="mt-auto"> {/* mt-auto empuja el botón al final si hay espacio */}
+                <button
+                  onClick={() => {
+                    setShowAdvice(false);
+                    setEnableButton(true);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-400 transition-all text-white px-3 py-2 rounded-lg"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {!loading ? (
         <div
