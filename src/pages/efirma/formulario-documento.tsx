@@ -61,7 +61,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   nextStep,
   // returnStep
 }) => {
-  const token = sessionStorage.getItem("jwt");
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
   const validacionDocumento = useSelector(

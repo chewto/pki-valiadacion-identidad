@@ -62,8 +62,6 @@ const FaceDetection: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const token = sessionStorage.getItem("jwt");
-
   const overlaySize = useSelector((state: RootState) => state.pruebaVida);
 
   const overlaySizeRef = useRef(overlaySize);

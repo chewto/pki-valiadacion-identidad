@@ -111,7 +111,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const esMobile = useMobile();
 
-  const jwt = useJWT();
+  useJWT();
 
   useValidationRedirect(
     validationName,
