@@ -28,6 +28,7 @@ import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
 import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
+import api from "@nucleo/api-urls/api";
 // import Camera from '@pages/efirma/nueva-camara'
 
 interface Props {
@@ -60,6 +61,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   nextStep,
   // returnStep
 }) => {
+  const token = sessionStorage.getItem("jwt");
   const informacionFirmador = useSelector((state: RootState) => state.firmador);
   const informacion = useSelector((state: RootState) => state.informacion);
   const validacionDocumento = useSelector(
@@ -348,10 +350,9 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     // --- BLOQUE DETECTION (El que fallaba) ---
     try {
-      const resDetection = await axios.post(
+      const resDetection = await api.post(
         `${URLS.detection}?documento=${type}&lado=${placeholder.toUpperCase()}`,
-        { image: data.imagen, country: data.country },
-      );
+        { image: data.imagen, country: data.country });
 
       const resData = resDetection.data;
 
@@ -412,7 +413,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           : URLS.validarDocumentoReverso;
 
     try {
-      const resValidacion = await axios.post(urlValidacion, data);
+      const resValidacion = await api.post(urlValidacion, data);
       durationValidation = Date.now() - validationTimeStart;
 
       const resData = resValidacion.data;
@@ -737,8 +738,8 @@ export const FormularioDocumento: React.FC<Props> = ({
                 retry && !continuarBoton
                   ? `Reintentar subir foto del ${placeholder} de su ${tipoDocumento}`
                   : continuarBoton
-                  ? `Subir una nueva foto del ${placeholder} de su ${tipoDocumento}`
-                  : `Subir foto del ${placeholder} de su ${tipoDocumento}`
+                    ? `Subir una nueva foto del ${placeholder} de su ${tipoDocumento}`
+                    : `Subir foto del ${placeholder} de su ${tipoDocumento}`
               }
               style={{
                 background: preview.length >= 1 ? "#00ba13" : "#0d6efd",

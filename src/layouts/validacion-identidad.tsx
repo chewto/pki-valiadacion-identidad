@@ -43,6 +43,7 @@ import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 import { Spinner } from "reactstrap";
 import { setColumnId } from "@nucleo/redux/slices/timerSlice";
 import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
+import useJWT from "@nucleo/hooks/useJWT";
 // import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
@@ -109,6 +110,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
+
+  const jwt = useJWT();
 
   useValidationRedirect(
     validationName,

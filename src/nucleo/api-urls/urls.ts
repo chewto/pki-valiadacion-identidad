@@ -3,14 +3,14 @@
 const URL = import.meta.env.VITE_BASE_URL
 
 const rutasURL = {
-      validacion: `${URL}/validacion-back`,
-      // fe: `${URL}/fe-back/api/Firmador`,
-      fe: `https://honducert.firma.e-custodia.com/fe-back/api/Firmador`,
-      resultados: `${URL}/efirma.php/`,
-      rejected: `${URL}/resultado_validacion_fallida`,
-      validacionVida: `${URL}/validacion-vida`,
-      saveVideo: `${URL}/fe-val-back/api/Video`,
-      ocr: `${URL}/validacion-ocr-back`,
+  validacion: `${URL}/validacion-back`,
+  // fe: `${URL}/fe-back/api/Firmador`,
+  fe: `https://honducert.firma.e-custodia.com/fe-back/api/Firmador`,
+  resultados: `${URL}/efirma.php/`,
+  rejected: `${URL}/resultado_validacion_fallida`,
+  validacionVida: `${URL}/validacion-vida`,
+  saveVideo: `${URL}/fe-val-back/api/Video`,
+  ocr: `${URL}/validacion-ocr-back`,
 }
 
 const firmadorUrlBase = rutasURL["fe"]
@@ -24,6 +24,7 @@ const ocr = rutasURL['ocr']
 export const URLS = {
   detection: `${urlBase}/document/detection`,
   getLink: `${urlBase}/link`,
+  generateToken: `${urlBase}/auth/generate-token`,
   documentTest: `${urlBase}/ocr/document`,
   ping: `${urlBase}/ping`,
   logs: `${urlBase}/log`,
@@ -49,7 +50,7 @@ export const URLS = {
   resultados: `${efirmaUrl}`,
   getMedia: `${urlBase}/get-media`,
   // standaloneResults: `https://${subdomain}.e-custodia.com/resultado_validacion`,
-  rejected:`${rejected}`,
+  rejected: `${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
   // lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`,
   testBarcode: `${urlBase}/ocr/barcode-reader`,
@@ -64,5 +65,5 @@ export const URLS = {
 
 export const validationRedirects = {
   "EFIRMA": `/ekyc-efirma`,
-  "EKYC_LLEIDA":`/ekyc`,
+  "EKYC_LLEIDA": `/ekyc`,
 }

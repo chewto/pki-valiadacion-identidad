@@ -19,7 +19,7 @@ import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
 import demoImg from "/demo.png";
 import { useMobile } from "@nucleo/hooks/useMobile";
-
+import api from '../nucleo/api-urls/api'
 // --- Interfaces ---
 // interface ImageDrawing {
 //   img: HTMLImageElement | null;
@@ -61,6 +61,8 @@ const FaceDetection: React.FC<Props> = ({
   tries,
 }) => {
   const dispatch = useDispatch();
+
+  const token = sessionStorage.getItem("jwt");
 
   const overlaySize = useSelector((state: RootState) => state.pruebaVida);
 
@@ -362,10 +364,10 @@ const FaceDetection: React.FC<Props> = ({
     let videoPath = "";
 
     const savingStart = performance.now();
-    await axios
+    await api
       .post(URLS.saveVideo, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "multipart/form-data"
         },
       })
       .then((res) => {
@@ -383,7 +385,7 @@ const FaceDetection: React.FC<Props> = ({
     const deviceType = isMobile ? "MOBILE" : "DESKTOP";
 
     const detectStart = performance.now();
-    await axios
+    await api
       .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
       .then((res) => {
         console.log(res.data);

@@ -6,9 +6,7 @@ import { useDispatch } from "react-redux";
 import { Alert, Button } from "reactstrap";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
-// import Selfie from "@pages/efirma/selfie";
 import FaceDetection from "@layouts/face-test";
-//import { SpinnerLoading } from "../shared/spinner-loading";
 
 interface Props {
   preview: string;
@@ -65,21 +63,21 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   };
 
   useEffect(() => {
-    if(success){
+    if (success) {
       setTimeout(() => {
         nextStep()
       }, 700)
     }
-  }, [success,setSuccess])
+  }, [success, setSuccess])
 
   useEffect(() => {
-    if(counter == tries){
+    if (counter == tries) {
       setSuccess(true)
       // setTimeout(() => {
       //   nextStep()
       // }, 700)
     }
-  }, [counter,tries])
+  }, [counter, tries])
 
   return (
     <>
@@ -148,7 +146,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
       )}
 
       <div className={`${mostrarCamara ? 'flex' : 'hidden'} justify-center  mb-1`}>
-            <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">Intentos restantes: {triesCounter + 1} </span>
+        <span className="px-2 py-1 shadow-lg rounded-lg shadow-black bg-slate-200">Intentos restantes: {triesCounter + 1} </span>
       </div>
 
       {capturarOtraVez && !success && (
