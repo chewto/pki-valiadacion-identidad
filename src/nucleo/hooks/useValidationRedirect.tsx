@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   URLS,
   validationRedirects,
 } from "../api-urls/urls";
+import api from "@nucleo/api-urls/api";
 
 export const useValidationRedirect = (
   validationName: string,
@@ -14,7 +14,7 @@ export const useValidationRedirect = (
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`${URLS.validationProvider}?entityId=${idUser}`).then((res) => {
+    api.get(`${URLS.validationProvider}?entityId=${idUser}`).then((res) => {
       const provider = res.data.provider;
       if (provider !== validationName) {
         const pageNav =

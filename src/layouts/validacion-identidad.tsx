@@ -44,6 +44,7 @@ import { Spinner } from "reactstrap";
 import { setColumnId } from "@nucleo/redux/slices/timerSlice";
 import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 import useJWT from "@nucleo/hooks/useJWT";
+import api from "@nucleo/api-urls/api";
 // import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
@@ -163,10 +164,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     document.title = "Validacion identidad";
 
-    axios({
-      method: "get",
-      url: userDataUrl,
-    })
+    api.get(userDataUrl)
       .then((res) => {
 
         if (res.data.dato == null) {
@@ -183,10 +181,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       .finally(() => setLoading(false));
 
     if (!standalone) {
-      axios({
-        method: "get",
-        url: `${URLS.getLivenessTest}?id=${idUsuarioParam}`,
-      }).then((res) => {
+      api.get(`${URLS.getLivenessTest}?id=${idUsuarioParam}`).then((res) => {
         dispatch(setLivenessTest({ data: res.data.validacionVida }));
       });
     }
@@ -197,7 +192,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
     const init = async () => {
       try {
-        const req = await axios.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`);
+        const req = await api.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`);
         const res = await req.data;
         dispatch(setColumnId(res.id));
         await runFullTest()
@@ -211,12 +206,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     if (results) {
-      axios.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
+      api.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
     }
   }, [results])
 
   useEffect(() => {
-    axios.get(getCountry).then((res) => {
+    api.get(getCountry).then((res) => {
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);
@@ -226,8 +221,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     if (informacionFirmador.validacionVida) {
-      axios
-        .get(getMediaUrl)
+      api.get(getMediaUrl)
         .then((res) => {
           if (res.data.evidencias === false) {
             window.location.href = standalone
@@ -254,12 +248,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   useEffect(() => {
 
     // usar prefix
-    axios
-      .get(
-        standalone
-          ? `${URLS.comprobarValidacion}?hash=${hash}`
-          : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`
-      )
+    api.get(
+      standalone
+        ? `${URLS.comprobarValidacion}?hash=${hash}`
+        : `${URLS.comprobarValidacion}?efirmaId=${idUsuarioParam}`
+    )
       .then((res) => {
         const estadoValidacion: string = res.data.results.estado;
         if (estadoValidacion.length >= 1) {
@@ -280,28 +273,24 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       });
 
 
-    axios({
-      method: "get",
-      url: validationParamsUrl,
-    })
-      .then((res) => {
-        const { validationPercent, validationAttendance, documentsTries, detectionTries } =
-          res.data;
-        console.log(detectionTries, documentsTries)
+    api.get(validationParamsUrl).then((res) => {
+      const { validationPercent, validationAttendance, documentsTries, detectionTries } =
+        res.data;
+      console.log(detectionTries, documentsTries)
 
-        setValidationParams({
-          validationAttendance:
-            validationAttendance === null
-              ? "AUTOMATICA"
-              : `${validationAttendance}`,
-          validationPercent:
-            validationPercent === null ? "60" : `${validationPercent}`,
-          // documentsTries: documentsTries === null ? 2 : documentsTries,
-          // detectionTries: detectionTries ?? 1
-          documentsTries: 2,
-          detectionTries: 1
-        });
-      })
+      setValidationParams({
+        validationAttendance:
+          validationAttendance === null
+            ? "AUTOMATICA"
+            : `${validationAttendance}`,
+        validationPercent:
+          validationPercent === null ? "60" : `${validationPercent}`,
+        // documentsTries: documentsTries === null ? 2 : documentsTries,
+        // detectionTries: detectionTries ?? 1
+        documentsTries: 2,
+        detectionTries: 1
+      });
+    })
       .catch(() => {
         setValidationParams({
           validationAttendance: "AUTOMATICA",
@@ -394,7 +383,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     if (!failed) {
       try {
 
-        const res = await axios.post(url, reqBody, {
+        const res = await api.post(url, reqBody, {
           headers: { "Content-Type": "application/json" },
         });
 

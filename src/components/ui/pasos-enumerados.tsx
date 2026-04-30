@@ -95,7 +95,7 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
               const isCurrent = i === currentLabelIndex && !isLastStep;
 
               return (
-                <div key={index} className="relative flex flex-col items-center gap-1 z-20">
+                <div key={index} className="relative flex flex-col items-center gap-1 z-0">
                   <div
                     className={`
                 w-7 h-7 rounded-full flex items-center justify-center
