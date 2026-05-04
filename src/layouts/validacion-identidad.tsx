@@ -112,7 +112,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const esMobile = useMobile();
 
-  useJWT();
+  const jwt = useJWT();
 
   useValidationRedirect(
     validationName,
@@ -140,7 +140,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const [continuarBoton, setContinuarBoton] = useState<boolean>(false);
 
-  const [retry, setRetry] = useState<boolean>(false);
+  const [retry, setRetry] = useState<boolean | null>(null);
   const [estadoValidacion, setEstadoValidacion] = useState<string>("");
 
   // const [sending, setSending] = useState<boolean>(false);
@@ -162,6 +162,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
+    if (!jwt.token) return;
     document.title = "Validacion identidad";
 
     api.get(userDataUrl)
@@ -187,9 +188,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [jwt.token]);
 
   useEffect(() => {
+    if (!jwt.token) return;
     const init = async () => {
       try {
         const req = await api.post(`${URLS.timeLog}?user_id=${idUsuarioParam}`);
@@ -202,24 +204,27 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     };
 
     init();
-  }, [dispatch, idUsuarioParam]);
+  }, [dispatch, idUsuarioParam, jwt.token]);
 
   useEffect(() => {
+    if (!jwt.token) return;
     if (results) {
       api.post(`${URLS.timeLog}update-speedtest?id=${timerData.id}`, results);
     }
-  }, [results])
+  }, [results, jwt.token])
 
   useEffect(() => {
+    if (!jwt.token) return;
     api.get(getCountry).then((res) => {
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);
       dispatch(setCountry({ country: country }));
     });
-  }, [dispatch, getCountry]);
+  }, [dispatch, getCountry, jwt.token]);
 
   useEffect(() => {
+    if (!jwt.token) return;
     if (informacionFirmador.validacionVida) {
       api.get(getMediaUrl)
         .then((res) => {
@@ -243,10 +248,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         })
         .finally(() => setLoading(false));
     }
-  }, [dispatch, getMediaUrl, informacionFirmador.validacionVida]);
+  }, [dispatch, getMediaUrl, informacionFirmador.validacionVida, jwt.token]);
 
   useEffect(() => {
-
+    if (!jwt.token) return;
     // usar prefix
     api.get(
       standalone
@@ -301,7 +306,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       });
     geolocation();
     obtenerIp();
-  }, []);
+  }, [jwt.token]);
 
   const obtenerIp = () => {
     axios({
@@ -687,7 +692,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           </div>
         </div>
 
-        {!retry && (
+        {!retry && retry !== null && (
           <Advertencia
             titulo="Su validación esta siendo procesada"
             contenido="Estado de la validación:"

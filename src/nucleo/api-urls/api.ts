@@ -6,6 +6,18 @@ const api = axios.create({
     baseURL: `${import.meta.env.VITE_BASE_URL}/validacion-back`,
 });
 
+// Add interceptor to default axios for all imports
+axios.interceptors.request.use(
+    (config) => {
+        const token = sessionStorage.getItem('ekyc_token');
+        if (token && config.headers) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 // Bandera para no entrar en bucle si la renovación falla
 let isRefreshing = false;
 
