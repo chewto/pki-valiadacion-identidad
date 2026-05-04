@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import QRCode from "react-qr-code";
 import '../../styles/qr.component.css'
-import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { URLS } from '@nucleo/api-urls/urls';
 import { Spinner } from 'reactstrap';
