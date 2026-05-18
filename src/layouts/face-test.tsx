@@ -136,6 +136,15 @@ const FaceDetection: React.FC<Props> = ({
     // eslint-disable-next-line
   }, [loading, currentMessageIndex]);
 
+  // --- ESTADOS Y REFS PARA BLOQUEO DE CÁMARA (HARDWARE / PRIVACIDAD) ---
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraMuted, setIsCameraMuted] = useState<boolean>(false);
+  const [isCameraBlack, setIsCameraBlack] = useState<boolean>(false);
+  const [isCameraFrozen, setIsCameraFrozen] = useState<boolean>(false);
+
+  const prevFrameDataRef = useRef<Uint8ClampedArray | null>(null);
+  const frozenFramesCountRef = useRef<number>(0);
+
   // activar boton manual
   useEffect(() => {
     setTimeout(() => {
@@ -187,10 +196,26 @@ const FaceDetection: React.FC<Props> = ({
 
   // 4. INICIAR CÁMARA
   const startVideo = () => {
+    setCameraError(null);
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: "user" }, audio: true })
       .then((currentStream) => {
         setStream(currentStream);
+
+        // Verificar estado de mute en la pista de video (para interruptores de hardware)
+        const videoTrack = currentStream.getVideoTracks()[0];
+        if (videoTrack) {
+          setIsCameraMuted(videoTrack.muted);
+          videoTrack.onmute = () => {
+            console.log("Pista de video silenciada por hardware");
+            setIsCameraMuted(true);
+          };
+          videoTrack.onunmute = () => {
+            console.log("Pista de video reactivada");
+            setIsCameraMuted(false);
+          };
+        }
+
         if (videoRef.current) {
           videoRef.current.srcObject = currentStream;
           videoRef.current.onloadedmetadata = () => {
@@ -203,6 +228,15 @@ const FaceDetection: React.FC<Props> = ({
       .catch((err) => {
         console.error("Error cámara:", err);
         setIsModelLoaded(false);
+        if (err.name === "NotAllowedError") {
+          setCameraError("Permiso de cámara denegado por el usuario o el sistema.");
+        } else if (err.name === "NotFoundError") {
+          setCameraError("No se encontró ninguna cámara conectada.");
+        } else if (err.name === "NotReadableError") {
+          setCameraError("La cámara está bloqueada por hardware o en uso por otra aplicación.");
+        } else {
+          setCameraError(`No se pudo acceder a la cámara (${err.message}).`);
+        }
       });
   };
 
@@ -238,8 +272,61 @@ const FaceDetection: React.FC<Props> = ({
     // Clear interval if it exists to avoid memory leaks
     if (detectionInterval.current) clearInterval(detectionInterval.current);
 
+    // Crear canvas offscreen para análisis de pixeles (detección de cubierta negra o imagen congelada)
+    const checkCanvas = document.createElement("canvas");
+    checkCanvas.width = 64;
+    checkCanvas.height = 64;
+    const checkCtx = checkCanvas.getContext("2d", { willReadFrequently: true });
+
     detectionInterval.current = setInterval(async () => {
       if (!video || video.paused || video.ended) return;
+
+      // --- ANÁLISIS DE PIXELES (HARDWARE SHUTTER / STATIC PLACEHOLDER) ---
+      if (checkCtx && video.videoWidth > 0) {
+        try {
+          checkCtx.drawImage(video, 0, 0, 64, 64);
+          const frameData = checkCtx.getImageData(0, 0, 64, 64).data;
+
+          // 1. Cálculo de Luminancia (Detección de pantalla negra / cubierta física)
+          let totalLuminance = 0;
+          for (let i = 0; i < frameData.length; i += 4) {
+            const r = frameData[i];
+            const g = frameData[i + 1];
+            const b = frameData[i + 2];
+            totalLuminance += 0.299 * r + 0.587 * g + 0.114 * b;
+          }
+          const avgLuminance = totalLuminance / (64 * 64);
+          if (avgLuminance < 5) {
+            setIsCameraBlack(true);
+          } else {
+            setIsCameraBlack(false);
+          }
+
+          // 2. Comparación de Frames (Detección de imagen estática de reemplazo del driver ej. Lenovo Vantage)
+          let isFrozen = false;
+          if (prevFrameDataRef.current) {
+            let identicalPixels = 0;
+            for (let i = 0; i < frameData.length; i++) {
+              if (frameData[i] === prevFrameDataRef.current[i]) {
+                identicalPixels++;
+              }
+            }
+            if (identicalPixels === frameData.length) {
+              frozenFramesCountRef.current += 1;
+              if (frozenFramesCountRef.current > 5) {
+                isFrozen = true;
+              }
+            } else {
+              frozenFramesCountRef.current = 0;
+              isFrozen = false;
+            }
+          }
+          prevFrameDataRef.current = new Uint8ClampedArray(frameData);
+          setIsCameraFrozen(isFrozen);
+        } catch (e) {
+          console.error("Error en análisis de pixeles de video:", e);
+        }
+      }
 
       // Detect a single face
       const detection = await faceapi.detectSingleFace(
@@ -310,6 +397,17 @@ const FaceDetection: React.FC<Props> = ({
     };
     setMediaRecorder(recorder);
   }, [stream]);
+
+  const getBlockReason = () => {
+    if (cameraError) return cameraError;
+    if (isCameraMuted) return "La cámara está desactivada por un interruptor de hardware o teclado.";
+    if (isCameraBlack) return "La lente de la cámara está cubierta o bloqueada (imagen en negro).";
+    if (isCameraFrozen) return "La cámara muestra una imagen estática o de bloqueo (ej. modo privacidad activado en ajustes del fabricante).";
+    return null;
+  };
+
+  const blockReason = getBlockReason();
+  const isCameraBlocked = Boolean(blockReason);
 
   const recordVideo = () => {
     if (!mediaRecorder || isRecording) return;
@@ -532,6 +630,16 @@ const FaceDetection: React.FC<Props> = ({
         </div>
       )}
 
+      {blockReason && (
+        <div className="w-11/12 my-2">
+          <Alert color="danger" className="m-0 text-center text-sm font-bold shadow-md flex flex-col items-center gap-1">
+            <span>⚠️ Acceso a Cámara Bloqueado</span>
+            <span className="text-xs font-normal">{blockReason}</span>
+            <span className="text-xs font-normal mt-1">Por favor, habilite la cámara, retire cualquier cubierta física o desactive el modo privacidad para poder continuar.</span>
+          </Alert>
+        </div>
+      )}
+
       {!loading ? (
         <div
           style={styles.mainContainer}
@@ -544,7 +652,7 @@ const FaceDetection: React.FC<Props> = ({
             <div style={styles.statusIndicator}>Mantengase quieto.</div>
           )}
 
-          {!isModelLoaded && (
+          {!isModelLoaded && !cameraError && (
             <div style={styles.loadingOverlay}>Cargando IA...</div>
           )}
 
@@ -562,7 +670,7 @@ const FaceDetection: React.FC<Props> = ({
               </div>
             )}
             <video ref={videoRef} muted playsInline style={styles.fullSize} />
-            <canvas ref={canvasRef} style={styles.fullSizeAbsolute} />/
+            <canvas ref={canvasRef} style={styles.fullSizeAbsolute} />
             {/* REFERENCIA ESTÁTICA CENTRAL (SEMI-TRANSPARENTE) */}
             {/* <img
               ref={maskImgRef}
@@ -585,8 +693,14 @@ const FaceDetection: React.FC<Props> = ({
         <div className="w-full flex justify-center items-center">
           <button
             onClick={() => recordVideo()}
-            className={`mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg ${isRecording ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"}`}
-            disabled={isRecording}
+            className={`mt-2 px-4 py-2 text-white rounded-lg ${
+              isCameraBlocked
+                ? "bg-gray-400 cursor-not-allowed opacity-60"
+                : isRecording
+                ? "bg-blue-600 opacity-50 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 shadow-lg transition-all"
+            }`}
+            disabled={isRecording || isCameraBlocked}
           >
             Grabar video
           </button>
