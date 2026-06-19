@@ -487,10 +487,14 @@ const FaceDetection: React.FC<Props> = ({
         console.log(res.data);
 
         const preview: string = res.data.photo;
+        const allFrames: string[] = res.data.allFrames || [];
+        const framesCount: number = res.data.framesCount || allFrames.length;
 
         const data: PruebaVida = {
           movimiento: res.data.movimientoDetectado,
           videoHash: videoPath,
+          allFrames: allFrames,
+          framesCount: framesCount,
         };
 
         if (counter < tries - 1) {

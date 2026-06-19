@@ -5,6 +5,8 @@ export interface PruebaVida{
   y?: number;    // Centro Y en px
   rx?: number;          // Radio X en px (30% de 100)
   ry?: number;
+  allFrames?: string[];
+  framesCount?: number;
 }
 
 export interface InformacionIdentidad {

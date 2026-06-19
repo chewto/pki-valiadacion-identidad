@@ -8,6 +8,8 @@ const initialState: PruebaVida = {
   y: 0,
   rx: 0,
   ry: 0,
+  allFrames: [],
+  framesCount: 0,
 };
 
 export const pruebaVidaSlice = createSlice({
@@ -15,7 +17,7 @@ export const pruebaVidaSlice = createSlice({
   initialState,
   reducers: {
     setIdCarpetas: (state, action: PayloadAction<PruebaVida>) => {
-      const { movimiento, videoHash } = action.payload;
+      const { movimiento, videoHash, allFrames, framesCount } = action.payload;
 
       // 1. ALWAYS update the videoHash
       state.videoHash = videoHash;
@@ -26,6 +28,12 @@ export const pruebaVidaSlice = createSlice({
         console.log("Movimiento updated to:", movimiento);
       } else {
         console.log("Movimiento update skipped, but videoHash was updated.");
+      }
+
+      // 3. Update allFrames and framesCount if provided
+      if (allFrames) {
+        state.allFrames = allFrames;
+        state.framesCount = framesCount || allFrames.length;
       }
     },
     setFaceIndicator: (state, action: PayloadAction<any>) => {

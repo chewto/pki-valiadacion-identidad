@@ -66,6 +66,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const validacionDocumento = useSelector(
     (state: RootState) => state.validacionDocumento,
   );
+  const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
   const times = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch();
 
@@ -290,6 +291,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             imagenPersona: informacion.foto_persona,
             country: informacionFirmador.pais,
             tries: conteo,
+            allFrames: ladoDocumento === "anverso" ? pruebaVida.allFrames : [],
           };
 
           validarDocumento(data);
@@ -427,6 +429,11 @@ export const FormularioDocumento: React.FC<Props> = ({
         dispatch(setFrontSide(resData.document));
         dispatch(setFrontResult({ sideResult: resData.validSide }));
         dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
+
+        // Usar bestFrame como foto de evidencia (selfie) si está disponible
+        if (resData.bestFrame) {
+          dispatch(setFotos({ labelFoto: "foto_persona", data: resData.bestFrame }));
+        }
 
         if (resData.face && resData.faceDetected && resData.validSide) {
           setTimeout(() => nextStep(), 700);
