@@ -510,7 +510,8 @@ const FaceDetection: React.FC<Props> = ({
         if (res.status == 200) {
           if (
             !res.data.photoResult.isReal ||
-            res.data.movimientoDetectado == "!OK"
+            res.data.movimientoDetectado == "!OK" ||
+            res.data.documentDetection?.document_detected
           ) {
             setCounter((state) => state + 1);
             // setTriesCounter((state) => state - 1)
