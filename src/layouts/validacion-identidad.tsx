@@ -290,10 +290,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             : `${validationAttendance}`,
         validationPercent:
           validationPercent === null ? "60" : `${validationPercent}`,
-        // documentsTries: documentsTries === null ? 2 : documentsTries,
-        // detectionTries: detectionTries ?? 1
-        documentsTries: 2,
-        detectionTries: 1,
+        documentsTries: documentsTries === null ? 2 : documentsTries,
+        detectionTries: detectionTries ?? 1,
+        // documentsTries: 2,
+        // detectionTries: 1,
         faceTries: faceTries ?? 1
       });
     })
