@@ -152,7 +152,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationAttendance: "",
     validationPercent: "",
     documentsTries: 0,
-    detectionTries: 0
+    detectionTries: 0,
+    faceTries: 0
   });
 
   const [documentList, setDocumentList] = useState<string[]>([]);
@@ -279,9 +280,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
 
     api.get(validationParamsUrl).then((res) => {
-      const { validationPercent, validationAttendance, documentsTries, detectionTries } =
+      const { validationPercent, validationAttendance, documentsTries, detectionTries, faceTries } =
         res.data;
-      console.log(detectionTries, documentsTries)
 
       setValidationParams({
         validationAttendance:
@@ -293,7 +293,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         // documentsTries: documentsTries === null ? 2 : documentsTries,
         // detectionTries: detectionTries ?? 1
         documentsTries: 2,
-        detectionTries: 1
+        detectionTries: 1,
+        faceTries: faceTries ?? 1
       });
     })
       .catch(() => {
@@ -301,7 +302,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           validationAttendance: "AUTOMATICA",
           validationPercent: "60",
           documentsTries: 2,
-          detectionTries: 1
+          detectionTries: 1,
+          faceTries: 1
         });
       });
     geolocation();
@@ -512,7 +514,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           selfie={labelFoto.foto_persona}
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
           nextStep={handleNext}
-          tries={validationParams.detectionTries}
+          tries={validationParams.faceTries}
         />,
         // <Demo side="frontal"  handleNext={handleNext}/>,
         <FormularioDocumento

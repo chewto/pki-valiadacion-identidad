@@ -60,6 +60,7 @@ const FaceDetection: React.FC<Props> = ({
   setCounter,
   tries,
 }) => {
+
   const dispatch = useDispatch();
 
   const overlaySize = useSelector((state: RootState) => state.pruebaVida);
