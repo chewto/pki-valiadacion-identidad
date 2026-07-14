@@ -1,5 +1,5 @@
 import faceTemplate from "/face_template_OK.png";
-import { URLS } from "@nucleo/api-urls/urls";
+import { URLS, DB_COUNTRY } from "@nucleo/api-urls/urls";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
@@ -213,7 +213,7 @@ const Selfie: React.FC<Props> = ({
 
   const saveMedia = async (data: Blob) => {
     console.log(times.id)
-    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=inicio`).then((res) => {
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=inicio&country=${DB_COUNTRY}`).then((res) => {
       console.log(res.data);
     }
     )
@@ -230,7 +230,7 @@ const Selfie: React.FC<Props> = ({
     let durationUpload = 0;
     const savingStart = performance.now();
     await axios
-      .post(URLS.saveVideo, formData, {
+      .post(`${URLS.saveVideo}?country=${DB_COUNTRY}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -257,7 +257,7 @@ const Selfie: React.FC<Props> = ({
 
     const detectStart = performance.now();
     await axios
-      .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}`)
+      .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}&country=${DB_COUNTRY}`)
       .then((res) => {
         const endTimePruebaVida = Date.now();
         durationPruebaVida = endTimePruebaVida - startTimePruebaVida;
@@ -318,7 +318,7 @@ const Selfie: React.FC<Props> = ({
     const detectTime = (detectEnd - detectStart).toFixed(2);
 
     await axios.post(
-      URLS.logs,
+      `${URLS.logs}?country=${DB_COUNTRY}`,
       {
         message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`,
       },
@@ -329,7 +329,7 @@ const Selfie: React.FC<Props> = ({
       }
     );
 
-    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=fin`).then((res) => {
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=fin&country=${DB_COUNTRY}`).then((res) => {
       console.log(res.data);
     }
     )

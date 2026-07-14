@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { URLS } from "@nucleo/api-urls/urls";
+import { URLS, DB_COUNTRY } from "@nucleo/api-urls/urls";
 import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
 import { useHour } from "@nucleo/hooks/useHour";
@@ -361,7 +361,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     try {
       await axios.post(
-        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio`
+        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio&country=${DB_COUNTRY}`
       );
     } catch (err) {
       console.error("Error al iniciar log", err);
@@ -398,10 +398,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
         await Promise.all([
           axios.post(
-            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin`
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin&country=${DB_COUNTRY}`
           ),
           axios.post(
-            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin`
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin&country=${DB_COUNTRY}`
           ),
         ]).catch((e) => console.error("Error en logs finales", e));
 

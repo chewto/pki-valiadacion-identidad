@@ -2,6 +2,8 @@
 
 const URL = import.meta.env.VITE_BASE_URL
 
+export const DB_COUNTRY = import.meta.env.VITE_DB_COUNTRY || 'COL';
+
 const rutasURL = {
   validacion: `${URL}/validacion-back`,
   fe: `${URL}/fe-back/api/Firmador`,

@@ -1,4 +1,4 @@
-import { URLS } from '@nucleo/api-urls/urls';
+import { URLS, DB_COUNTRY } from '@nucleo/api-urls/urls';
 import { useState, useCallback } from 'react';
 
 interface Metric {
@@ -19,7 +19,7 @@ export const useSpeedTest = () => {
   const measurePing = async (url: string): Promise<number> => {
     const start = performance.now();
     // Usamos HEAD para que sea una petición ultra ligera
-    await fetch(`${url}?t=${Math.random()}`, { method: 'HEAD', cache: 'no-cache' });
+    await fetch(`${url}?t=${Math.random()}&country=${DB_COUNTRY}`, { method: 'HEAD', cache: 'no-cache' });
     const end = performance.now();
     return Math.round(end - start);
   };
@@ -90,7 +90,7 @@ export const useSpeedTest = () => {
   const blob = new Blob([data], { type: 'application/octet-stream' });
   const startTime = performance.now();
 
-    await fetch(endpoint, {
+    await fetch(`${endpoint}?country=${DB_COUNTRY}`, {
       method: 'POST',
       body: blob,
       // Importante: No enviar caché y manejar cabeceras según tu servidor

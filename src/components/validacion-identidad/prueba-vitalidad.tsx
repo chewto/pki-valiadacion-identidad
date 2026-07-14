@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { useRef, useEffect, Dispatch, SetStateAction } from "react";
-import { URLS } from "../../nucleo/api-urls/urls";
+import { URLS, DB_COUNTRY } from "../../nucleo/api-urls/urls";
 
 interface Props{
   porcentaje: number | undefined;
@@ -39,7 +39,7 @@ export const PruebaVitalidad: React.FC<Props> = ({ setPorcentaje}) => {
             }
             axios({
               method:'post',
-              url:URLS.validacionVida,
+              url:`${URLS.validacionVida}?country=${DB_COUNTRY}`,
               data: data,
               headers: {
                 "Content-Type": 'application/json'

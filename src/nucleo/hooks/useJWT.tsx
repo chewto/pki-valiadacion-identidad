@@ -1,4 +1,4 @@
-import { URLS } from '@nucleo/api-urls/urls';
+import { URLS, DB_COUNTRY } from '@nucleo/api-urls/urls';
 import { useState, useEffect, useCallback } from 'react';
 
 export interface TokenResponse {
@@ -21,7 +21,7 @@ const useJWT = (): UseJWTReturn => {
     const fetchToken = useCallback(async () => {
         try {
             setLoading(true);
-            const fetchUrl = `${URLS.generateToken}${URLS.generateToken.includes('?') ? '&' : '?'}t=${Date.now()}`;
+            const fetchUrl = `${URLS.generateToken}${URLS.generateToken.includes('?') ? '&' : '?'}t=${Date.now()}&country=${DB_COUNTRY}`;
             const response = await fetch(fetchUrl, {
                 method: 'GET',
                 cache: 'no-store',
