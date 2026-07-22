@@ -3,14 +3,16 @@ const URL = import.meta.env.VITE_BASE_URL;
 export const DB_COUNTRY = import.meta.env.VITE_DB_COUNTRY || 'COL';
 
 // Mapa de URLs base de servicios externos por país (fe-back / fe-val-back)
-const countryServiceUrls: Record<string, { fe: string; saveVideo: string }> = {
+const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string }> = {
   COL: {
     fe: import.meta.env.VITE_FE_BASE_URL_CO,
     saveVideo: import.meta.env.VITE_FE_BASE_URL_CO,
+    pruebaVida: import.meta.env.VITE_FE_BASE_URL_CO,
   },
   HND: {
     fe: import.meta.env.VITE_FE_BASE_URL_HN,
     saveVideo: import.meta.env.VITE_FE_BASE_URL_HN,
+    pruebaVida: import.meta.env.VITE_FE_BASE_URL_HN,
   },
 };
 
@@ -20,6 +22,7 @@ export const getCountryServiceUrls = (country: string) => {
   return {
     fe: `${config.fe}/fe-back/api/Firmador`,
     saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
+    pruebaVida: `${config.pruebaVida}/validacion-back/anti-spoof`,
   };
 };
 
@@ -60,7 +63,7 @@ export const URLS = {
   resultados: `${efirmaUrl}`,
   getMedia: `${urlBase}/get-media`,
   rejected: `${rejected}`,
-  pruebaVida: `${urlBase}/anti-spoof`,
+  pruebaVida: countryUrls.pruebaVida,
   testBarcode: `${urlBase}/ocr/barcode-reader`,
   getLivenessTest: `${urlBase}/validation/get-livenesstest`,
   livenesstest: livenesstest,
