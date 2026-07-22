@@ -166,7 +166,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     if (!jwt.token) return;
     document.title = "Validacion identidad";
 
-    api.get(userDataUrl)
+    axios.get(userDataUrl)
       .then((res) => {
 
         if (res.data.dato == null) {
