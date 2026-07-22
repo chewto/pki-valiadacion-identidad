@@ -1,26 +1,36 @@
-
-
-const URL = import.meta.env.VITE_BASE_URL
+const URL = import.meta.env.VITE_BASE_URL;
 
 export const DB_COUNTRY = import.meta.env.VITE_DB_COUNTRY || 'COL';
 
-const rutasURL = {
-  validacion: `${URL}/validacion-back`,
-  fe: `${URL}/fe-back/api/Firmador`,
-  resultados: `${URL}/efirma.php/`,
-  rejected: `${URL}/resultado_validacion_fallida`,
-  validacionVida: `${URL}/validacion-vida`,
-  saveVideo: `${URL}/fe-val-back/api/Video`,
-  ocr: `${URL}/validacion-ocr-back`,
-}
+// Mapa de URLs base de servicios externos por país (fe-back / fe-val-back)
+const countryServiceUrls: Record<string, { fe: string; saveVideo: string }> = {
+  COL: {
+    fe: import.meta.env.VITE_FE_BASE_URL_CO,
+    saveVideo: import.meta.env.VITE_FE_BASE_URL_CO,
+  },
+  HND: {
+    fe: import.meta.env.VITE_FE_BASE_URL_HN,
+    saveVideo: import.meta.env.VITE_FE_BASE_URL_HN,
+  },
+};
 
-const firmadorUrlBase = rutasURL["fe"]
-const urlBase = rutasURL["validacion"]
-const efirmaUrl = rutasURL["resultados"]
-const rejected = rutasURL['rejected']
-const livenesstest = rutasURL['validacionVida']
-const saveVideo = rutasURL['saveVideo']
-const ocr = rutasURL['ocr']
+// Helper: con DB_COUNTRY selecciona las URLs correctas automáticamente
+export const getCountryServiceUrls = (country: string) => {
+  const config = countryServiceUrls[country] || countryServiceUrls['COL'];
+  return {
+    fe: `${config.fe}/fe-back/api/Firmador`,
+    saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
+  };
+};
+
+const countryUrls = getCountryServiceUrls(DB_COUNTRY);
+
+// URLs del back centralizado (mismo dominio para todos los países)
+const urlBase = `${URL}/validacion-back`;
+const efirmaUrl = `${URL}/efirma.php/`;
+const rejected = `${URL}/resultado_validacion_fallida`;
+const livenesstest = `${URL}/validacion-vida`;
+const ocr = `${URL}/validacion-ocr-back`;
 
 export const URLS = {
   detection: `${urlBase}/document/detection`,
@@ -41,26 +51,23 @@ export const URLS = {
   validationParameters: `${urlBase}/validation/validation-params`,
   validationFailed: `${urlBase}/validation/failed`,
   obtenerIp: 'https://api.ipify.org/?format=json',
-  // obtenerEvidencias: 'http://127.0.0.1:4000/obtener-evidencias',
   obtenerData: `${urlBase}/obtener-usuario`,
   comprobarProceso: `${urlBase}/comprobacion-proceso`,
   comprobarValidacion: `${urlBase}/validation/check-validation`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
-  obtenerFirmador: firmadorUrlBase,
+  obtenerFirmador: countryUrls.fe,
   getUserData: `${urlBase}/validation/get-user`,
   resultados: `${efirmaUrl}`,
   getMedia: `${urlBase}/get-media`,
-  // standaloneResults: `https://${subdomain}.e-custodia.com/resultado_validacion`,
   rejected: `${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
-  // lleidaValidation: `https://${ekycSubdomain}.e-custodia.com/ekyc`,
   testBarcode: `${urlBase}/ocr/barcode-reader`,
   getLivenessTest: `${urlBase}/validation/get-livenesstest`,
   livenesstest: livenesstest,
   getCountry: `${urlBase}/country/get`,
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
-  saveVideo: `${saveVideo}`,
+  saveVideo: countryUrls.saveVideo,
   ocr: `${ocr}/ocr`
 }
 
