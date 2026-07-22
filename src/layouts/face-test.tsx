@@ -71,6 +71,7 @@ const FaceDetection: React.FC<Props> = ({
 
   useEffect(() => {
     console.log("isMobile:", isMobile);
+    console.log(handleDetectionLoop, MODEL_URL);
   }, [isMobile]);
 
   useEffect(() => {
@@ -160,9 +161,9 @@ const FaceDetection: React.FC<Props> = ({
     const init = async () => {
       setIsModelLoaded(true);
       try {
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        ]);
+        // await Promise.all([
+        //   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        // ]);
 
         // Cargar imagen en memoria para el Canvas
         // const imgObj = new Image();
@@ -222,7 +223,7 @@ const FaceDetection: React.FC<Props> = ({
           videoRef.current.onloadedmetadata = () => {
             handleResize();
             videoRef.current?.play();
-            handleDetectionLoop();
+            // handleDetectionLoop();
           };
         }
       })
