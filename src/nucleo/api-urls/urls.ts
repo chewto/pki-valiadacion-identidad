@@ -3,16 +3,18 @@ const URL = import.meta.env.VITE_BASE_URL;
 export const DB_COUNTRY = import.meta.env.VITE_DB_COUNTRY || 'COL';
 
 // Mapa de URLs base de servicios externos por país (fe-back / fe-val-back)
-const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string }> = {
+const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string; efirmaUrl: string }> = {
   COL: {
     fe: import.meta.env.VITE_FE_BASE_URL_CO,
     saveVideo: import.meta.env.VITE_FE_BASE_URL_CO,
     pruebaVida: import.meta.env.VITE_FE_BASE_URL_CO,
+    efirmaUrl: import.meta.env.VITE_FE_BASE_URL_CO,
   },
   HND: {
     fe: import.meta.env.VITE_FE_BASE_URL_HN,
     saveVideo: import.meta.env.VITE_FE_BASE_URL_HN,
     pruebaVida: import.meta.env.VITE_FE_BASE_URL_HN,
+    efirmaUrl: import.meta.env.VITE_FE_BASE_URL_HN,
   },
 };
 
@@ -23,6 +25,7 @@ export const getCountryServiceUrls = (country: string) => {
     fe: `${config.fe}/fe-back/api/Firmador`,
     saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
     pruebaVida: `${config.pruebaVida}/validacion-back/anti-spoof`,
+    efirmaUrl: `${config.efirmaUrl}/efirma.php/`,
   };
 };
 
@@ -30,7 +33,6 @@ const countryUrls = getCountryServiceUrls(DB_COUNTRY);
 
 // URLs del back centralizado (mismo dominio para todos los países)
 const urlBase = `${URL}/validacion-back`;
-const efirmaUrl = `${URL}/efirma.php/`;
 const rejected = `${URL}/resultado_validacion_fallida`;
 const livenesstest = `${URL}/validacion-vida`;
 const ocr = `${URL}/validacion-ocr-back`;
@@ -60,7 +62,7 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: countryUrls.fe,
   getUserData: `${urlBase}/validation/get-user`,
-  resultados: `${efirmaUrl}`,
+  resultados: countryUrls.efirmaUrl,
   getMedia: `${urlBase}/get-media`,
   rejected: `${rejected}`,
   pruebaVida: countryUrls.pruebaVida,
