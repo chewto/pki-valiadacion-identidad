@@ -20,8 +20,7 @@ const useCountry = () => {
   useEffect(() => {
     const fetchCountry = async () => {
       try {
-        const baseUrl = import.meta.env.VITE_BASE_URL;
-        const response = await fetch(`${baseUrl}/`, { method: 'HEAD' });
+        const response = await fetch(`/`, { method: 'HEAD' });
         const xFuente = response.headers.get('X-Fuente');
         if (xFuente) {
           const country = countryMap[xFuente] || DEFAULT_COUNTRY;
