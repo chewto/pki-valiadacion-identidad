@@ -6,8 +6,20 @@ import TestBrowser from "@components/validacion-identidad/test-browser";
 import Verify from "@pages/verify/verify";
 import NetworkDashboard from "@layouts/speed-test";
 import  TestCamera from "@components/test/test-camera";
+import { useEffect } from "react";
 
 function App() {
+
+  useEffect(() => {
+    fetch('/', { method: 'HEAD' })
+    .then((response) => {response.json})
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error('Error al realizar la solicitud:', error);
+    })
+  }, []);
 
   return (
     <Router>
