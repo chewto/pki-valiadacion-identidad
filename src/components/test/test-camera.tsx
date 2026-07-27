@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import axios from 'axios';
-import { URLS, DB_COUNTRY } from '@nucleo/api-urls/urls';
+import { URLS } from '@nucleo/api-urls/urls';
+import { getCountry } from '@nucleo/hooks/useCountry';
 
 interface TestCameraProps {
   totalTime: number;
@@ -27,7 +28,7 @@ const TestCamera: React.FC = () => {
   useEffect(() => {
     if (videoPath) {
       console.log('Video guardado en:', videoPath);
-      axios.post(`${URLS.documentTest}?path=${videoPath}&intervalo=${intervalo}&documentType=${tipoDocumento}&documentSide=${ladoDocumento}&country=${DB_COUNTRY}`)
+      axios.post(`${URLS.documentTest}?path=${videoPath}&intervalo=${intervalo}&documentType=${tipoDocumento}&documentSide=${ladoDocumento}&country=${getCountry()}`)
         .then(res => setRes(res.data))
         .catch(error => {
           console.error('Error al obtener datos del video:', error);
@@ -97,7 +98,7 @@ const TestCamera: React.FC = () => {
 
       try {
         setIsUploading(true);
-        const response = await axios.post(`${URLS.saveVideo}?country=${DB_COUNTRY}`, formData, {
+        const response = await axios.post(`${URLS.saveVideo}?country=${getCountry()}`, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
         setVideoPath(response.data.ruta);

@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { URLS, DB_COUNTRY } from './urls';
+import { URLS } from './urls';
+import { getCountry } from '@nucleo/hooks/useCountry';
 
 // Creamos la instancia personalizada
 const api = axios.create({
@@ -29,7 +30,7 @@ api.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
         if (config.url && !/[?&]country=/.test(config.url)) {
-            config.url += config.url.includes('?') ? `&country=${DB_COUNTRY}` : `?country=${DB_COUNTRY}`;
+            config.url += config.url.includes('?') ? `&country=${getCountry()}` : `?country=${getCountry()}`;
         }
         return config;
     },
@@ -53,7 +54,7 @@ api.interceptors.response.use(
                 console.warn("JWT Expirado. Intentando renovación con API Key...");
 
                 // Pedimos un nuevo token usando la API Key del .env (Vite usa import.meta.env)
-                const res = await axios.get(`${URLS.generateToken}?country=${DB_COUNTRY}`, {
+                const res = await axios.get(`${URLS.generateToken}?country=${getCountry()}`, {
                     headers: {
                         'x-api-key': import.meta.env.VITE_FRONTEND_API_KEY
                     }

@@ -1,5 +1,6 @@
 import faceTemplate from "/face_template_OK.png";
-import { URLS, DB_COUNTRY } from "@nucleo/api-urls/urls";
+import { URLS } from "@nucleo/api-urls/urls";
+import { getCountry } from "@nucleo/hooks/useCountry";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setFotos } from "@nucleo/redux/slices/informacionSlice";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
@@ -213,7 +214,7 @@ const Selfie: React.FC<Props> = ({
 
   const saveMedia = async (data: Blob) => {
     console.log(times.id)
-    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=inicio&country=${DB_COUNTRY}`).then((res) => {
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=inicio&country=${getCountry()}`).then((res) => {
       console.log(res.data);
     }
     )
@@ -230,7 +231,7 @@ const Selfie: React.FC<Props> = ({
     let durationUpload = 0;
     const savingStart = performance.now();
     await axios
-      .post(`${URLS.saveVideo}?country=${DB_COUNTRY}`, formData, {
+      .post(`${URLS.saveVideo}?country=${getCountry()}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -257,7 +258,7 @@ const Selfie: React.FC<Props> = ({
 
     const detectStart = performance.now();
     await axios
-      .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}&country=${DB_COUNTRY}`)
+      .post(`${URLS.pruebaVida}?path=${videoPath}&device=${deviceType}&country=${getCountry()}`)
       .then((res) => {
         const endTimePruebaVida = Date.now();
         durationPruebaVida = endTimePruebaVida - startTimePruebaVida;
@@ -318,7 +319,7 @@ const Selfie: React.FC<Props> = ({
     const detectTime = (detectEnd - detectStart).toFixed(2);
 
     await axios.post(
-      `${URLS.logs}?country=${DB_COUNTRY}`,
+      `${URLS.logs}?country=${getCountry()}`,
       {
         message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`,
       },
@@ -329,7 +330,7 @@ const Selfie: React.FC<Props> = ({
       }
     );
 
-    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=fin&country=${DB_COUNTRY}`).then((res) => {
+    await axios.post(`${URLS.timeLogUpdate}?id=${times.id}&column=rostro&action=fin&country=${getCountry()}`).then((res) => {
       console.log(res.data);
     }
     )

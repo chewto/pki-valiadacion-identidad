@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { URLS, DB_COUNTRY } from "@nucleo/api-urls/urls";
+import { URLS } from "@nucleo/api-urls/urls";
+import { getCountry } from "@nucleo/hooks/useCountry";
 import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
 import { useHour } from "@nucleo/hooks/useHour";
@@ -95,7 +96,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     ? `${URLS.getMedia}?hash=${hash}`
     : `${URLS.getMedia}?id=${idUsuarioParam}`;
 
-  const getCountry = standalone
+  const getCountryUrl = standalone
     ? `${URLS.getCountry}?hash=${hash}`
     : `${URLS.getCountry}?id=${idUsuarioParam}`;
 
@@ -216,13 +217,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   useEffect(() => {
     if (!jwt.token) return;
-    api.get(getCountry).then((res) => {
+    api.get(getCountryUrl).then((res) => {
       const country = res.data.country;
       const documents = res.data.documentList;
       setDocumentList((state) => [...state, ...documents]);
       dispatch(setCountry({ country: country }));
     });
-  }, [dispatch, getCountry, jwt.token]);
+  }, [dispatch, getCountryUrl, jwt.token]);
 
   useEffect(() => {
     if (!jwt.token) return;
@@ -361,7 +362,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     try {
       await axios.post(
-        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio&country=${DB_COUNTRY}`
+        `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio&country=${getCountry()}`
       );
     } catch (err) {
       console.error("Error al iniciar log", err);
@@ -398,10 +399,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
         await Promise.all([
           axios.post(
-            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin&country=${DB_COUNTRY}`
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=fin&country=${getCountry()}`
           ),
           axios.post(
-            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin&country=${DB_COUNTRY}`
+            `${URLS.timeLogUpdate}?id=${timerData.id}&column=fecha&action=fin&country=${getCountry()}`
           ),
         ]).catch((e) => console.error("Error en logs finales", e));
 

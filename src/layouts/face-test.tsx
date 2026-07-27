@@ -4,7 +4,8 @@ import { useRef, useEffect, useState, SetStateAction, Dispatch } from "react";
 import * as faceapi from "face-api.js";
 // import faceTemplate from "/face_template_OK.png"; // RUTA DE TU IMAGEN
 import axios from "axios";
-import { URLS, DB_COUNTRY } from "@nucleo/api-urls/urls";
+import { URLS } from "@nucleo/api-urls/urls";
+import { getCountry } from "@nucleo/hooks/useCountry";
 import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import "@styles/face-detection.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -546,7 +547,7 @@ const FaceDetection: React.FC<Props> = ({
     const detectTime = (detectEnd - detectStart).toFixed(2);
 
     await axios.post(
-      `${URLS.logs}?country=${DB_COUNTRY}`,
+      `${URLS.logs}?country=${getCountry()}`,
       {
         message: `el guardado del video ha tardado ${savingTime} ms | la deteccion ha tardado ${detectTime}`,
       },

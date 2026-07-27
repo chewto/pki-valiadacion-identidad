@@ -23,7 +23,8 @@ import {
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
-import { URLS, DB_COUNTRY } from "../../nucleo/api-urls/urls";
+import { URLS } from "../../nucleo/api-urls/urls";
+import { getCountry } from "../../nucleo/hooks/useCountry";
 import { imagePlaceholder } from "@components/dataurl";
 import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
@@ -321,7 +322,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     // 1. Registro de inicio (Log)
     try {
       await axios.post(
-        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio&country=${DB_COUNTRY}`,
+        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio&country=${getCountry()}`,
       );
     } catch (e) {
       console.error("Error logging start:", e);
@@ -338,7 +339,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     let durationOcr = 0;
 
     try {
-      const resOcr = await axios.post(`${URLS.ocr}?country=${DB_COUNTRY}`, { image: data.imagen });
+      const resOcr = await axios.post(`${URLS.ocr}?country=${getCountry()}`, { image: data.imagen });
       durationOcr = Date.now() - ocrTimeStart;
       data["ocr"] = resOcr.data.ocr;
       data["textAngle"] = resOcr.data.textAngle;
@@ -491,7 +492,7 @@ export const FormularioDocumento: React.FC<Props> = ({
     // 3. Registro de fin y tiempos finales
     try {
       await axios.post(
-        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin&country=${DB_COUNTRY}`,
+        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin&country=${getCountry()}`,
       );
     } catch (e) {
       console.error("Error logging end:", e);

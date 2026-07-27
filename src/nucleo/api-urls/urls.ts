@@ -1,6 +1,6 @@
-const URL = import.meta.env.VITE_BASE_URL;
+import { getCountry } from '@nucleo/hooks/useCountry';
 
-export const DB_COUNTRY = import.meta.env.VITE_DB_COUNTRY || 'COL';
+const URL = import.meta.env.VITE_BASE_URL;
 
 // Mapa de URLs base de servicios externos por país (fe-back / fe-val-back)
 const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string; efirmaUrl: string }> = {
@@ -18,8 +18,9 @@ const countryServiceUrls: Record<string, { fe: string; saveVideo: string; prueba
   },
 };
 
-// Helper: con DB_COUNTRY selecciona las URLs correctas automáticamente
-export const getCountryServiceUrls = (country: string) => {
+// Helper: selecciona las URLs correctas según el país (X-Fuente header)
+export const getCountryServiceUrls = () => {
+  const country = getCountry();
   const config = countryServiceUrls[country] || countryServiceUrls['COL'];
   return {
     fe: `${config.fe}/fe-back/api/Firmador`,
@@ -29,7 +30,7 @@ export const getCountryServiceUrls = (country: string) => {
   };
 };
 
-const countryUrls = getCountryServiceUrls(DB_COUNTRY);
+const countryUrls = getCountryServiceUrls();
 
 // URLs del back centralizado (mismo dominio para todos los países)
 const urlBase = `${URL}/validacion-back`;
