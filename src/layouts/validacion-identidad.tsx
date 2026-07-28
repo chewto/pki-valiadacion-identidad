@@ -167,7 +167,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     if (!jwt.token) return;
     document.title = "Validacion identidad";
 
-    axios.get(userDataUrl)
+    api.get(userDataUrl)
       .then((res) => {
 
         if (res.data.dato == null) {
@@ -183,11 +183,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
 
-    if (!standalone) {
-      api.get(`${URLS.getLivenessTest}?id=${idUsuarioParam}`).then((res) => {
-        dispatch(setLivenessTest({ data: res.data.validacionVida }));
-      });
-    }
+    // if (!standalone) {
+    //   api.get(`${URLS.getLivenessTest}?id=${idUsuarioParam}`).then((res) => {
+    //     dispatch(setLivenessTest({ data: res.data.validacionVida }));
+    //   });
+    // }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jwt.token]);

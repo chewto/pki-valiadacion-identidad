@@ -23,7 +23,7 @@ export const getCountryServiceUrls = () => {
   const country = getCountry();
   const config = countryServiceUrls[country] || countryServiceUrls['COL'];
   return {
-    fe: `${config.fe}/fe-back/api/Firmador`,
+    // fe: `${config.fe}/fe-back/api/Firmador`,
     saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
     pruebaVida: `${config.pruebaVida}/validacion-back/anti-spoof`,
     efirmaUrl: `${config.efirmaUrl}/efirma.php/`,
@@ -61,7 +61,7 @@ export const URLS = {
   comprobarProceso: `${urlBase}/comprobacion-proceso`,
   comprobarValidacion: `${urlBase}/validation/check-validation`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
-  obtenerFirmador: countryUrls.fe,
+  obtenerFirmador: `${urlBase}/validation/get-user`,
   getUserData: `${urlBase}/validation/get-user`,
   resultados: countryUrls.efirmaUrl,
   getMedia: `${urlBase}/get-media`,
