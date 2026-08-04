@@ -36,7 +36,6 @@ const countryUrls = getCountryServiceUrls();
 const urlBase = `${URL}/validacion-back`;
 const rejected = `${URL}/resultado_validacion_fallida`;
 const livenesstest = `${URL}/validacion-vida`;
-const ocr = `${URL}/validacion-ocr-back`;
 
 export const URLS = {
   detection: `${urlBase}/document/detection`,
@@ -74,7 +73,7 @@ export const URLS = {
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
   saveVideo: countryUrls.saveVideo,
-  ocr: `${ocr}/ocr`
+  ocr: `https://colombia.efirmaplus.com/validacion-ocr-back/ocr`
 }
 
 export const validationRedirects = {

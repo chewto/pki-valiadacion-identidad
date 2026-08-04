@@ -63,6 +63,7 @@ export interface MRZ{
   code: string;
   data: MRZData;
   percentages: MRZPercentages;
+  extractedData: MRZExtractedData;
 }
 
 interface MRZPercentages{
@@ -73,6 +74,17 @@ interface MRZPercentages{
 interface MRZData{
   name: string;
   lastName: string;
+}
+
+interface MRZExtractedData{
+  name: string;
+  lastName: string;
+  documentNumber: string;
+  dateOfBirth: string;
+  expirationDate: string;
+  nationality: string;
+  sex: string;
+  mrzType: string;
 }
 
 export interface DocumentData{

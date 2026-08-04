@@ -25,6 +25,16 @@ const initialState: ValidacionDocumento = {
     percentages: {
       name: '',
       lastName: ''
+    },
+    extractedData: {
+      name: '',
+      lastName: '',
+      documentNumber: '',
+      dateOfBirth: '',
+      expirationDate: '',
+      nationality: '',
+      sex: '',
+      mrzType: ''
     }
   },
   barcode: "",
@@ -76,7 +86,7 @@ export const validacionDocumentolice = createSlice({
       }
     },
     setValidacionMRZ: (state, action: PayloadAction<MRZ>) => {
-      const { code, data, percentages } = action.payload;
+      const { code, data, percentages, extractedData } = action.payload;
       state.mrz.code = code;
       state.mrz.data = {
         name: data.name,
@@ -85,6 +95,16 @@ export const validacionDocumentolice = createSlice({
       state.mrz.percentages = {
         name: `${percentages.name}`,
         lastName: `${percentages.lastName}`
+      }
+      state.mrz.extractedData = {
+        name: extractedData.name,
+        lastName: extractedData.lastName,
+        documentNumber: extractedData.documentNumber,
+        dateOfBirth: extractedData.dateOfBirth,
+        expirationDate: extractedData.expirationDate,
+        nationality: extractedData.nationality,
+        sex: extractedData.sex,
+        mrzType: extractedData.mrzType
       }
     },
     setValidacionCodigoBarras: (

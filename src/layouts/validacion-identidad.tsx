@@ -18,8 +18,7 @@ import {
 import {
   setCountry,
   setDirecciones,
-  setFirmador,
-  setLivenessTest,
+  setFirmador
 } from "@nucleo/redux/slices/firmadorSlice";
 import { useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
@@ -86,7 +85,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const userDataUrl = standalone
     ? `${URLS.getUserData}?hash=${hash}`
-    : `${URLS.obtenerFirmador}/${idUsuarioParam}`;
+    : `${URLS.obtenerFirmador}?id=${idUsuarioParam}`;
 
   const validationParamsUrl = standalone
     ? `${URLS.validationParameters}?hash=${hash}`
