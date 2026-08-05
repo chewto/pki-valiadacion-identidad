@@ -97,14 +97,14 @@ export const validacionDocumentolice = createSlice({
         lastName: `${percentages.lastName}`
       }
       state.mrz.extractedData = {
-        name: extractedData.name,
-        lastName: extractedData.lastName,
-        documentNumber: extractedData.documentNumber,
-        dateOfBirth: extractedData.dateOfBirth,
-        expirationDate: extractedData.expirationDate,
-        nationality: extractedData.nationality,
-        sex: extractedData.sex,
-        mrzType: extractedData.mrzType
+        name: extractedData?.name ?? "",
+        lastName: extractedData?.lastName ?? "",
+        documentNumber: extractedData?.documentNumber ?? "",
+        dateOfBirth: extractedData?.dateOfBirth ?? "",
+        expirationDate: extractedData?.expirationDate ?? "",
+        nationality: extractedData?.nationality ?? "",
+        sex: extractedData?.sex ?? "",
+        mrzType: extractedData?.mrzType ?? ""
       }
     },
     setValidacionCodigoBarras: (
