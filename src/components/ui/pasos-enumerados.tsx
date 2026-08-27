@@ -25,6 +25,8 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const totalTipo3 = pasosTipo2.length;
   // paso 0 = primer step visible (índice 0 en labels3)
   const currentLabelIndex = Math.min(paso, labels3.length - 1);
+  // true cuando ya se completó el último paso (paso supera el último índice)
+  const allDone = paso > totalTipo3 - 1;
 
   return (
     <nav aria-label="Progreso del proceso de verificación" className="z-0">
@@ -78,7 +80,7 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
                 style={{
                   width: totalTipo3 <= 1 || currentLabelIndex === 0
                     ? '0%'
-                    : currentLabelIndex === totalTipo3 - 1 // ¿Es el último paso?
+                    : allDone // ¿Ya se completó el último paso?
                       ? '100%'
                       : `${((currentLabelIndex - 1) / (totalTipo3 - 1)) * 100}%`
                 }}
@@ -86,13 +88,11 @@ export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
             </div>
 
             {pasosTipo2.map((index, i) => {
-              const isLastStep = currentLabelIndex === totalTipo3 - 1;
+              // El paso está completado si ya pasó, o si es el último y ya se terminó
+              const isCompleted = i < currentLabelIndex || (allDone && i === currentLabelIndex);
 
-              // El paso está completado si ya pasó, o si es el último y estamos en él
-              const isCompleted = i < currentLabelIndex || (isLastStep && i === currentLabelIndex);
-
-              // Es el paso actual solo si NO es el último (porque el último ya se ve como completado)
-              const isCurrent = i === currentLabelIndex && !isLastStep;
+              // Es el paso actual (en curso), nunca si ya se terminó todo
+              const isCurrent = i === currentLabelIndex && !allDone;
 
               return (
                 <div key={index} className="relative flex flex-col items-center gap-1 z-0">
