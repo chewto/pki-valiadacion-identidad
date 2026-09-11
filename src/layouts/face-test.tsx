@@ -43,6 +43,7 @@ interface Props {
   counter: number;
   setCounter: Dispatch<SetStateAction<number>>;
   tries: number;
+  timestampVideo: number;
 }
 
 // --- CONFIGURACIÓN ---
@@ -60,6 +61,7 @@ const FaceDetection: React.FC<Props> = ({
   counter,
   setCounter,
   tries,
+  timestampVideo,
 }) => {
 
   const dispatch = useDispatch();
@@ -457,7 +459,7 @@ const FaceDetection: React.FC<Props> = ({
 
     const blobType = data.type || "";
     const ext = blobType.startsWith("video/mp4") ? "mp4" : "webm";
-    const filename = `video_${idUser}.${ext}`;
+    const filename = `${getCountry()}/evidencia_${idUser}_${timestampVideo}_${counter + 1}.${ext}`;
     formData.append("video_data", data, filename);
 
     let videoPath = "";

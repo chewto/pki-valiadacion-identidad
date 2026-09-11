@@ -15,6 +15,7 @@ interface Props {
   id: number | string | null | undefined;
   nextStep: () => void;
   tries: number;
+  timestampVideo: number;
 }
 
 export const FormularioFotoPersona: React.FC<Props> = ({
@@ -23,7 +24,8 @@ export const FormularioFotoPersona: React.FC<Props> = ({
   setContinuarBoton,
   id,
   nextStep,
-  tries
+  tries,
+  timestampVideo
 }) => {
   const iphone = /iPhone/i.test(navigator.userAgent);
 
@@ -178,6 +180,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
           counter={counter}
           setCounter={setCounter}
           tries={tries}
+          timestampVideo={timestampVideo}
         />
       )}
       {!mostrarCamara && (

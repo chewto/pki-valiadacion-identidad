@@ -1,39 +1,39 @@
-import { getCountry } from '@nucleo/hooks/useCountry';
+// import { getCountry } from '@nucleo/hooks/useCountry';
 
 const URL = import.meta.env.VITE_BASE_URL;
 
 // Mapa de URLs base de servicios externos por país (fe-back / fe-val-back)
-const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string; efirmaUrl: string }> = {
-  COL: {
-    fe: import.meta.env.VITE_FE_BASE_URL_CO,
-    saveVideo: import.meta.env.VITE_FE_BASE_URL_CO,
-    pruebaVida: import.meta.env.VITE_FE_BASE_URL_CO,
-    efirmaUrl: import.meta.env.VITE_FE_BASE_URL_CO,
-  },
-  HND: {
-    fe: import.meta.env.VITE_FE_BASE_URL_HN,
-    saveVideo: import.meta.env.VITE_FE_BASE_URL_HN,
-    pruebaVida: import.meta.env.VITE_FE_BASE_URL_HN,
-    efirmaUrl: import.meta.env.VITE_FE_BASE_URL_HN,
-  },
-};
+// const countryServiceUrls: Record<string, { fe: string; saveVideo: string; pruebaVida: string; efirmaUrl: string }> = {
+//   COL: {
+//     fe: import.meta.env.VITE_FE_BASE_URL_CO,
+//     saveVideo: import.meta.env.VITE_FE_BASE_URL_CO,
+//     pruebaVida: import.meta.env.VITE_FE_BASE_URL_CO,
+//     efirmaUrl: import.meta.env.VITE_FE_BASE_URL_CO,
+//   },
+//   HND: {
+//     fe: import.meta.env.VITE_FE_BASE_URL_HN,
+//     saveVideo: import.meta.env.VITE_FE_BASE_URL_HN,
+//     pruebaVida: import.meta.env.VITE_FE_BASE_URL_HN,
+//     efirmaUrl: import.meta.env.VITE_FE_BASE_URL_HN,
+//   },
+// };
 
-// Helper: selecciona las URLs correctas según el país (X-Fuente header)
-export const getCountryServiceUrls = () => {
-  const country = getCountry();
-  const config = countryServiceUrls[country] || countryServiceUrls['COL'];
-  return {
-    // fe: `${config.fe}/fe-back/api/Firmador`,
-    saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
-    pruebaVida: `${config.pruebaVida}/validacion-back/anti-spoof`,
-    efirmaUrl: `${config.efirmaUrl}/efirma.php/`,
-  };
-};
+// // Helper: selecciona las URLs correctas según el país (X-Fuente header)
+// export const getCountryServiceUrls = () => {
+//   const country = getCountry();
+//   const config = countryServiceUrls[country] || countryServiceUrls['COL'];
+//   return {
+//     // fe: `${config.fe}/fe-back/api/Firmador`,
+//     saveVideo: `${config.saveVideo}/fe-val-back/api/Video`,
+//     pruebaVida: `${config.pruebaVida}/validacion-back/anti-spoof`,
+//     efirmaUrl: `${config.efirmaUrl}/efirma.php/`,
+//   };
+// };
 
-const countryUrls = getCountryServiceUrls();
+// const countryUrls = getCountryServiceUrls();
 
 // URLs del back centralizado (mismo dominio para todos los países)
-const urlBase = `${URL}`;
+const urlBase = `${URL}/validacion-back`;
 const rejected = `${URL}/resultado_validacion_fallida`;
 const livenesstest = `${URL}/validacion-vida`;
 
@@ -62,17 +62,17 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: `${urlBase}/validation/get-user`,
   getUserData: `${urlBase}/validation/get-user`,
-  resultados: countryUrls.efirmaUrl,
+  resultados: `${urlBase}/efirma.php/`,
   getMedia: `${urlBase}/get-media`,
   rejected: `${rejected}`,
-  pruebaVida: countryUrls.pruebaVida,
+  pruebaVida: `${urlBase}/anti-spoof`,
   testBarcode: `${urlBase}/ocr/barcode-reader`,
   getLivenessTest: `${urlBase}/validation/get-livenesstest`,
   livenesstest: livenesstest,
   getCountry: `${urlBase}/country/get`,
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
-  saveVideo: countryUrls.saveVideo,
+  saveVideo: `${URL}/fe-val-back/api/Video/`,
   ocr: `https://colombia.efirmaplus.com/validacion-ocr-back/ocr`
 }
 

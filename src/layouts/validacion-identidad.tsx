@@ -57,6 +57,8 @@ interface Props {
 export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const validationName = "EFIRMA";
 
+  const timestampVideo = useRef(Date.now()).current;
+
   const { hash } = useParams();
   const [params] = useSearchParams();
 
@@ -515,6 +517,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           id={standalone ? informacionFirmador.idUsuario : idUsuarioParam}
           nextStep={handleNext}
           tries={validationParams.faceTries}
+          timestampVideo={timestampVideo}
         />,
         // <Demo side="frontal"  handleNext={handleNext}/>,
         <FormularioDocumento
@@ -566,6 +569,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     labelFoto.reverso,
     standalone,
     useModel,
+    timestampVideo,
     validationParams.documentsTries,
     validationParams.validationAttendance,
   ]);
