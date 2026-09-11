@@ -459,7 +459,7 @@ const FaceDetection: React.FC<Props> = ({
 
     const blobType = data.type || "";
     const ext = blobType.startsWith("video/mp4") ? "mp4" : "webm";
-    const filename = `${getCountry()}/evidencia_${idUser}_${timestampVideo}_${counter + 1}.${ext}`;
+    const filename = `${getCountry()}/video_${idUser}_${timestampVideo}_${counter + 1}.${ext}`;
     formData.append("video_data", data, filename);
 
     let videoPath = "";

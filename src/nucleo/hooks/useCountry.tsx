@@ -4,8 +4,8 @@ const SESSION_KEY = 'db_country';
 const DEFAULT_COUNTRY = 'COL';
 
 const countryMap: Record<string, string> = {
-  prueba01: 'COL',
-  prueba02: 'HND',
+  COLOMBIA: 'COL',
+  HONDUCERT: 'HND',
 };
 
 export const getCountry = (): string => {
