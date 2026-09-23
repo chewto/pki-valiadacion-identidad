@@ -7,13 +7,14 @@ import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
 import { useHour } from "@nucleo/hooks/useHour";
 import { useDate } from "@nucleo/hooks/useDate";
-import { RootState } from "@nucleo/redux/store";
+import { RootState, store } from "@nucleo/redux/store";
 import {
   setIp,
   setCoordenadas,
   setHoraFecha,
   setDispostivoNavegador,
   setFotos,
+  setTipoDocumento,
 } from "@nucleo/redux/slices/informacionSlice";
 import {
   setCountry,
@@ -36,14 +37,30 @@ import { useDispatch, useSelector } from "react-redux";
 // import safari from "../assets/img/safari.png";
 // import chrome from "../assets/img/chrome.png"
 import { CodigoQR } from "@components/ui/codigo-qr";
-import { PruebaVida } from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import {
+  PruebaVida,
+  ValidacionDocumento,
+} from "@nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { setIdCarpetas } from "@nucleo/redux/slices/pruebaVidaSlice";
+import {
+  setValidacionOCR,
+  setValidacionMRZ,
+  setValidacionCodigoBarras,
+  setValidacionRostro,
+  restoreValidationSides,
+} from "@nucleo/redux/slices/validacionDocumentoSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 // import FaceDetection from "./face-test";
 import { Spinner } from "reactstrap";
 import { setColumnId } from "@nucleo/redux/slices/timerSlice";
 import { useSpeedTest } from "@nucleo/hooks/useSpeedtest";
 import useJWT from "@nucleo/hooks/useJWT";
+import { useValidationProgress } from "@nucleo/hooks/useValidationProgress";
+import {
+  saveProgress,
+  ValidationProgressData,
+  ValidationProgressPayload,
+} from "@nucleo/services/validation-progress.service";
 import api from "@nucleo/api-urls/api";
 // import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
@@ -121,6 +138,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     idUsuarioParam,
     `id=${idParam}&idUsuario=${idUsuarioParam}&tipo=${tipoParam}`
   );
+
+  const idUsuarioProgreso = standalone
+    ? informacionFirmador.idUsuario
+    : idUsuarioParam;
+
+  const { isLoadingProgress, initialStep, progressData } = useValidationProgress({
+    idUsuario: idUsuarioProgreso,
+    country: getCountry(),
+    enabled: Boolean(jwt.token) && Boolean(idUsuarioProgreso),
+  });
 
   const hora = useHour();
   const fecha = useDate();
@@ -357,6 +384,18 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     formElement.appendChild(input);
   };
 
+  const buildValidationPayload = (
+    paso?: number
+  ): Omit<ValidationProgressPayload, "paso"> & { paso?: number } => ({
+    info: informacion,
+    documentValidation: validacionDocumento,
+    signInfo: { ...informacionFirmador, pais: informacionFirmador.pais || getCountry() },
+    livenessTest: pruebaVida,
+    params: validationParams,
+    times: timerData,
+    paso,
+  });
+
   const enviar = async (failed: boolean) => {
     setMostrar(true);
     setLoading(true);
@@ -369,24 +408,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       console.error("Error al iniciar log", err);
     }
 
-    const reqBody: {
-      info: typeof informacion;
-      documentValidation: typeof validacionDocumento;
-      signInfo: typeof informacionFirmador;
-      livenessTest: typeof pruebaVida;
-      params: typeof validationParams;
-      failed?: string;
-      failedBack?: string;
-      failedFront?: string;
-      times: typeof timerData;
-    } = {
-      info: informacion,
-      documentValidation: validacionDocumento,
-      signInfo: informacionFirmador,
-      livenessTest: pruebaVida,
-      params: validationParams,
-      times: timerData,
-    };
+    const reqBody = buildValidationPayload();
+
+    console.log(reqBody);
 
 
     if (!failed) {
@@ -439,7 +463,34 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
 
+  const activeStepsRef = useRef(activeSteps);
+  activeStepsRef.current = activeSteps;
+
+  const validationParamsRef = useRef(validationParams);
+  validationParamsRef.current = validationParams;
+
+  const idUsuarioProgresoRef = useRef(idUsuarioProgreso);
+  idUsuarioProgresoRef.current = idUsuarioProgreso;
+
+  const buildLiveProgressPayload = (paso: number): ValidationProgressPayload => {
+    const state = store.getState();
+    return {
+      info: state.informacion,
+      documentValidation: state.validacionDocumento,
+      signInfo: { ...state.firmador, pais: state.firmador.pais || getCountry() },
+      livenessTest: state.pruebaVida,
+      params: validationParamsRef.current,
+      times: state.timer,
+      paso,
+    };
+  };
+
   const handleNext = () => {
+    const pasoCompletado = activeStepsRef.current + 1;
+    if (idUsuarioProgresoRef.current) {
+      saveProgress(idUsuarioProgresoRef.current, getCountry(), buildLiveProgressPayload(pasoCompletado))
+        .catch((err) => console.error("Error guardando progreso:", err));
+    }
     setActiveSteps((prevActiveStep) => prevActiveStep + 1);
   };
 
@@ -574,6 +625,137 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     validationParams.validationAttendance,
   ]);
 
+  useEffect(() => {
+    if (isLoadingProgress) return;
+    if (progressData && !didRehydrateRef.current) {
+      didRehydrateRef.current = true;
+      rehydrateFromProgress(progressData);
+    }
+    if (initialStep >= componentsSteps.length && componentsSteps.length > 0) {
+      setActiveSteps(Math.min(initialStep, componentsSteps.length));
+      setContinuarBoton(true);
+      return;
+    }
+    const resumeStep = Math.min(
+      Math.max(initialStep, 0),
+      Math.max(componentsSteps.length - 1, 0)
+    );
+    setActiveSteps(resumeStep);
+  }, [isLoadingProgress, initialStep, componentsSteps.length, progressData]);
+
+  const didRehydrateRef = useRef(false);
+
+  const rehydrateFromProgress = (data: ValidationProgressData) => {
+    const info = data.info as
+      | { tipoDocumento?: string; anverso?: string; reverso?: string; foto_persona?: string }
+      | undefined;
+
+    if (info) {
+      if (typeof info.tipoDocumento === "string" && info.tipoDocumento.length > 0) {
+        dispatch(setTipoDocumento({ tipoDocumento: info.tipoDocumento }));
+      }
+      const labelFotos = {
+        anverso: info.anverso,
+        reverso: info.reverso,
+        foto_persona: info.foto_persona,
+      } as const;
+      (Object.keys(labelFotos) as Array<"anverso" | "reverso" | "foto_persona">).forEach(
+        (labelFoto) => {
+          const dataFoto = labelFotos[labelFoto];
+          if (typeof dataFoto === "string" && dataFoto.length > 0) {
+            dispatch(setFotos({ labelFoto, data: dataFoto }));
+          }
+        }
+      );
+    }
+
+    const documentValidation = data.documentValidation as
+      | ValidacionDocumento
+      | undefined;
+
+    if (documentValidation) {
+      if (documentValidation.ocr) {
+        dispatch(setValidacionOCR(documentValidation));
+      }
+      if (documentValidation.mrz) {
+        dispatch(setValidacionMRZ(documentValidation.mrz));
+      }
+      if (documentValidation.barcode) {
+        dispatch(setValidacionCodigoBarras(documentValidation));
+      }
+      if (
+        typeof documentValidation.face === "boolean" ||
+        typeof documentValidation.confidence === "number" ||
+        documentValidation.documentFace
+      ) {
+        dispatch(setValidacionRostro(documentValidation));
+      }
+      if (documentValidation.sides) {
+        dispatch(
+          restoreValidationSides({
+            front: documentValidation.sides.front,
+            back: documentValidation.sides.back,
+            sideResult: documentValidation.sideResult,
+          })
+        );
+      }
+    }
+
+    const livenessTest = data.livenessTest as Partial<PruebaVida> | undefined;
+    if (livenessTest) {
+      const { movimiento, videoHash, allFrames, framesCount } = livenessTest;
+      dispatch(
+        setIdCarpetas({
+          movimiento: movimiento ?? "",
+          videoHash: videoHash ?? "",
+          allFrames,
+          framesCount,
+        })
+      );
+    }
+
+    const params = data.params as
+      | {
+          validationAttendance?: string;
+          validationPercent?: string;
+          documentsTries?: number;
+          detectionTries?: number;
+          faceTries?: number;
+        }
+      | undefined;
+
+    if (params) {
+      setValidationParams({
+        validationAttendance:
+          params.validationAttendance ?? "AUTOMATICA",
+        validationPercent: params.validationPercent ?? "60",
+        documentsTries: params.documentsTries ?? 2,
+        detectionTries: params.detectionTries ?? 1,
+        faceTries: params.faceTries ?? 1,
+      });
+    }
+
+    const times = data.times as { id?: number | string } | undefined;
+    if (times && (typeof times.id === "number" || typeof times.id === "string")) {
+      if (!timerData.id || timerData.id === 0) {
+        dispatch(setColumnId(Number(times.id)));
+      }
+    }
+  };
+
+  const pasoGuardadoRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!continuarBoton) return;
+    if (!idUsuarioProgresoRef.current) return;
+    const pasoFinal = componentsSteps.length;
+    if (pasoGuardadoRef.current === pasoFinal) return;
+    pasoGuardadoRef.current = pasoFinal;
+    saveProgress(idUsuarioProgresoRef.current, getCountry(), buildLiveProgressPayload(pasoFinal)).catch(
+      (err) => console.error("Error guardando progreso final:", err)
+    );
+  }, [continuarBoton, componentsSteps.length]);
+
   const useKeyboardBlocker = () => {
     useEffect(() => {
       const handleKeyDown = (event: any) => {
@@ -624,11 +806,24 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       >
         <Card isBlocked={!retry}>
           <Header titulo="Validación de identidad" />
-          <div className="m-0">
-            <PasosEnumerados tipo="3" paso={activeSteps} />
-            <div className="content-buttons"></div>
-            <>{componentsSteps[activeSteps]}</>
-          </div>
+<div className="m-0">
+              {!isLoadingProgress && (
+                <>
+                  <PasosEnumerados tipo="3" paso={activeSteps} />
+                  <div className="content-buttons"></div>
+                  <>{componentsSteps[activeSteps] ?? null}</>
+                </>
+              )}
+            </div>
+            <>
+              {isLoadingProgress && (
+                <MensajeVerificacion
+                  loading={isLoadingProgress}
+                  error={false}
+                  mensaje="Consultando progreso"
+                />
+              )}
+            </>
           <>
             {mostrarMensaje && loading && (
               <MensajeVerificacion

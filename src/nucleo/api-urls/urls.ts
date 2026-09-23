@@ -59,6 +59,7 @@ export const URLS = {
   obtenerData: `${urlBase}/obtener-usuario`,
   comprobarProceso: `${urlBase}/comprobacion-proceso`,
   comprobarValidacion: `${urlBase}/validation/check-validation`,
+  validationProgress: `${urlBase}/validation/progress`,
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: `${urlBase}/validation/get-user`,
   getUserData: `${urlBase}/validation/get-user`,

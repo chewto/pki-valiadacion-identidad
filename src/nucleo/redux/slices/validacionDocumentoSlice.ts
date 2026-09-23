@@ -123,6 +123,27 @@ export const validacionDocumentolice = createSlice({
       state.face = face;
       state.documentFace = documentFace
     },
+    restoreValidationSides: (
+      state,
+      action: PayloadAction<{
+        front?: DocumentData;
+        back?: DocumentData;
+        sideResult?: { front?: boolean; back?: boolean };
+      }>
+    ) => {
+      if (action.payload.front) {
+        state.sides.front = { ...action.payload.front };
+      }
+      if (action.payload.back) {
+        state.sides.back = { ...action.payload.back };
+      }
+      if (typeof action.payload.sideResult?.front === "boolean") {
+        state.sideResult.front = action.payload.sideResult.front;
+      }
+      if (typeof action.payload.sideResult?.back === "boolean") {
+        state.sideResult.back = action.payload.sideResult.back;
+      }
+    },
     setBackResult:(
       state,
       action: PayloadAction<{sideResult: boolean}>
@@ -173,6 +194,7 @@ export const {
   setValidacionMRZ,
   setValidacionCodigoBarras,
   setValidacionRostro,
+  restoreValidationSides,
   setFrontSide,
   setBackSide,
   setFrontResult,
