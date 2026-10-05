@@ -62,10 +62,56 @@ import {
   ValidationProgressPayload,
 } from "@nucleo/services/validation-progress.service";
 import api from "@nucleo/api-urls/api";
+import {
+  useGeolocation,
+  GeolocationErrorCode,
+  GeolocationError,
+} from "@nucleo/hooks/useGeolocation";
+import {
+  getDocumentConfig,
+  DEFAULT_DOCUMENT_CONFIG,
+} from "@nucleo/services/document-config.service";
+import { normalizeApiError } from "@nucleo/services/api-error.service";
+import {
+  ApiErrorCode,
+  BlockingAlertType,
+  DocumentConfigResponse,
+  LocationCoords,
+  SignaturePayload,
+} from "@nucleo/interfaces/firma/location.interface";
+import { AlertaBloqueo } from "@components/ui/alerta-bloqueo";
 // import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
 const isDevMode = import.meta.env.VITE_DEVELOPMENT_MODE === "true";
+
+const mapGeoErrorToAlertType = (code?: string): BlockingAlertType => {
+  switch (code) {
+    case GeolocationErrorCode.PERMISSION_DENIED:
+      return "permission";
+    case GeolocationErrorCode.TIMEOUT:
+      return "timeout";
+    default:
+      return "unavailable";
+  }
+};
+
+const mapApiErrorToAlertType = (code: ApiErrorCode): BlockingAlertType => {
+  switch (code) {
+    case ApiErrorCode.VPN_DETECTED:
+      return "vpn";
+    case ApiErrorCode.PROXY_DETECTED:
+      return "proxy";
+    case ApiErrorCode.LOCATION_REQUIRED:
+      return "location_required";
+    case ApiErrorCode.LOCATION_MISMATCH:
+      return "mismatch";
+    case ApiErrorCode.LOCATION_UNAVAILABLE:
+      return "unavailable";
+    default:
+      return "unknown";
+  }
+};
 
 interface Props {
   standalone: boolean;
@@ -132,6 +178,25 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const esMobile = useMobile();
 
   const jwt = useJWT();
+
+  const {
+    coordinates,
+    supported: geoSupported,
+    getLocationPromise,
+  } = useGeolocation({
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0,
+  });
+
+  const [docConfig, setDocConfig] = useState<DocumentConfigResponse | null>(
+    null
+  );
+
+  const [alertaBloqueo, setAlertaBloqueo] = useState<{
+    tipo: BlockingAlertType;
+    mensaje?: string;
+  } | null>(null);
 
   useValidationRedirect(
     validationName,
@@ -335,8 +400,38 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           faceTries: 1
         });
       });
-    geolocation();
+    // Captura inicial de ubicación (misma conducta previa: se solicita al cargar)
+    getLocationPromise().catch(() => undefined);
     obtenerIp();
+  }, [jwt.token]);
+
+  // Sincroniza coordenadas con Redux (payload de evidencias existente)
+  useEffect(() => {
+    if (coordinates) {
+      dispatch(
+        setCoordenadas({
+          latitud: `${coordinates.latitude}`,
+          longitud: `${coordinates.longitude}`,
+        })
+      );
+    } else if (!geoSupported) {
+      dispatch(
+        setCoordenadas({ latitud: "no disponible", longitud: "no disponible" })
+      );
+    }
+  }, [coordinates, geoSupported, dispatch]);
+
+  // Configuración del documento: ubicación obligatoria y política anti-VPN
+  useEffect(() => {
+    if (!jwt.token) return;
+    getDocumentConfig(
+      standalone ? { hash: hash ?? undefined } : { efirmaId: idUsuarioParam ?? undefined }
+    )
+      .then((config) => setDocConfig(config))
+      .catch((err) => {
+        console.error("Error consultando configuración del documento:", err);
+        setDocConfig(DEFAULT_DOCUMENT_CONFIG);
+      });
   }, [jwt.token]);
 
   const obtenerIp = () => {
@@ -351,25 +446,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         console.error(error);
         dispatch(setIp({ ip: "ip inaccesible" }));
       });
-  };
-
-  const geolocation = () => {
-    const mostrarPosicion = (posicion: GeolocationPosition) => {
-      const latitud: number = posicion.coords.latitude;
-      const longitud: number = posicion.coords.longitude;
-
-      dispatch(
-        setCoordenadas({ latitud: `${latitud}`, longitud: `${longitud}` })
-      );
-    };
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(mostrarPosicion);
-    } else {
-      dispatch(
-        setCoordenadas({ latitud: "no disponible", longitud: "no disponible" })
-      );
-    }
   };
 
   const appendHiddenInput = (
@@ -400,6 +476,37 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     setMostrar(true);
     setLoading(true);
 
+    // 1. Configuración del documento: ¿exige ubicación / política VPN?
+    const config =
+      docConfig ??
+      (await getDocumentConfig(
+        standalone
+          ? { hash: hash ?? undefined }
+          : { efirmaId: idUsuarioParam ?? undefined }
+      ).catch(() => DEFAULT_DOCUMENT_CONFIG));
+    if (config !== docConfig) setDocConfig(config);
+
+    // 2. Gate de GPS: si la config exige ubicación, se obtiene una posición fresca.
+    //    Si falla (permiso denegado / timeout / sin GPS) NO se envía la firma.
+    let location: LocationCoords | undefined;
+    if (!failed && config.require_location_validation) {
+      try {
+        location = await getLocationPromise();
+      } catch (geoError) {
+        const err = geoError as GeolocationError;
+        setLoading(false);
+        setMostrar(false);
+        setAlertaBloqueo({
+          tipo: mapGeoErrorToAlertType(err.code),
+          mensaje: err.message,
+        });
+        return;
+      }
+    } else if (coordinates) {
+      // Ubicación opcional: se adjunta como evidencia si ya fue capturada.
+      location = coordinates;
+    }
+
     try {
       await axios.post(
         `${URLS.timeLogUpdate}?id=${timerData.id}&column=evidencias&action=inicio&country=${getCountry()}`
@@ -408,7 +515,10 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       console.error("Error al iniciar log", err);
     }
 
-    const reqBody = buildValidationPayload();
+    const reqBody: SignaturePayload = {
+      ...buildValidationPayload(),
+      ...(location ? { location } : {}),
+    };
 
     console.log(reqBody);
 
@@ -453,12 +563,42 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           window.location.href = `${URLS.resultados}?id=${idValidacion}&idUsuario=${idUsuario}&tipo=${tipoParam}`;
         }
       } catch (error) {
-        // Manejo de errores de la petición principal
-        console.error("Error en la validación:", error);
-        setLoading(false);
-        setError(true);
+        // Manejo centralizado de errores de la API (VPN / ubicación / genéricos)
+        const apiError = normalizeApiError(error);
+        console.error("Error en la validación:", apiError);
+
+        if (apiError.code !== ApiErrorCode.UNKNOWN) {
+          setLoading(false);
+          setMostrar(false);
+          // Si el backend exigió ubicación y la config no lo sabía, se aprende
+          // para que el reintento incluya el gate de GPS.
+          if (apiError.code === ApiErrorCode.LOCATION_REQUIRED) {
+            setDocConfig((prev) => ({
+              ...(prev ?? DEFAULT_DOCUMENT_CONFIG),
+              require_location_validation: true,
+            }));
+          }
+          setAlertaBloqueo({
+            tipo: mapApiErrorToAlertType(apiError.code),
+            mensaje: apiError.message,
+          });
+        } else {
+          setLoading(false);
+          setError(true);
+        }
       }
     }
+  };
+
+  const reintentarDesdeAlerta = () => {
+    setAlertaBloqueo(null);
+    enviar(false);
+  };
+
+  const cerrarAlerta = () => {
+    setAlertaBloqueo(null);
+    setLoading(false);
+    setMostrar(false);
   };
 
   const [activeSteps, setActiveSteps] = useState<number>(0);
@@ -870,6 +1010,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             <p className="mb-6 text-center">
               {loading ? "Enviando evidencias." : "Enviar evidencias."}
             </p>
+            {docConfig?.block_on_vpn && (
+              <p className="mb-4 text-center text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+                Tu conexión será verificada contra VPN/Proxy. Si estás usando
+                una, desactívala antes de finalizar.
+              </p>
+            )}
             <form
               className="flex justify-center items-center"
               onSubmit={(e) => {
@@ -892,6 +1038,15 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             </form>
           </div>
         </div>
+
+        {alertaBloqueo && (
+          <AlertaBloqueo
+            tipo={alertaBloqueo.tipo}
+            mensaje={alertaBloqueo.mensaje}
+            onReintentar={reintentarDesdeAlerta}
+            onCerrar={cerrarAlerta}
+          />
+        )}
 
         {!retry && retry !== null && (
           <Advertencia

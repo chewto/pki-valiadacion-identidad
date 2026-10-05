@@ -5,9 +5,11 @@ interface Props{
   titulo: string;
   contenido: string;
   elemento: JSX.Element;
+  /** Clase z-index del backdrop (default z-40). Usar z-[60] para superponerse al modal de finalizar (z-50). */
+  zClass?: "z-40" | "z-[60]";
 }
 
-export const Advertencia: React.FC<Props> = ({ titulo, contenido, elemento }) => {
+export const Advertencia: React.FC<Props> = ({ titulo, contenido, elemento, zClass = "z-40" }) => {
   const dialogRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
 
@@ -58,7 +60,7 @@ export const Advertencia: React.FC<Props> = ({ titulo, contenido, elemento }) =>
 
   return (
     /* Backdrop */
-    <div className="fixed inset-0 flex justify-center items-start pt-4 bg-black/50 z-40 animate-fadeIn">
+    <div className={`fixed inset-0 flex justify-center items-start pt-4 bg-black/50 ${zClass} animate-fadeIn`}>
       {/* Dialog */}
       <div
         ref={dialogRef}

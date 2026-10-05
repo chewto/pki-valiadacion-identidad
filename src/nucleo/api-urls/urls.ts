@@ -54,6 +54,8 @@ export const URLS = {
   validarDocumentoReverso: `${urlBase}/ocr/reverso`,
   validacionVida: `${urlBase}/validacion-vida`,
   validationParameters: `${urlBase}/validation/validation-params`,
+  // TODO: placeholder — ruta pendiente de definir por backend
+  documentConfig: `${urlBase}/validation/document-config`,
   validationFailed: `${urlBase}/validation/failed`,
   obtenerIp: 'https://api.ipify.org/?format=json',
   obtenerData: `${urlBase}/obtener-usuario`,
