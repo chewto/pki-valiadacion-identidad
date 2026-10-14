@@ -63,7 +63,9 @@ export const URLS = {
   comprobarFirma: `${urlBase}/comprobacion-firma`,
   obtenerFirmador: `${urlBase}/validation/get-user`,
   getUserData: `${urlBase}/validation/get-user`,
-  resultados: `${urlBase}/efirma.php/`,
+  get resultados() {
+    return `${window.location.origin}/efirma.php`;
+  },
   getMedia: `${urlBase}/get-media`,
   rejected: `${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,
