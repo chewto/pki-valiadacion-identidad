@@ -66,6 +66,9 @@ export const URLS = {
   get resultados() {
     return `${window.location.origin}/efirma.php`;
   },
+  get qrBase() {
+    return `${window.location.origin}/evidencia/#/evidencias`;
+  },
   getMedia: `${urlBase}/get-media`,
   rejected: `${rejected}`,
   pruebaVida: `${urlBase}/anti-spoof`,

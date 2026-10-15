@@ -6,8 +6,6 @@ import { URLS } from '@nucleo/api-urls/urls';
 import { Spinner } from 'reactstrap';
 import api from '@nucleo/api-urls/api';
 
-const URL = import.meta.env.VITE_QR_BASE_URL
-
 interface resProp {
   enlace: string;
 }
@@ -25,7 +23,7 @@ export const CodigoQR: React.FC = () => {
     api.get(`${URLS.getLink}?id=${idSigner}`)
       .then((res: { data: resProp }) => {
         setLoading(false);
-        setQrValue(`${URL}/${res.data.enlace}`);
+        setQrValue(`${URLS.qrBase}/${res.data.enlace}`);
       })
   }, [])
 
