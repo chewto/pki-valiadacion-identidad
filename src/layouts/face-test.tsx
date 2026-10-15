@@ -93,7 +93,7 @@ const FaceDetection: React.FC<Props> = ({
   // const drawingImageRef = useRef<ImageDrawing>({ img: null, isLoaded: false });
 
   // 2. ESTADOS
-  const [isModelLoaded, setIsModelLoaded] = useState<boolean>(true);
+  const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
   // const [isCenteredAndOk, setIsCenteredAndOk] = useState<boolean>(false);
   const [videoDimensions, setVideoDimensions] = useState({
     width: 0,
@@ -162,27 +162,14 @@ const FaceDetection: React.FC<Props> = ({
   // 3. CARGA INICIAL
   useEffect(() => {
     const init = async () => {
-      setIsModelLoaded(true);
       try {
-        // await Promise.all([
-        //   faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        // ]);
-
-        // Cargar imagen en memoria para el Canvas
-        // const imgObj = new Image();
-        // imgObj.src = faceTemplate;
-        // imgObj.onload = () => {
-        //   drawingImageRef.current = { img: imgObj, isLoaded: true };
-        //   startVideo();
-        // };
-        // imgObj.onerror = () => {
-        //   drawingImageRef.current = { img: null, isLoaded: false };
-        // };
-        startVideo();
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        setIsModelLoaded(true);
       } catch (error) {
         console.error("Error cargando modelos:", error);
         setIsModelLoaded(false);
       }
+      startVideo();
     };
 
     init();
@@ -226,7 +213,9 @@ const FaceDetection: React.FC<Props> = ({
           videoRef.current.onloadedmetadata = () => {
             handleResize();
             videoRef.current?.play();
-            // handleDetectionLoop();
+            if (faceapi.nets.tinyFaceDetector.isLoaded) {
+              handleDetectionLoop();
+            }
           };
         }
       })
