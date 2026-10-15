@@ -6,6 +6,7 @@ import TestBrowser from "@components/validacion-identidad/test-browser";
 import Verify from "@pages/verify/verify";
 import NetworkDashboard from "@layouts/speed-test";
 import  TestCamera from "@components/test/test-camera";
+import TestModelo from "@components/test/test-modelo";
 import useCountry from "@nucleo/hooks/useCountry";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="deteccion" element={<TestBrowser/>}/>
           <Route path="net" element={<NetworkDashboard/>}/>
           <Route path="camera" element={<TestCamera/>}/>
+          <Route path="modelo" element={<TestModelo/>}/>
         </Route>
       </Routes>
     </Router>
