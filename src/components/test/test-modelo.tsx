@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as faceapi from "face-api.js";
 
-const MODEL_URL = "/models";
+const MODEL_URL = `${import.meta.env.BASE_URL}models`;
 const MANIFESTS = [
   "tiny_face_detector_model-weights_manifest.json",
   "ssd_mobilenetv1_model-weights_manifest.json",
@@ -221,9 +221,12 @@ const TestModelo: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto my-6 px-4">
       <h1 className="text-2xl font-bold mb-2">Prueba de modelos face-api.js</h1>
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-gray-600 mb-1">
         Ruta base: <code className="bg-gray-100 px-1">{MODEL_URL}</code> — se verifica el manifest por HTTP, se carga
         cada modelo y se ejecuta una detección real sobre <code className="bg-gray-100 px-1">/demo.png</code>.
+      </p>
+      <p className="text-xs text-gray-500 mb-4 break-all">
+        <code>BASE_URL = "{import.meta.env.BASE_URL}"</code> | <code>location = {typeof window !== "undefined" ? window.location.href : "—"}</code>
       </p>
 
       <button
@@ -289,7 +292,7 @@ const TestModelo: React.FC = () => {
       )}
 
       <div className="relative inline-block mb-4">
-        <img ref={imgRef} src="demo.png" alt="Imagen de prueba" className="max-w-full max-h-80 border" crossOrigin="anonymous" />
+        <img ref={imgRef} src={`${import.meta.env.BASE_URL}demo.png`} alt="Imagen de prueba" className="max-w-full max-h-80 border" crossOrigin="anonymous" />
         <canvas ref={canvasRef} className="absolute top-0 left-0 max-w-full max-h-80" />
       </div>
 

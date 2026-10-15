@@ -47,7 +47,7 @@ interface Props {
 }
 
 // --- CONFIGURACIÓN ---
-const MODEL_URL = "/models";
+  const MODEL_URL = `${import.meta.env.BASE_URL}models`;
 // const DRAWING_IMG_URL = "/face_template_OK.png"; // RUTA DE TU IMAGEN
 // const BRIGHTNESS_THRESHOLD = 50;
 
