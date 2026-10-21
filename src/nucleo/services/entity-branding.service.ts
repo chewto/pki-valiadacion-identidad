@@ -5,7 +5,7 @@ import { EntityBrandingResponse } from "@nucleo/interfaces/branding/branding.int
 export const getEntityBranding = async (
   efirmaId: string | number
 ): Promise<EntityBrandingResponse> => {
-  const { data } = await api.get(`${URLS.entityBranding}?efirmaId=${efirmaId}`);
+  const { data } = await api.get(`${URLS.entityBranding}?id=${efirmaId}`);
   const logo =
     typeof data?.logo === "string" && data.logo.trim() !== ""
       ? data.logo.trim()

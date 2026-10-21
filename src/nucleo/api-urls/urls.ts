@@ -77,7 +77,7 @@ export const URLS = {
   livenesstest: livenesstest,
   getCountry: `${urlBase}/country/get`,
   // TODO: placeholder — ruta pendiente de definir por backend
-  entityBranding: `${urlBase}/validation/entity-branding`,
+  entityBranding: `${urlBase}/logo-entidad/get`,
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
   saveVideo: `${URL}/fe-val-back/api/Video/`,
