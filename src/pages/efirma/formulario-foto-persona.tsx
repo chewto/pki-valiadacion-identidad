@@ -117,26 +117,33 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
       {messages.length >= 1 && (
         <Advertencia
-          titulo="Advertencia"
-          contenido=""
+          titulo="Sugerencias para su captura"
+          contenido="Por favor, tome en cuenta las siguientes indicaciones para validar su foto correctamente:"
+          tipo="warning"
+          onClose={() => setMessages([])}
           elemento={
-            <div>
-              <ul className="p-0">
+            <div className="flex flex-col items-center w-full gap-3">
+              <ul className="w-full flex flex-col gap-2 p-0 m-0">
                 {messages.map((message: string, index) => (
                   <li
                     key={index}
-                    className="bg-yellow-200 px-2 py-2 my-1 rounded-xl border-2 border-yellow-500 text-xl"
+                    className="flex items-start gap-2.5 bg-amber-50/80 border border-amber-200/90 rounded-xl p-3 text-xs sm:text-sm text-amber-950 shadow-sm"
                   >
-                    {message}
+                    <span className="flex-shrink-0 mt-0.5 text-amber-600">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </span>
+                    <span className="leading-snug">{message}</span>
                   </li>
                 ))}
               </ul>
 
               <button
                 onClick={() => setMessages([])}
-                className="stepper-btn mt-2"
+                className="w-full sm:w-auto min-w-[150px] px-6 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center mt-1"
               >
-                cerrar
+                Entendido
               </button>
             </div>
           }
