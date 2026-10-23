@@ -6,8 +6,8 @@ interface Props {
   paso: number;
 }
 
-const STEP_LABELS_TIPO3_CON_SELFIE = ["Documento", "Cámara", "Selfie", "Anverso", "Reverso"];
-const STEP_LABELS_TIPO3_SIN_SELFIE = ["Documento", "Cámara", "Anverso", "Reverso"];
+const STEP_LABELS_TIPO3_CON_SELFIE = ["Inicio", "Cámara", "Selfie", "Anverso", "Reverso"];
+const STEP_LABELS_TIPO3_SIN_SELFIE = ["Inicio", "Cámara", "Anverso", "Reverso"];
 
 export const PasosEnumerados: React.FC<Props> = ({ tipo, paso }) => {
   const informacionFirmador = useSelector((state: RootState) => state.firmador)

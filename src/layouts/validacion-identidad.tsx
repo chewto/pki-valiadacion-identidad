@@ -25,7 +25,7 @@ import { useMobile } from "@nucleo/hooks/useMobile";
 import { useValidationRedirect } from "@nucleo/hooks/useValidationRedirect";
 
 import { FormularioDocumento } from "@pages/efirma/formulario-documento";
-import { DocumentSelector } from "@pages/shared/document-selector";
+import { WelcomeScreen } from "@pages/shared/welcome-screen";
 import { AccesoCamara } from "@pages/efirma/acceso-camara";
 import { Header } from "@components/ui/header";
 import { PasosEnumerados } from "@components/ui/pasos-enumerados";
@@ -206,6 +206,12 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         if (standalone) {
           dispatch(setDirecciones(res.data.dato));
           setUseModel(res.data.dato.usoModelo == null ? false : true);
+        }
+        // Auto-setear tipo de documento desde el firmador
+        if (res.data.dato?.tipoDocumento) {
+          dispatch(
+            setTipoDocumento({ tipoDocumento: res.data.dato.tipoDocumento })
+          );
         }
       })
       .catch((err) => console.log(err))
@@ -507,14 +513,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const componentsSteps = useMemo(() => {
     return informacionFirmador.validacionVida
       ? [
-        <DocumentSelector
-          key="document-selector"
-          tipoDocumento={informacion.tipoDocumento}
-          documentList={documentList}
-          continuarBoton={continuarBoton}
-          useModel={standalone ? useModel : false}
-          nextStep={handleNext}
-        />,
+        <WelcomeScreen key="welcome-screen" nextStep={handleNext} />,
         <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
         <FormularioDocumento
           key="formulario-anverso"
@@ -550,14 +549,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         />,
       ]
       : [
-        <DocumentSelector
-          key="document-selector"
-          tipoDocumento={informacion.tipoDocumento}
-          documentList={documentList}
-          continuarBoton={continuarBoton}
-          useModel={standalone ? useModel : false}
-          nextStep={handleNext}
-        />,
+        <WelcomeScreen key="welcome-screen" nextStep={handleNext} />,
         <AccesoCamara key="acceso-camara" nextStep={handleNext} />,
         // <Demo side="face" handleNext={handleNext}/>,
         <FormularioFotoPersona
