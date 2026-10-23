@@ -15,7 +15,7 @@ import {
   setIdCarpetas,
   setMovement,
 } from "@nucleo/redux/slices/pruebaVidaSlice";
-import { Alert, Spinner } from "reactstrap";
+import { Spinner } from "reactstrap";
 import { CameraOverlay } from "@components/validacion-identidad/recuadro";
 import { RootState } from "@nucleo/redux/store";
 import demoImg from "/demo.png";
@@ -558,13 +558,7 @@ const FaceDetection: React.FC<Props> = ({
     >
       {showAdvice && (
         <div
-          className="flex justify-center md:items-center xsm:items-start md:p-16 xsm:p-2" // Se agrega scroll al contenedor externo
-          style={{
-            position: "fixed",
-            inset: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            zIndex: 200
-          }}
+          className="fixed inset-0 flex justify-center items-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm z-50 animate-fadeIn"
           onClick={() => {
             setShowAdvice(false);
             setEnableButton(true);
@@ -574,52 +568,74 @@ const FaceDetection: React.FC<Props> = ({
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "#fff",
-              color: "#000",
-              padding: "20px 24px",
-              borderRadius: 12,
-              maxWidth: 420,
-              width: "100%",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
-              // --- CAMBIOS PARA SCROLL INTERNO ---
-              maxHeight: "calc(100vh - 40px)", // Evita que sea más alto que la pantalla
-              overflowY: "auto",               // Habilita el scroll interno
-              display: "flex",                 // Asegura que el contenido fluya bien
-              flexDirection: "column"
-            }}
+            className="
+              bg-white rounded-2xl shadow-2xl border border-slate-100
+              flex flex-col w-full max-w-md
+              max-h-[92vh] max-h-[92dvh]
+              outline-none overflow-hidden
+              animate-scaleIn
+            "
           >
-            <div className="flex flex-col items-center md:p-3 xsm:px-1 xsm:py-0">
-              <Alert color="info" className="md:text-sm xsm:text-base text-center w-full">
-                <strong>Recomendaciones Clave</strong> para una Validación
-                Exitosa
-              </Alert>
-              <ul className="text-justify flex flex-col gap-1 md:px-3 xsm:px-1 m-0 list-disc xsm:text-xs md:text-sm font-bold">
-                <li>
-                  Coloque su rostro dentro del recuadro y presione "Grabar
-                  video" para iniciar la grabación.
-                </li>
-                <li>
-                  Evita la luz solar directa o lámparas muy potentes cerca de la
-                  cara.
-                </li>
-                <li>
-                  Mantenga el teléfono firme y limpie el lente de la cámara.
-                </li>
-                <li>Ubíquese en un área con buena iluminación frontal.</li>
-              </ul>
-              <img
-                src={demoImg}
-                alt="demostracion"
-                className="md:w-8/12 xsm:w-9/12 my-2 xsm:my-3 rounded-md object-contain"
-              />
-              <div className="mt-auto"> {/* mt-auto empuja el botón al final si hay espacio */}
+            {/* Header del modal */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 border border-blue-200 flex items-center justify-center font-bold flex-shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="font-bold text-sm sm:text-base text-slate-800 m-0">Recomendaciones Clave</h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 m-0">Para una validación exitosa</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAdvice(false);
+                  setEnableButton(true);
+                }}
+                className="text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 p-1.5 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                aria-label="Cerrar recomendaciones"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Contenido adaptable */}
+            <div className="p-4 sm:p-5 overflow-y-auto custom-scrollbar flex flex-col items-center gap-3">
+              <div className="w-full grid grid-cols-1 gap-2 text-xs sm:text-sm text-slate-700">
+                <div className="flex items-start gap-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5">
+                  <span className="text-blue-600 mt-0.5 text-sm">🎯</span>
+                  <span className="leading-snug">Coloque su rostro dentro del recuadro y presione <strong>"Grabar video"</strong>.</span>
+                </div>
+                <div className="flex items-start gap-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5">
+                  <span className="text-amber-500 mt-0.5 text-sm">☀️</span>
+                  <span className="leading-snug">Ubíquese en un área iluminada de frente, evitando contraluz directo.</span>
+                </div>
+                <div className="flex items-start gap-2 bg-slate-50/80 border border-slate-100 rounded-xl p-2.5">
+                  <span className="text-emerald-500 mt-0.5 text-sm">📱</span>
+                  <span className="leading-snug">Mantenga el dispositivo firme y limpie la lente de la cámara.</span>
+                </div>
+              </div>
+
+              <div className="w-full flex justify-center py-1">
+                <img
+                  src={demoImg}
+                  alt="Demostración de pose"
+                  className="max-h-24 sm:max-h-32 w-auto object-contain rounded-xl border border-slate-200/80 shadow-sm bg-slate-50"
+                />
+              </div>
+
+              {/* Botón inferior siempre visible */}
+              <div className="w-full pt-1 flex justify-center">
                 <button
                   onClick={() => {
                     setShowAdvice(false);
                     setEnableButton(true);
                   }}
-                  className="bg-blue-600 hover:bg-blue-400 transition-all text-white px-3 py-2 rounded-lg"
+                  className="w-full sm:w-auto min-w-[150px] px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   Entendido
                 </button>
@@ -630,12 +646,19 @@ const FaceDetection: React.FC<Props> = ({
       )}
 
       {blockReason && (
-        <div className="w-11/12 my-2">
-          <Alert color="danger" className="m-0 text-center text-sm font-bold shadow-md flex flex-col items-center gap-1">
-            <span>⚠️ Acceso a Cámara Bloqueado</span>
-            <span className="text-xs font-normal">{blockReason}</span>
-            <span className="text-xs font-normal mt-1">Por favor, habilite la cámara, retire cualquier cubierta física o desactive el modo privacidad para poder continuar.</span>
-          </Alert>
+        <div className="w-11/12 my-2 animate-fadeIn">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3.5 shadow-sm text-center flex flex-col items-center gap-1.5">
+            <div className="flex items-center gap-1.5 text-red-700 font-bold text-sm">
+              <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span>Acceso a Cámara Bloqueado</span>
+            </div>
+            <span className="text-xs text-red-600 font-medium">{blockReason}</span>
+            <span className="text-xs text-slate-600 leading-relaxed max-w-sm">
+              Por favor, habilite la cámara en los permisos de su navegador, retire cualquier cubierta física o desactive el modo privacidad para continuar.
+            </span>
+          </div>
         </div>
       )}
 
@@ -682,9 +705,13 @@ const FaceDetection: React.FC<Props> = ({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center text-center my-4 border-gray-200 bg-slate-100 border-2 rounded-lg p-4 shadow-lg">
-          <span>{sendingMessages[currentMessageIndex]}</span>
-          <Spinner color="primary" />
+        <div className="flex flex-col justify-center items-center text-center my-4 border border-slate-200 bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl max-w-sm w-11/12 gap-3 animate-scaleIn">
+          <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+            <Spinner color="primary" size="sm" />
+          </div>
+          <span className="text-sm font-semibold text-slate-700 leading-snug">
+            {sendingMessages[currentMessageIndex]}
+          </span>
         </div>
       )}
 

@@ -562,33 +562,41 @@ export const FormularioDocumento: React.FC<Props> = ({
 
       {showModal && (
         <Advertencia
-          titulo="Advertencia"
-          contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
+          titulo="Documento No Válido"
+          contenido="Hemos detectado inconsistencias en el documento subido. Por favor, revise las siguientes indicaciones:"
+          tipo="warning"
+          onClose={!disabled ? () => setShowModal(false) : undefined}
           elemento={
-            <div className="flex flex-col items-center justify-center ">
-              <Alert color="warning">
-                <p className="xsm:text-sm md:text-lg text-justify">
-                  Hemos detectado que el documento subido anteriormente no
-                  corresponde con el documento seleccionado. Por favor,
-                  asegúrese de subir el <strong>{placeholder}</strong> de su{" "}
-                  <strong>{tipoDocumento.toLocaleLowerCase()}</strong> para
-                  poder continuar con el proceso.
-                </p>
-              </Alert>
+            <div className="flex flex-col items-center w-full gap-3">
+              <div className="w-full bg-amber-50/80 border border-amber-200/80 rounded-xl p-3 text-amber-900 text-xs sm:text-sm text-center leading-relaxed">
+                Por favor, asegúrese de subir el <strong>{placeholder}</strong> de su{" "}
+                <strong className="capitalize">{tipoDocumento.toLocaleLowerCase()}</strong> con buena luz y sin reflejos para poder continuar.
+              </div>
+
               {!(tipoDocumento === passport) && (
-                <div className="flex flex-col justify-center items-center mb-2">
-                  <p>
-                    <strong>Imagen de referencia</strong>
-                  </p>
-                  <img src={publicPath} alt="" className=" xsm:w-5/6 md:w-96" />
+                <div className="flex flex-col justify-center items-center w-full bg-slate-50 border border-slate-100 rounded-xl p-2.5">
+                  <span className="text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                    Imagen de referencia
+                  </span>
+                  <img 
+                    src={publicPath} 
+                    alt="Referencia de documento" 
+                    className="max-h-28 sm:max-h-40 w-auto object-contain rounded-lg shadow-sm border border-slate-200 bg-white" 
+                  />
                 </div>
               )}
+
               <button
                 onClick={() => setShowModal(false)}
-                className="stepper-btn"
+                className="w-full sm:w-auto min-w-[140px] px-5 py-2.5 text-sm font-semibold rounded-xl text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 mt-1"
                 disabled={disabled}
               >
-                cerrar {disabled && <span>({seconds}s)</span>}
+                <span>Cerrar</span>
+                {disabled && (
+                  <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-mono">
+                    {seconds}s
+                  </span>
+                )}
               </button>
             </div>
           }
