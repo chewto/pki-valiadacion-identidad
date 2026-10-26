@@ -77,7 +77,7 @@ export const WelcomeScreen: React.FC<Props> = ({ nextStep }) => {
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
     >
       {/* Saludo animado */}
-      <div className="text-center mb-4">
+      <div className="text-center my-2">
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-1">
           {displayName ? (
             <>
@@ -97,7 +97,7 @@ export const WelcomeScreen: React.FC<Props> = ({ nextStep }) => {
       {userData.tipoDocumento && (
         <div
           className="flex items-center gap-2 bg-blue-50 border border-blue-200
-                      rounded-full px-4 py-1.5 mb-5 animate-fadeIn"
+                      rounded-full px-4 py-1.5 mb-4 animate-fadeIn"
         >
           <svg
             className="w-4 h-4 text-blue-500"
@@ -135,7 +135,7 @@ export const WelcomeScreen: React.FC<Props> = ({ nextStep }) => {
           <div
             key={i}
             className={`flex items-center gap-3 bg-white border border-slate-200
-                        rounded-xl px-4 py-3 shadow-sm
+                        rounded-xl px-4 py-2 shadow-sm
                         transition-all duration-[400ms] ease-out
                         ${
                           stepsVisible[i]

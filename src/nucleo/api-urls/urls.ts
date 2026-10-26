@@ -33,7 +33,7 @@ const URL = import.meta.env.VITE_BASE_URL;
 // const countryUrls = getCountryServiceUrls();
 
 // URLs del back centralizado (mismo dominio para todos los países)
-const urlBase = `${URL}/validacion-back`;
+const urlBase = `${URL}/python`;
 const rejected = `${URL}/resultado_validacion_fallida`;
 const livenesstest = `${URL}/validacion-vida`;
 
