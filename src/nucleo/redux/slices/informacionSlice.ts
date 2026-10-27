@@ -57,12 +57,18 @@ export const informacionSlice = createSlice({
     setVaciarFoto: (state) => {
       state.foto_persona = "";
     },
-    setTipoDocumento: (
+        setTipoDocumento: (
       state,
       action: PayloadAction<{ tipoDocumento: string }>
     ) => {
       const { tipoDocumento } = action.payload;
-      state.tipoDocumento = tipoDocumento;
+      state.tipoDocumento = tipoDocumento
+        ? tipoDocumento
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toUpperCase()
+            .trim()
+        : "";
     },
   },
 });

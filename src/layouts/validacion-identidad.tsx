@@ -390,12 +390,28 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     formElement.appendChild(input);
   };
 
+  const cleanTipoDoc = (doc?: string): string =>
+    doc
+      ? doc
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toUpperCase()
+          .trim()
+      : "";
+
   const buildValidationPayload = (
     paso?: number
   ): Omit<ValidationProgressPayload, "paso"> & { paso?: number } => ({
-    info: informacion,
+    info: {
+      ...informacion,
+      tipoDocumento: cleanTipoDoc(informacion.tipoDocumento || informacionFirmador.tipoDocumento),
+    },
     documentValidation: validacionDocumento,
-    signInfo: { ...informacionFirmador, pais: informacionFirmador.pais || getCountry() },
+    signInfo: {
+      ...informacionFirmador,
+      tipoDocumento: cleanTipoDoc(informacionFirmador.tipoDocumento || informacion.tipoDocumento),
+      pais: informacionFirmador.pais || getCountry(),
+    },
     livenessTest: pruebaVida,
     params: validationParams,
     times: timerData,
@@ -481,9 +497,16 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const buildLiveProgressPayload = (paso: number): ValidationProgressPayload => {
     const state = store.getState();
     return {
-      info: state.informacion,
+      info: {
+        ...state.informacion,
+        tipoDocumento: cleanTipoDoc(state.informacion.tipoDocumento || state.firmador.tipoDocumento),
+      },
       documentValidation: state.validacionDocumento,
-      signInfo: { ...state.firmador, pais: state.firmador.pais || getCountry() },
+      signInfo: {
+        ...state.firmador,
+        tipoDocumento: cleanTipoDoc(state.firmador.tipoDocumento || state.informacion.tipoDocumento),
+        pais: state.firmador.pais || getCountry(),
+      },
       livenessTest: state.pruebaVida,
       params: validationParamsRef.current,
       times: state.timer,
