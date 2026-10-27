@@ -12,7 +12,7 @@ const initialState: Dato = {
 const cleanAccents = (text: string | undefined): string => {
   return text ? text
     .normalize("NFD") 
-    .replace(/[\u0300-\u036f]/g, "") : '';
+    .replace(/[\u0300-\u036f]/g, "").toUpperCase().trim() : '';
 };
 
 export const firmadorSlice = createSlice({

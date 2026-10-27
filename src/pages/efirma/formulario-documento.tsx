@@ -32,6 +32,17 @@ import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
 import api from "@nucleo/api-urls/api";
 // import Camera from '@pages/efirma/nueva-camara'
 
+
+const normalizeTipoDocumento = (doc?: string): string => {
+  if (!doc) return "";
+  return doc
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
 interface Props {
   id: string | number | null | undefined;
   tipoDocumento: string;
@@ -74,11 +85,17 @@ export const FormularioDocumento: React.FC<Props> = ({
   const passport = "PASAPORTE";
 
   const placeholder = ladoDocumento === "anverso" ? "frontal" : "reverso";
+
+  const tipoDocumentoNormalizado = normalizeTipoDocumento(
+    tipoDocumento || informacionFirmador.tipoDocumento || informacion.tipoDocumento
+  );
+
   const [mostrarPreview, setMostrarPreview] = useState<boolean>(false);
   const [conteo, setConteo] = useState<number>(1);
   const publicPath =
     "./svg/prod/" +
-    `${placeholder}_${tipoDocumento.toLocaleLowerCase().replace(" ", "_").replace(" ", "_")}.svg`;
+    `${placeholder}_${tipoDocumentoNormalizado.toLowerCase().replace(/ /g, "_")}.svg`;
+  console.log(publicPath)
   // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -116,22 +133,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     }
   }, [showModal, seconds]);
 
-  // 1. Definimos el mapeo fuera para que sea una constante única
-  const DOCUMENT_MAPPING = {
-    DNI: "DNI",
-    "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
-    "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
-    "CEDULA DIGITAL": "CEDULA_DIGITAL",
-    PASAPORTE: "PASAPORTE",
-  } as const; // 'as const' hace que los valores sean literales, no solo strings
-
-  // 2. Extraemos el tipo de las llaves automáticamente
-  type DocumentType = keyof typeof DOCUMENT_MAPPING;
-
-  const conversor = (document: DocumentType) => {
-    return DOCUMENT_MAPPING[document];
-  };
-
   const [ocrReq, setOcrReq] = useState<{
     loading: boolean;
     error: boolean;
@@ -153,6 +154,18 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [horizontal, setHorizontal] = useState<boolean>(false);
 
+  const DOCUMENT_MAPPING = {
+    DNI: "DNI",
+    "CEDULA DE CIUDADANIA": "CEDULA_CIUDADANIA",
+    "CEDULA DE EXTRANJERIA": "CEDULA_EXTRANJERIA",
+    "CEDULA DIGITAL": "CEDULA_DIGITAL",
+    PASAPORTE: "PASAPORTE",
+  } as const;
+  type DocumentType = keyof typeof DOCUMENT_MAPPING;
+
+  const conversor = (document: string) => {
+    return DOCUMENT_MAPPING[document as DocumentType];
+  };
 
   const loadingMessages = [
     "Estamos verificando tu identidad, por favor espera un momento...",
@@ -288,7 +301,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
             documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
             ladoDocumento,
-            tipoDocumento,
+            tipoDocumento: tipoDocumentoNormalizado,
             imagenPersona: informacion.foto_persona,
             country: informacionFirmador.pais,
             tries: conteo,
@@ -318,7 +331,8 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
-    const type = conversor(data.tipoDocumento);
+    const type = normalizeTipoDocumento(data.tipoDocumento || tipoDocumentoNormalizado);
+    data.tipoDocumento = type;
     // 1. Registro de inicio (Log)
     try {
       await axios.post(
@@ -352,8 +366,9 @@ export const FormularioDocumento: React.FC<Props> = ({
 
     // --- BLOQUE DETECTION (El que fallaba) ---
     try {
+      const typeForDetection = conversor(type);
       const resDetection = await api.post(
-        `${URLS.detection}?documento=${type}&lado=${placeholder.toUpperCase()}`,
+        `${URLS.detection}?documento=${typeForDetection}&lado=${placeholder.toUpperCase()}`,
         { image: data.imagen, country: data.country });
 
       const resData = resDetection.data;
