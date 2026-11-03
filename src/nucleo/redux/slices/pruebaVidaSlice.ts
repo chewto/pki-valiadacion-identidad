@@ -36,7 +36,10 @@ export const pruebaVidaSlice = createSlice({
         state.framesCount = framesCount || allFrames.length;
       }
     },
-    setFaceIndicator: (state, action: PayloadAction<any>) => {
+    setFaceIndicator: (
+      state,
+      action: PayloadAction<{ x: number; y: number; rx: number; ry: number }>
+    ) => {
       const { x, y, rx, ry } = action.payload;
 
       console.log("SET FACE INDICATOR:", { x, y, rx, ry });

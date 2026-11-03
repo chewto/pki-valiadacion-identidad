@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { URLS } from "../../nucleo/api-urls/urls";
 import "../../styles/selfie-movil.component.css";
@@ -59,7 +58,6 @@ export const ValidacionVida: React.FC<Props> = ({
   
     // handleStartRecording();
     handleOpenCamera();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleOpenCamera = async () => {

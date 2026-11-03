@@ -73,6 +73,28 @@
   background: #167a21;
 }
 
+.loading-progress {
+  width: 100%;
+  max-width: 350px;
+  margin: 15px auto 0;
+  text-align: center;
+}
+
+.loading-message {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.35;
+  margin: 0 0 4px;
+}
+
+.loading-elapsed {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+
 .loading-grid {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -83,6 +105,19 @@
   width: 100%;
   max-width: 350px;
   margin: 15px auto;
+}
+
+.step-error {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #b91c1c;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .loading-indicator {

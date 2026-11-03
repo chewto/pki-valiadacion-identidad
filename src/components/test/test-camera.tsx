@@ -3,9 +3,20 @@ import axios from 'axios';
 import { URLS } from '@nucleo/api-urls/urls';
 import { getCountry } from '@nucleo/hooks/useCountry';
 
+interface FrameClass {
+  label: string;
+  crop: string;
+}
+
+interface FrameResult {
+  frame: number | string;
+  documentDetected: boolean;
+  classes: FrameClass[];
+}
+
 interface TestCameraProps {
   totalTime: number;
-  framesResults: any[];
+  framesResults: FrameResult[];
 }
 
 const TestCamera: React.FC = () => {
@@ -34,7 +45,7 @@ const TestCamera: React.FC = () => {
           console.error('Error al obtener datos del video:', error);
         });
     }
-  }, [videoPath]);
+  }, [videoPath, intervalo, tipoDocumento, ladoDocumento]);
 
   useEffect(() => {
     if (res) {
@@ -177,11 +188,11 @@ const TestCamera: React.FC = () => {
       <div className='flex flex-col items-center w-2/4'>
         {res.framesResults && (
           <>
-          {res.framesResults.map((frame: any, index: number) => (
+          {res.framesResults.map((frame, index: number) => (
             <div key={index} style={{ marginTop: '10px', padding: '10px', border: `1px solid ${frame.documentDetected ? '#00ff00' : '#ff0000'}`, borderRadius: '8px'}}>
               <p><strong>frame: {frame.frame} | documento valido: {frame.documentDetected ? 'Sí' : 'No'}</strong></p> 
               <div className='flex flex-wrap'>
-                {frame.classes.length > 0 ? frame.classes.map((cls: any, idx:number) => (
+                {frame.classes.length > 0 ? frame.classes.map((cls, idx:number) => (
                   <div className='flex flex-col ' key={idx}>
                     <span >{cls.label}</span>
                     <img src={cls.crop} className='w-3/4' alt={cls.label} />

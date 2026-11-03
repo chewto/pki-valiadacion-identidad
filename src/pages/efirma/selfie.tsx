@@ -93,7 +93,7 @@ const Selfie: React.FC<Props> = ({
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.log(err);
       }
     };

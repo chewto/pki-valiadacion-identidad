@@ -119,7 +119,7 @@ export default function BarcodeCapture() {
     }
   };
 
-  const readBarcode = (body: any) => {
+  const readBarcode = (body: unknown) => {
     axios
       .post(`${URLS.testBarcode}?id=1`, body)
       .then((res) => {
@@ -132,6 +132,9 @@ export default function BarcodeCapture() {
 
   useEffect(() => {
     iniciarCamara();
+    // La cámara se inicializa una sola vez; iniciarCamara no es memoizable sin
+    // alterar el ciclo de vida actual del componente.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -142,11 +145,14 @@ export default function BarcodeCapture() {
     <div className="">
       <div className="bg-white p-6 flex justify-center ">
         <div className="absolute flex z-20">
-          {types.map((type: any) => (
+          {types.map((type) => (
             <button
+              type="button"
               onClick={() => {
                 setType(type.label);
-                setRectangle(type.barcode);
+                if (type.barcode) {
+                  setRectangle(type.barcode);
+                }
               }}
               className="text-xs"
             >

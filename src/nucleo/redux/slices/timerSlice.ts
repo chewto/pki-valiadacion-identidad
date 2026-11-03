@@ -9,7 +9,7 @@ interface selfieTime {
 interface documentTime {
   ocrTime: number;
   recognizeTime: number;
-  innerTimes: any;
+  innerTimes: Record<string, unknown>;
 }
 
 interface TimerState {

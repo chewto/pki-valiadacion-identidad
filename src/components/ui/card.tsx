@@ -1,4 +1,6 @@
 import '@styles/card.css'
+import type { MouseEvent } from 'react'
+
 interface Props{
   children: JSX.Element[] | JSX.Element;
   isBlocked: boolean;
@@ -6,7 +8,7 @@ interface Props{
 
 export default function Card({children, isBlocked}:Props) {
 
-  const handleClick = (e:any) => {
+  const handleClick = (e: MouseEvent<HTMLElement>) => {
     if(isBlocked){
       e.preventDefault()
     }

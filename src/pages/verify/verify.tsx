@@ -22,7 +22,7 @@ export default function Verify() {
     } catch (e) {
       console.log(e);
     }
-  }, []);
+  }, [payload]);
 
   useEffect(() => {
     // Autoenvía el formulario en cuanto se monte el componente

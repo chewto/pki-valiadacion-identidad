@@ -222,8 +222,6 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     //     dispatch(setLivenessTest({ data: res.data.validacionVida }));
     //   });
     // }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jwt.token]);
 
   useEffect(() => {
@@ -773,7 +771,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
   const useKeyboardBlocker = () => {
     useEffect(() => {
-      const handleKeyDown = (event: any) => {
+      const handleKeyDown = (event: KeyboardEvent) => {
         // Bloquear F12
         if (event.key === "F12") {
           event.preventDefault();
@@ -805,7 +803,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
     }, []); // El array vacío asegura que solo se monte y desmonte una vez
   };
 
-  const handleContextMenu = (e: React.MouseEvent<any>) => {
+  const handleContextMenu = (e: React.MouseEvent<HTMLElement>) => {
     if (!isDevMode) {
       e.preventDefault();
     }

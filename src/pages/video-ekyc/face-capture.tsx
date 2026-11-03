@@ -36,6 +36,8 @@ export default function FaceCapture() {
       socket.off("video_frame");
       socket.off("disconnect");
     };
+    // El socket se crea fuera del efecto; agregarlo reiniciaría la conexión.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

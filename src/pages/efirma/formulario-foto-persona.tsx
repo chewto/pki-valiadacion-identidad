@@ -33,6 +33,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
 
   useEffect(() => {
     setContinuarBoton(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [success, setSuccess] = useState<boolean>(false);
@@ -70,6 +71,7 @@ export const FormularioFotoPersona: React.FC<Props> = ({
         nextStep()
       }, 700)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [success, setSuccess])
 
   useEffect(() => {

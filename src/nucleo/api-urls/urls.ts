@@ -33,7 +33,7 @@ const URL = import.meta.env.VITE_BASE_URL;
 // const countryUrls = getCountryServiceUrls();
 
 // URLs del back centralizado (mismo dominio para todos los países)
-const urlBase = `${URL}/python`;
+const urlBase = `${URL}`;
 const rejected = `${URL}/resultado_validacion_fallida`;
 const livenesstest = `${URL}/validacion-vida`;
 
@@ -80,7 +80,7 @@ export const URLS = {
   entityBranding: `${urlBase}/logo-entidad/get`,
   frontValidation: `${urlBase}/document/front`,
   backValidation: `${urlBase}/document/back`,
-  saveVideo: `${URL}/fe-val-back/api/Video/`,
+  saveVideo: `${urlBase}/upload-video`,
   ocr: `https://colombia.efirmaplus.com/validacion-ocr-back/ocr`
 }
 

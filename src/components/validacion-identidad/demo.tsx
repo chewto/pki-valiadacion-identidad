@@ -13,7 +13,7 @@ export default function Demo({ side, handleNext }: Props) {
 
   useEffect(() => {
     console.log(side)
-  }, [informacion])
+  }, [informacion, side])
 
   const svgPath = side === 'face' ?  `/svg/${side}.svg` : `/svg/${side}_${informacion.tipoDocumento.replace(/\s+/g, '_').toLowerCase()}.svg`;
   // return (<div>demo funcionando {side} {informacion.tipoDocumento}</div>)

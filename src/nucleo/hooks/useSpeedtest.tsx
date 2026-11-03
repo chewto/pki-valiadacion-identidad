@@ -58,10 +58,11 @@ export const useSpeedTest = () => {
       if (response.body) {
         const reader = response.body.getReader();
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value) receivedLength += value.length;
+        let done = false;
+        while (!done) {
+          const chunk = await reader.read();
+          done = chunk.done;
+          if (chunk.value) receivedLength += chunk.value.length;
         }
       } else {
         // Fallback if stream not available
@@ -75,8 +76,9 @@ export const useSpeedTest = () => {
       const mbps = (bits / 1024 / 1024) / Math.max(durationSecs, 1e-6);
       const roundedMbps = Number(mbps.toFixed(2));
       return { down: roundedMbps, secsDown: durationSecs };
-    } catch (err: any) {
-      console.log(`Error downloading: ${err?.message ?? err}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`Error downloading: ${message}`);
       return { down: 0, secsDown: 0 };
     }
   }

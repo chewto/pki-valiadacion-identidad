@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import "@styles/styles.css";
 import "@styles/selfie-movil.component.css";
 import "@styles/formulario-style.component.css";
@@ -30,6 +30,9 @@ import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
 import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
 import api from "@nucleo/api-urls/api";
+import type { ValidationFeedback } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import { normalizeValidationFeedback, shouldAutoAdvanceAfterValidation } from "../../nucleo/services/validation-feedback.service";
+import { ValidationFeedbackPanel } from "../../components/ui/validation-feedback-panel";
 // import Camera from '@pages/efirma/nueva-camara'
 
 
@@ -42,6 +45,44 @@ const normalizeTipoDocumento = (doc?: string): string => {
     .replace(/\s+/g, " ")
     .trim();
 };
+
+const loadingMessages = [
+  "Estamos verificando tu identidad, por favor espera un momento...",
+  "Analizando el documento, esto tomará solo unos segundos.",
+  "Extrayendo la información, por favor no cierres esta ventana.",
+  "Comprobando la autenticidad del documento.",
+  "Leyendo datos como nombre, número de documento y fecha de nacimiento.",
+  "Comparando la información extraída con nuestros registros.",
+  "Verificando la calidad de la imagen del documento.",
+  "Asegurándonos de que el documento esté vigente y legible.",
+  "Casi terminamos, estamos haciendo las últimas comprobaciones.",
+];
+
+const FEEDBACK_AUTO_ADVANCE_MS = 2000;
+
+type RequestStatus = {
+  loading: boolean;
+  error: boolean;
+  success: boolean | null;
+};
+
+const createRequestStatus = (): RequestStatus => ({
+  loading: true,
+  error: false,
+  success: null,
+});
+
+const requestSucceeded = (): RequestStatus => ({
+  loading: false,
+  error: false,
+  success: true,
+});
+
+const requestFailed = (): RequestStatus => ({
+  loading: false,
+  error: true,
+  success: false,
+});
 
 interface Props {
   id: string | number | null | undefined;
@@ -102,14 +143,20 @@ export const FormularioDocumento: React.FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [isCorrupted, setIsCorrupted] = useState<boolean>(false);
-  const [messages, setMessages] = useState<string[]>([]);
-  console.log(messages)
+  const [feedback, setFeedback] = useState<ValidationFeedback | null>(null);
   const [retry, setRetry] = useState<boolean>(false);
-  const [reqMessage, setReqMessage] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
 
   const [seconds, setSeconds] = useState<number>(5);
   const [disabled, setDisabled] = useState(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const lastPayloadRef = useRef<any>(null);
+  const autoAdvanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Evita que dos intentos de validación se ejecuten en paralelo.
+  const inFlightRef = useRef(false);
+  // Identifica el intento actual para no pisar el estado de uno más nuevo.
+  const attemptIdRef = useRef(0);
+  const feedbackId = "document-validation-feedback";
 
   useEffect(() => {
     // Si el modal no está visible, reseteamos todo y no ejecutamos el timer
@@ -133,22 +180,20 @@ export const FormularioDocumento: React.FC<Props> = ({
     }
   }, [showModal, seconds]);
 
-  const [ocrReq, setOcrReq] = useState<{
-    loading: boolean;
-    error: boolean;
-    success: boolean | null;
-  }>({ loading: true, error: false, success: null });
-  const [detectionReq, setDetectionReq] = useState<{
-    loading: boolean;
-    error: boolean;
-    success: boolean | null;
-    data: any;
-  }>({ loading: true, error: false, success: null, data: {} });
-  const [validationReq, setValidationReq] = useState<{
-    loading: boolean;
-    error: boolean;
-    success: boolean | null;
-  }>({ loading: true, error: false, success: null });
+  const [ocrReq, setOcrReq] = useState<RequestStatus>(createRequestStatus());
+  const [detectionReq, setDetectionReq] = useState<RequestStatus & { data: any }>({
+    ...createRequestStatus(),
+    data: {},
+  });
+  const [validationReq, setValidationReq] = useState<RequestStatus>(
+    createRequestStatus()
+  );
+
+  const resetRequestStatuses = () => {
+    setOcrReq(createRequestStatus());
+    setDetectionReq({ ...createRequestStatus(), data: {} });
+    setValidationReq(createRequestStatus());
+  };
 
   const mobile: boolean = useMobile();
 
@@ -167,43 +212,35 @@ export const FormularioDocumento: React.FC<Props> = ({
     return DOCUMENT_MAPPING[document as DocumentType];
   };
 
-  const loadingMessages = [
-    "Estamos verificando tu identidad, por favor espera un momento...",
-    "Analizando el documento, esto tomará solo unos segundos.",
-    "Extrayendo la información, por favor no cierres esta ventana.",
-    "Comprobando la autenticidad del documento.",
-    "Leyendo datos como nombre, número de documento y fecha de nacimiento.",
-    "Comparando la información extraída con nuestros registros.",
-    "Verificando la calidad de la imagen del documento.",
-    "Asegurándonos de que el documento esté vigente y legible.",
-    "Casi terminamos, estamos haciendo las últimas comprobaciones.",
-  ];
-
-  const [_, setLoadingMessageIndex] = useState(0);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (loading) {
+    if (!loading) {
       setLoadingMessageIndex(0);
-      setReqMessage(loadingMessages[0]);
-      interval = setInterval(() => {
-        setLoadingMessageIndex((prev) => {
-          const nextIndex = prev < loadingMessages.length - 1 ? prev + 1 : prev;
-          setReqMessage(loadingMessages[nextIndex]);
-          return nextIndex;
-        });
-      }, 2000);
-    } else {
-      setLoadingMessageIndex(0);
-      setReqMessage("");
-      console.log(reqMessage);
+      setElapsedSeconds(0);
+      return;
     }
+
+    setLoadingMessageIndex(0);
+    setElapsedSeconds(0);
+
+    // El contador demuestra que el proceso sigue vivo aunque la red tarde.
+    const elapsedTimer = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+
+    const messageTimer = setInterval(() => {
+      setLoadingMessageIndex((prev) =>
+        prev < loadingMessages.length - 1 ? prev + 1 : prev
+      );
+    }, 3000);
+
     return () => {
-      if (interval) clearInterval(interval);
+      clearInterval(elapsedTimer);
+      clearInterval(messageTimer);
     };
   }, [loading]);
-
-  // Replace reqMessage with loadingMessages[loadingMessageIndex] in the UI where loading is shown
 
   const verificarOrientacion = () => {
     if (window.matchMedia("(orientation: landscape)").matches) {
@@ -250,39 +287,91 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     // setConteo(1);
     setSuccess(false);
+    setFeedback(null);
+    setError(false);
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
   }, [ladoDocumento]);
+
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimerRef.current) {
+        clearTimeout(autoAdvanceTimerRef.current);
+      }
+    };
+  }, []);
+
+  const clearPendingAutoAdvance = () => {
+    if (autoAdvanceTimerRef.current) {
+      clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  };
+
+  const scheduleAutoAdvance = () => {
+    clearPendingAutoAdvance();
+    autoAdvanceTimerRef.current = setTimeout(() => {
+      autoAdvanceTimerRef.current = null;
+      if (ladoDocumento === "reverso") {
+        setContinuarBoton(true);
+      }
+      nextStep();
+    }, FEEDBACK_AUTO_ADVANCE_MS);
+  };
+
+  /**
+   * Deja la UI en estado "procesando" antes de cualquier espera.
+   * Debe ejecutarse al inicio de cada intento para que un reintento no
+   * reutilice los checks/errores del intento anterior.
+   */
+  const beginAttempt = () => {
+    attemptIdRef.current += 1;
+    clearPendingAutoAdvance();
+    resetRequestStatuses();
+    setLoading(true);
+    setContinuarBoton(false);
+    setRetry(false);
+    setIsCorrupted(false);
+    setFeedback(null);
+    setError(false);
+    setSuccess(false);
+    return attemptIdRef.current;
+  };
 
   const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = event.target.files?.[0];
     if (!archivo) return;
 
     // Bloqueamos inmediatamente para evitar múltiples clicks/procesos
-    setLoading(true);
-    setContinuarBoton(false);
-    setRetry(false);
-    setIsCorrupted(false);
+    beginAttempt();
 
     const objectUrl = URL.createObjectURL(archivo);
     const img = new Image();
 
     img.onload = () => {
-      const canvas = document.createElement("canvas");
+      try {
+        const canvas = document.createElement("canvas");
 
-      // Límite de resolución razonable para eKYC
-      const MAX_WIDTH = 1200;
-      let width = img.width;
-      let height = img.height;
+        // Límite de resolución razonable para eKYC
+        const MAX_WIDTH = 1200;
+        let width = img.width;
+        let height = img.height;
 
-      if (width > MAX_WIDTH) {
-        height = (MAX_WIDTH * height) / width;
-        width = MAX_WIDTH;
-      }
+        if (width > MAX_WIDTH) {
+          height = (MAX_WIDTH * height) / width;
+          width = MAX_WIDTH;
+        }
 
-      canvas.width = width;
-      canvas.height = height;
+        canvas.width = width;
+        canvas.height = height;
 
-      const ctx = canvas.getContext("2d", { alpha: false }); // Deshabilitamos alpha para ahorrar memoria
-      if (ctx) {
+        const ctx = canvas.getContext("2d", { alpha: false }); // Deshabilitamos alpha para ahorrar memoria
+        if (!ctx) {
+          throw new Error("No se pudo obtener el contexto 2D del canvas");
+        }
+
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, width, height);
@@ -291,38 +380,42 @@ export const FormularioDocumento: React.FC<Props> = ({
         // pero el peso del string resultante baja drásticamente.
         const dataURLImage = canvas.toDataURL("image/jpeg", 0.8);
 
-        if (dataURLImage.length > 10) {
-          dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
-
-          const data = {
-            id: id,
-            imagen: dataURLImage,
-            nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
-            apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
-            documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
-            ladoDocumento,
-            tipoDocumento: tipoDocumentoNormalizado,
-            imagenPersona: informacion.foto_persona,
-            country: informacionFirmador.pais,
-            tries: conteo,
-            allFrames: ladoDocumento === "anverso" ? pruebaVida.allFrames : [],
-          };
-
-          validarDocumento(data);
-        } else {
-          setIsCorrupted(true);
-          setLoading(false);
+        if (dataURLImage.length <= 10) {
+          throw new Error("La imagen procesada quedó vacía");
         }
-      }
 
-      // 4. IMPORTANTE: Liberamos la memoria del objectUrl
-      URL.revokeObjectURL(objectUrl);
-      event.target.value = ""; // Limpiamos el input después de procesar
+        dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
+
+        const data = {
+          id: id,
+          imagen: dataURLImage,
+          nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
+          apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
+          documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
+          ladoDocumento,
+          tipoDocumento: tipoDocumentoNormalizado,
+          imagenPersona: informacion.foto_persona,
+          country: informacionFirmador.pais,
+          tries: conteo,
+          allFrames: ladoDocumento === "anverso" ? pruebaVida.allFrames : [],
+        };
+
+        void validarDocumento(data);
+      } catch (processingError) {
+        console.error("Error procesando la imagen del documento:", processingError);
+        setIsCorrupted(true);
+        setLoading(false);
+      } finally {
+        // 4. IMPORTANTE: Liberamos la memoria del objectUrl
+        URL.revokeObjectURL(objectUrl);
+        event.target.value = ""; // Limpiamos el input después de procesar
+      }
     };
 
     img.onerror = () => {
       setLoading(false);
       setIsCorrupted(true);
+      resetRequestStatuses();
       URL.revokeObjectURL(objectUrl);
       event.target.value = ""; // Limpiamos el input si hay error
     };
@@ -331,199 +424,257 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const validarDocumento = async (data: any) => {
-    const type = normalizeTipoDocumento(data.tipoDocumento || tipoDocumentoNormalizado);
-    data.tipoDocumento = type;
-    // 1. Registro de inicio (Log)
-    try {
-      await axios.post(
-        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio&country=${getCountry()}`,
-      );
-    } catch (e) {
-      console.error("Error logging start:", e);
-    }
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
 
-    // 2. Estado inicial
-    setTriesCounter((state) => state - 1);
-    const startPerformance = performance.now();
-    setError(false);
-    setLoading(true);
-
-    // --- BLOQUE OCR ---
-    const ocrTimeStart = Date.now();
-    let durationOcr = 0;
+    // Reinicia checks/errores y muestra el progreso ANTES de la primera espera.
+    const attemptId = beginAttempt();
 
     try {
-      const resOcr = await axios.post(`${URLS.ocr}?country=${getCountry()}`, { image: data.imagen });
-      durationOcr = Date.now() - ocrTimeStart;
-      data["ocr"] = resOcr.data.ocr;
-      data["textAngle"] = resOcr.data.textAngle;
-      setOcrReq({ ...ocrReq, loading: false, success: true });
-    } catch (error) {
-      console.error("OCR Error:", error);
-      setOcrReq({ ...ocrReq, error: true, success: false });
-      // Si el OCR es crítico, podrías poner un return aquí
-    }
+      const type = normalizeTipoDocumento(data.tipoDocumento || tipoDocumentoNormalizado);
+      data.tipoDocumento = type;
 
-    // --- BLOQUE DETECTION (El que fallaba) ---
-    try {
-      const typeForDetection = conversor(type);
-      const resDetection = await api.post(
-        `${URLS.detection}?documento=${typeForDetection}&lado=${placeholder.toUpperCase()}`,
-        { image: data.imagen, country: data.country });
-
-      const resData = resDetection.data;
-
-      setConteo((prev) => prev + 1);
-      setMainCounter((prev) => prev + 1);
-
-      if (ladoDocumento === "anverso") {
-        dispatch(setFrontDetection());
+      // 1. Registro de inicio (Log)
+      try {
+        await axios.post(
+          `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=inicio&country=${getCountry()}`,
+        );
+      } catch (e) {
+        console.error("Error logging start:", e);
       }
 
-      if (ladoDocumento === "reverso") {
-        dispatch(setBackDetection());
+      // 2. Estado inicial
+      setTriesCounter((state) => state - 1);
+      const startPerformance = performance.now();
+      lastPayloadRef.current = data;
+
+      // --- BLOQUE OCR ---
+      const ocrTimeStart = Date.now();
+      let durationOcr = 0;
+
+      try {
+        const resOcr = await axios.post(`${URLS.ocr}?country=${getCountry()}`, { image: data.imagen });
+        durationOcr = Date.now() - ocrTimeStart;
+        data["ocr"] = resOcr.data.ocr;
+        data["textAngle"] = resOcr.data.textAngle;
+        setOcrReq(requestSucceeded());
+      } catch (error) {
+        console.error("OCR Error:", error);
+        setOcrReq(requestFailed());
+        // Si el OCR es crítico, podrías poner un return aquí
       }
 
+      // --- BLOQUE DETECTION (El que fallaba) ---
+      try {
+        const typeForDetection = conversor(type);
+        const resDetection = await api.post(
+          `${URLS.detection}?documento=${typeForDetection}&lado=${placeholder.toUpperCase()}`,
+          { image: data.imagen, country: data.country });
 
-      if (!resData.documentoValido) {
-        setDetectionReq({
-          ...detectionReq,
-          loading: false,
-          success: false,
-          data: resData,
-        });
-        const triesDetect = tries - 1;
-        if (conteo <= triesDetect) {
-          setLoading(false);
-          setRetry(true);
-          setOcrReq({ loading: true, error: false, success: null });
+        const resData = resDetection.data;
+
+        setConteo((prev) => prev + 1);
+        setMainCounter((prev) => prev + 1);
+
+        if (ladoDocumento === "anverso") {
+          dispatch(setFrontDetection());
+        }
+
+        if (ladoDocumento === "reverso") {
+          dispatch(setBackDetection());
+        }
+
+        if (!resData.documentoValido) {
           setDetectionReq({
-            loading: true,
+            loading: false,
             error: false,
-            success: null,
-            data: {},
+            success: false,
+            data: resData,
           });
-          setShowModal(true);
-          return; // <--- AHORA SÍ FINALIZA LA FUNCIÓN AQUÍ
+          const triesDetect = tries - 1;
+          if (conteo <= triesDetect) {
+            setRetry(true);
+            setShowModal(true);
+            return; // El finally exterior apaga el loading y libera el intento
+          }
+        } else {
+          setDetectionReq({
+            loading: false,
+            error: false,
+            success: true,
+            data: resData,
+          });
         }
+      } catch (error) {
+        console.error("Detection Error:", error);
+        setDetectionReq({
+          loading: false,
+          error: true,
+          success: false,
+          data: {},
+        });
+        // Si falla la detección, no tiene sentido seguir
       }
 
-      setDetectionReq({ ...detectionReq, loading: false, success: true });
-    } catch (error) {
-      console.error("Detection Error:", error);
-      setDetectionReq({ ...detectionReq, error: true, success: false });
-      // setLoading(false);
-      // return; // Si falla la detección, no tiene sentido seguir
-    }
+      // --- BLOQUE VALIDACIÓN ---
+      const validationTimeStart = Date.now();
+      let durationValidation = 0;
 
-    // --- BLOQUE VALIDACIÓN ---
-    const validationTimeStart = Date.now();
-    let durationValidation = 0;
+      const urlValidacion =
+        ladoDocumento === "anverso"
+          ? useModel
+            ? URLS.frontValidation
+            : URLS.validarDocumentoAnverso
+          : useModel
+            ? URLS.backValidation
+            : URLS.validarDocumentoReverso;
 
-    const urlValidacion =
-      ladoDocumento === "anverso"
-        ? useModel
-          ? URLS.frontValidation
-          : URLS.validarDocumentoAnverso
-        : useModel
-          ? URLS.backValidation
-          : URLS.validarDocumentoReverso;
+      setValidationReq(createRequestStatus());
 
-    try {
-      const resValidacion = await api.post(urlValidacion, data);
-      durationValidation = Date.now() - validationTimeStart;
+      try {
+        const resValidacion = await api.post(urlValidacion, data);
+        durationValidation = Date.now() - validationTimeStart;
 
-      const resData = resValidacion.data;
-      const adviceMessages = resData.messages;
+        const resData = resValidacion.data;
+        const validationFeedback = normalizeValidationFeedback(resData);
+        // triesCounter conserva el valor previo al descuento de este intento.
+        const attemptsRemaining = Math.max(0, triesCounter - 1);
 
-      // Lógica para ANVERSO
+        // Lógica para ANVERSO
+        if (ladoDocumento === "anverso") {
+          dispatch(setValidacionOCR(resData));
+          dispatch(setValidacionCodigoBarras(resData));
+          dispatch(setValidacionMRZ(resData.mrz));
+          dispatch(setValidacionRostro(resData));
+          dispatch(setFrontSide(resData.document));
+          dispatch(setFrontResult({ sideResult: validationFeedback.canContinue }));
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
+
+          // Usar bestFrame como foto de evidencia (selfie) si está disponible
+          if (resData.bestFrame) {
+            dispatch(setFotos({ labelFoto: "foto_persona", data: resData.bestFrame }));
+          }
+
+          if (validationFeedback.hasIssues) {
+            setFeedback(validationFeedback);
+            setRetry(true);
+            setContinuarBoton(false);
+            if (
+              shouldAutoAdvanceAfterValidation(
+                validationFeedback,
+                attemptsRemaining
+              )
+            ) {
+              scheduleAutoAdvance();
+            }
+          } else if (resData.face && resData.faceDetected && resData.validSide) {
+            setTimeout(() => nextStep(), 700);
+          } else if (conteo >= detectionTries) {
+            setRetry(false);
+            setSuccess(true);
+            setTimeout(() => nextStep(), 700);
+          }
+        }
+
+        // Lógica para REVERSO
+        if (ladoDocumento === "reverso") {
+          dispatch(setValidacionCodigoBarras(resData));
+          dispatch(setValidacionMRZ(resData.mrz));
+          dispatch(setBackSide(resData.document));
+          dispatch(setBackResult({ sideResult: validationFeedback.canContinue }));
+          dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
+
+          if (validationFeedback.hasIssues) {
+            setFeedback(validationFeedback);
+            setRetry(true);
+            setContinuarBoton(false);
+            if (
+              shouldAutoAdvanceAfterValidation(
+                validationFeedback,
+                attemptsRemaining
+              )
+            ) {
+              scheduleAutoAdvance();
+            }
+          } else if (resData.validSide) {
+            setContinuarBoton(true);
+            setTimeout(() => nextStep(), 700);
+          }
+        }
+
+        setValidationReq(requestSucceeded());
+      } catch (error) {
+        console.error("Validation Error:", error);
+        clearPendingAutoAdvance();
+        setValidationReq(requestFailed());
+        setFeedback(null);
+        setContinuarBoton(false);
+        setError(true);
+        setRetry(true);
+      } finally {
+        // La validación ya terminó: se libera el intento y se apaga el loading
+        // sin esperar al registro de tiempos, que es telemetría no crítica.
+        if (attemptIdRef.current === attemptId) {
+          inFlightRef.current = false;
+          setLoading(false);
+        }
+        const endPerformance = performance.now();
+        console.log(
+          `validarDocumento finalizó en ${(endPerformance - startPerformance).toFixed(2)} ms`,
+        );
+      }
+
+      // 3. Registro de fin y tiempos finales
+      try {
+        await axios.post(
+          `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin&country=${getCountry()}`,
+        );
+      } catch (e) {
+        console.error("Error logging end:", e);
+      }
+
+      const validationTimeData = {
+        ocrTime: Number((durationOcr / 1000).toFixed(2)),
+        recognizeTime: Number((durationValidation / 1000).toFixed(2)),
+        innerTimes: {},
+      };
+
       if (ladoDocumento === "anverso") {
-        dispatch(setValidacionOCR(resData));
-        dispatch(setValidacionCodigoBarras(resData));
-        dispatch(setValidacionMRZ(resData.mrz));
-        dispatch(setValidacionRostro(resData));
-        dispatch(setFrontSide(resData.document));
-        dispatch(setFrontResult({ sideResult: resData.validSide }));
-        dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
-
-        // Usar bestFrame como foto de evidencia (selfie) si está disponible
-        if (resData.bestFrame) {
-          dispatch(setFotos({ labelFoto: "foto_persona", data: resData.bestFrame }));
-        }
-
-        if (resData.face && resData.faceDetected && resData.validSide) {
-          setTimeout(() => nextStep(), 700);
-        } else if (!resData.validSide && conteo < detectionTries) {
-          setMessages((prev) => [...prev, ...adviceMessages]);
-          setConteo((prev) => prev + 1);
-          setRetry(true);
-        } else if (conteo >= detectionTries) {
-          setMessages([]);
-          setRetry(false);
-          setSuccess(true);
-          setTimeout(() => nextStep(), 700);
-        }
+        dispatch(setFrontTime(validationTimeData));
+      } else {
+        dispatch(setBackTime(validationTimeData));
       }
-
-      // Lógica para REVERSO
-      if (ladoDocumento === "reverso") {
-        dispatch(setValidacionCodigoBarras(resData));
-        dispatch(setValidacionMRZ(resData.mrz));
-        dispatch(setBackSide(resData.document));
-        dispatch(setBackResult({ sideResult: resData.validSide }));
-        dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
-
-        if (resData.validSide) {
-          setContinuarBoton(true);
-          setTimeout(() => nextStep(), 700);
-        } else if (!resData.validSide && conteo < detectionTries) {
-          setMessages((prev) => [...prev, ...adviceMessages]);
-          setRetry(true);
-          setConteo((prev) => prev + 1);
-          setMainCounter((prev) => prev + 1);
-        } else if (conteo >= detectionTries) {
-          setMessages([]);
-          setRetry(false);
-          setSuccess(true);
-          setContinuarBoton(true);
-          setTimeout(() => nextStep(), 700);
-        }
-      }
-
-      setValidationReq({ ...validationReq, loading: false });
-    } catch (error) {
-      console.error("Validation Error:", error);
-      setValidationReq({ ...validationReq, error: true });
-      setError(true);
-      setRetry(true);
     } finally {
-      setLoading(false);
-      const endPerformance = performance.now();
-      console.log(
-        `validarDocumento finalizó en ${(endPerformance - startPerformance).toFixed(2)} ms`,
-      );
+      // Red de seguridad para salidas tempranas (p. ej. documento inválido).
+      // Solo actúa si este intento sigue siendo el más reciente.
+      if (attemptIdRef.current === attemptId) {
+        inFlightRef.current = false;
+        setLoading(false);
+      }
     }
+  };
 
-    // 3. Registro de fin y tiempos finales
-    try {
-      await axios.post(
-        `${URLS.timeLogUpdate}?id=${times.id}&column=${ladoDocumento}&action=fin&country=${getCountry()}`,
-      );
-    } catch (e) {
-      console.error("Error logging end:", e);
+  const requestRecapture = () => {
+    if (loading || inFlightRef.current) return;
+    clearPendingAutoAdvance();
+    setFeedback(null);
+    setError(false);
+    setIsCorrupted(false);
+    setContinuarBoton(false);
+    setRetry(true);
+    fileInputRef.current?.click();
+  };
+
+  const retryLastValidation = () => {
+    if (loading || inFlightRef.current) return;
+    clearPendingAutoAdvance();
+    if (!lastPayloadRef.current) {
+      requestRecapture();
+      return;
     }
-
-    const validationTimeData = {
-      ocrTime: Number((durationOcr / 1000).toFixed(2)),
-      recognizeTime: Number((durationValidation / 1000).toFixed(2)),
-      innerTimes: {},
-    };
-
-    if (ladoDocumento === "anverso") {
-      dispatch(setFrontTime(validationTimeData));
-    } else {
-      dispatch(setBackTime(validationTimeData));
-    }
+    setFeedback(null);
+    setError(false);
+    void validarDocumento(lastPayloadRef.current);
   };
 
   return (
@@ -549,31 +700,6 @@ export const FormularioDocumento: React.FC<Props> = ({
           Intentos restantes: {triesCounter}{" "}
         </span>
       </div>
-      {/*       
-      {messages.length >= 1 && (
-        <Advertencia
-          titulo="Advertencia"
-          contenido="El documento no es valido, por favor, haga caso a los siguientes mensajes. Recuerde tomar las fotos con buena luz y claridad."
-          elemento={
-            <div>
-              <ul className="text-left p-0">
-                {messages.map((message: string, index: number) => (
-                  <li
-                    key={index}
-                    className="border-2 border-yellow-400 rounded-md my-1 px-2 py-0.5 text-lg bg-yellow-200"
-                  >
-                    {message}
-                  </li>
-                ))}
-
-              </ul>
-              <button onClick={() => setMessages([])} className="stepper-btn">
-                cerrar
-              </button>
-            </div>
-          }
-        />
-      )} */}
 
       {showModal && (
         <Advertencia
@@ -625,8 +751,29 @@ export const FormularioDocumento: React.FC<Props> = ({
       )}
 
       {error && (
-        <Alert color="danger">
-          Para terminar la validación contacte con Soporte.
+        <Alert color="danger" className="text-center">
+          <p className="mb-2">
+            No pudimos verificar el documento por un problema de conexión.
+            Revisa tu conexión e inténtalo de nuevo.
+          </p>
+          <div className="flex flex-col justify-center gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={retryLastValidation}
+              disabled={loading}
+              className="rounded-lg bg-red-700 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              Reintentar
+            </button>
+            <button
+              type="button"
+              onClick={requestRecapture}
+              disabled={loading}
+              className="rounded-lg border border-red-300 bg-white px-3 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400"
+            >
+              Volver a capturar documento
+            </button>
+          </div>
         </Alert>
       )}
 
@@ -638,19 +785,35 @@ export const FormularioDocumento: React.FC<Props> = ({
 
       {/* aria-live="polite": el lector de pantalla anuncia cambios de estado sin interrumpir */}
       <div aria-live="polite" role="status" className="sr-only">
-        {loading && 'Verificando documento, por favor espere.'}
         {!loading && success && 'Documento verificado correctamente.'}
         {error && 'Error al verificar el documento. Por favor intente de nuevo.'}
       </div>
 
       {loading && (
-        <div className="flex justify-center w-full">
+        <div className="flex flex-col items-center justify-center w-full">
+          <div className="loading-progress">
+            <p className="loading-message" role="status" aria-live="polite">
+              {loadingMessages[loadingMessageIndex]}
+            </p>
+            <p className="loading-elapsed">
+              Tiempo transcurrido: {elapsedSeconds}s
+            </p>
+          </div>
           <div className="loading-grid">
             {/* Fila 1 */}
-            <div className="loading-indicator">
+            <div className={`loading-indicator${ocrReq.loading ? " pending" : ""}`}>
               <span>Alineando documento</span>
               <div className="status-area">
                 {ocrReq.loading && <Spinner aria-label="Alineando documento" />}
+                {ocrReq.error && (
+                  <span
+                    className="step-error"
+                    role="img"
+                    aria-label="No se pudo alinear el documento"
+                  >
+                    !
+                  </span>
+                )}
                 {ocrReq.success && (
                   <span aria-label="Alineación completada">
                     <svg
@@ -671,10 +834,19 @@ export const FormularioDocumento: React.FC<Props> = ({
 
             {/* Fila 2 */}
             {tipoDocumento !== passport && (
-              <div className="loading-indicator">
+              <div className={`loading-indicator${detectionReq.loading ? " pending" : ""}`}>
                 <span>Identificando tipo de documento</span>
                 <div className="status-area">
                   {detectionReq.loading && <Spinner aria-label="Identificando tipo de documento" />}
+                  {detectionReq.error && (
+                    <span
+                      className="step-error"
+                      role="img"
+                      aria-label="No se pudo identificar el tipo de documento"
+                    >
+                      !
+                    </span>
+                  )}
                   {detectionReq.success && (
                     <span aria-label="Identificación completada">
                       <svg
@@ -695,10 +867,19 @@ export const FormularioDocumento: React.FC<Props> = ({
             )}
 
             {/* Fila 3 */}
-            <div className="loading-indicator">
+            <div className={`loading-indicator${validationReq.loading ? " pending" : ""}`}>
               <span>Procesando documento</span>
               <div className="status-area">
                 {validationReq.loading && <Spinner aria-label="Procesando documento" />}
+                {validationReq.error && (
+                  <span
+                    className="step-error"
+                    role="img"
+                    aria-label="No se pudo procesar el documento"
+                  >
+                    !
+                  </span>
+                )}
                 {validationReq.success && (
                   <span aria-label="Procesamiento completado">
                     <svg
@@ -720,6 +901,13 @@ export const FormularioDocumento: React.FC<Props> = ({
         </div>
       )}
 
+      {!loading && feedback && (
+        <ValidationFeedbackPanel
+          id={feedbackId}
+          feedback={feedback}
+        />
+      )}
+
       {ladoDocumento === "reverso" && tipoDocumento === passport ? (
         <></>
       ) : (
@@ -738,18 +926,21 @@ export const FormularioDocumento: React.FC<Props> = ({
                   <label
                     className="file-input text-center text-sm md:text-sm"
                     aria-label={`${retry ? 'Reintentar subir' : 'Subir'} foto del ${placeholder} de su ${tipoDocumento}`}
+                    aria-describedby={feedback ? feedbackId : undefined}
                     style={{
                       background: preview.length >= 1 ? "#00ba13" : "#0d6efd",
                     }}
                   >
                     <input
+                      ref={fileInputRef}
                       type="file"
                       accept="image/*"
                       capture="environment"
                       onChange={handleCapture}
-                      className="opacity-0 w-0"
+                      className="sr-only"
                       disabled={loading}
-                      aria-hidden="true"
+                      aria-describedby={feedback ? feedbackId : undefined}
+                      aria-invalid={feedback ? true : undefined}
                     />
                     {preview.length <= 0 &&
                       `Subir foto del ${placeholder} de su ${tipoDocumento}`}
@@ -764,6 +955,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           {!mobile && !success && (
             <label
               className="file-input"
+              aria-describedby={feedback ? feedbackId : undefined}
               aria-label={
                 retry && !continuarBoton
                   ? `Reintentar subir foto del ${placeholder} de su ${tipoDocumento}`
@@ -776,13 +968,15 @@ export const FormularioDocumento: React.FC<Props> = ({
               }}
             >
               <input
+                ref={fileInputRef}
                 name={ladoDocumento}
                 type="file"
                 accept="image/jpeg"
                 onChange={handleCapture}
-                style={{ display: "none" }}
+                className="sr-only"
                 disabled={loading}
-                aria-hidden="true"
+                aria-describedby={feedback ? feedbackId : undefined}
+                aria-invalid={feedback ? true : undefined}
               />
               {preview.length <= 0 &&
                 `Subir foto del ${placeholder} de su ${tipoDocumento}`}

@@ -25,7 +25,7 @@ export const CodigoQR: React.FC = () => {
         setLoading(false);
         setQrValue(`${URLS.qrBase}/${res.data.enlace}`);
       })
-  }, [])
+  }, [idSigner])
 
   return (
     <div className="bg-white absolute shadow-xl rounded-lg left-0 bottom-0 mx-2 my-2 p-3 h-auto qr-container flex flex-col items-center">

@@ -5,7 +5,7 @@ export const normalizeDocumento = (documento: string) => {
   const numeros: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 
   for (let index = 0; index < normalizacion.length; index++) {
-    let numero = normalizacion[index];
+    const numero = normalizacion[index];
 
     if (numeros.includes(numero)) {
       documentoLimpio += numero;

@@ -22,5 +22,5 @@ export const useValidationRedirect = (
         navigate(`${pageNav}?${searchParams}`);
       }
     });
-  }, []);
+  }, [idUser, navigate, searchParams, validationName]);
 };

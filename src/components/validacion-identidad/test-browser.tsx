@@ -11,7 +11,7 @@ export default function TestBrowser() {
   useEffect(() => {
     console.log(isSafari, isIOS);
     console.log(isChrome, isAndroid);
-  }, []);
+  }, [isAndroid, isChrome, isIOS, isSafari]);
 
   return (
     <div>

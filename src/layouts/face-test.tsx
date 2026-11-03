@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useRef, useEffect, useState, SetStateAction, Dispatch } from "react";
 import * as faceapi from "face-api.js";
 // import faceTemplate from "/face_template_OK.png"; // RUTA DE TU IMAGEN
@@ -75,6 +73,7 @@ const FaceDetection: React.FC<Props> = ({
   useEffect(() => {
     console.log("isMobile:", isMobile);
     console.log(handleDetectionLoop, MODEL_URL);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobile]);
 
   useEffect(() => {
@@ -157,6 +156,7 @@ const FaceDetection: React.FC<Props> = ({
     }, adviceSeconds);
     // if (!isCenteredAndOk) {
     // }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 3. CARGA INICIAL
@@ -180,6 +180,7 @@ const FaceDetection: React.FC<Props> = ({
       window.removeEventListener("resize", handleResize);
       if (stream) stream.getTracks().forEach((track) => track.stop());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // useEffect(() => {
@@ -390,6 +391,7 @@ const FaceDetection: React.FC<Props> = ({
       chunks = [];
     };
     setMediaRecorder(recorder);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream]);
 
   const getBlockReason = () => {

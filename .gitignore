@@ -24,3 +24,5 @@ docs/
 *.sln
 *.sw?
 .env
+.env.development
+.env.local

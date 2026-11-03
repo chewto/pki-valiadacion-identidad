@@ -1,3 +1,51 @@
+export type MismatchField = "name" | "lastName" | "ID";
+export type MismatchSource = "ocr" | "mrz";
+export type FieldIssueKind = "mismatch" | "unreadable";
+
+export interface MismatchItem {
+  field: MismatchField;
+  label?: string;
+  source?: MismatchSource;
+  message?: string;
+  percentage?: number;
+  threshold?: number;
+}
+
+export interface FieldIssue {
+  field: MismatchField;
+  label: string;
+  source: MismatchSource;
+  message: string;
+  apiMessage?: string;
+  percentage?: number;
+  threshold?: number;
+  kind: FieldIssueKind;
+}
+
+export interface ValidationFeedback {
+  hasIssues: boolean;
+  hasMismatch: boolean;
+  tone: "success" | "warning" | "error";
+  canContinue: boolean;
+  fieldIssues: FieldIssue[];
+  generalMessages: string[];
+}
+
+export interface DocumentValidationResponse {
+  validSide?: boolean;
+  messages?: string[] | null;
+  hasMismatch?: boolean;
+  mismatches?: MismatchItem[] | null;
+  ocr?: {
+    data?: Partial<Record<MismatchField, string>>;
+    percentage?: Partial<Record<MismatchField, number | string>>;
+  } | null;
+  mrz?: {
+    data?: Partial<Record<MismatchField, string>>;
+  } | null;
+  [key: string]: unknown;
+}
+
 export interface PruebaVida{
   movimiento: string;
   videoHash: string;
@@ -48,7 +96,7 @@ export interface ValidacionDocumento {
   ocr: OCR;
   face: boolean;
   confidence: number;
-  documentFace: any[] | null;
+  documentFace: unknown[] | null;
   mrz: MRZ;
   barcode: string | null;
   sideResult: {

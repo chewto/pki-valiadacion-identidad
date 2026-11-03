@@ -33,5 +33,5 @@ export const useApproved = () => {
 
       navigate(newUrl);
     }
-  }, []);
+  }, [approvedParam, navigate]);
 };
