@@ -222,7 +222,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   };
 
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [ocrPercent, setOcrPercent] = useState(0);
 
   // Ignora eventos de la otra cara del documento en la misma sala.
@@ -249,17 +248,11 @@ export const FormularioDocumento: React.FC<Props> = ({
   useEffect(() => {
     if (!loading) {
       setLoadingMessageIndex(0);
-      setElapsedSeconds(0);
       return;
     }
 
     setLoadingMessageIndex(0);
-    setElapsedSeconds(0);
 
-    // El contador demuestra que el proceso sigue vivo aunque la red tarde.
-    const elapsedTimer = setInterval(() => {
-      setElapsedSeconds((prev) => prev + 1);
-    }, 1000);
 
     const messageTimer = setInterval(() => {
       setLoadingMessageIndex((prev) =>
@@ -268,7 +261,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     }, 3000);
 
     return () => {
-      clearInterval(elapsedTimer);
       clearInterval(messageTimer);
     };
   }, [loading]);
@@ -864,9 +856,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             {visibleOcrProgress && (
               <p className="loading-percent">{ocrPercent}%</p>
             )}
-            {/* <p className="loading-elapsed">
-              Tiempo transcurrido: {elapsedSeconds}s
-            </p> */}
+           
           </div>
           <div className="loading-grid">
             {/* Fila 1 */}
