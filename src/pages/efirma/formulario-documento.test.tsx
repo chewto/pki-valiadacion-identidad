@@ -105,6 +105,44 @@ const mockDocumentRequests = (
   };
 };
 
+class MockWebSocket {
+  static readonly CONNECTING = 0;
+  static readonly OPEN = 1;
+  static readonly CLOSING = 2;
+  static readonly CLOSED = 3;
+  static instances: MockWebSocket[] = [];
+
+  readyState: number = MockWebSocket.CONNECTING;
+  closed = false;
+  onopen: ((event: Event) => void) | null = null;
+  onmessage: ((event: { data: string }) => void) | null = null;
+  onerror: ((event: Event) => void) | null = null;
+  onclose: ((event: Event) => void) | null = null;
+
+  constructor(public readonly url: string) {
+    MockWebSocket.instances.push(this);
+  }
+
+  open() {
+    this.readyState = MockWebSocket.OPEN;
+    this.onopen?.(new Event("open"));
+  }
+
+  emit(payload: unknown) {
+    this.onmessage?.({ data: JSON.stringify(payload) });
+  }
+
+  close() {
+    this.closed = true;
+    this.readyState = MockWebSocket.CLOSED;
+    this.onclose?.(new Event("close"));
+  }
+
+  send() {
+    // Sin efecto: los eventos se emiten desde el test.
+  }
+}
+
 class MockImage {
   width = 100;
   height = 100;
@@ -126,7 +164,9 @@ beforeEach(() => {
   axiosPost.mockReset();
   apiPost.mockReset();
   axiosPost.mockResolvedValue({ data: {} });
+  MockWebSocket.instances = [];
 
+  vi.stubGlobal("WebSocket", MockWebSocket);
   vi.stubGlobal("Image", MockImage);
   HTMLCanvasElement.prototype.getContext = vi.fn(
     () => canvasContext
@@ -283,6 +323,158 @@ describe("FormularioDocumento - progreso al reintentar", () => {
     await waitFor(() =>
       expect(screen.queryByText(/Tiempo transcurrido:/)).toBeNull()
     );
+    expect(
+      await screen.findByText(/No pudimos verificar el documento/)
+    ).toBeTruthy();
+  });
+});
+
+describe("FormularioDocumento - progreso WebSocket OCR", () => {
+  it("abre el socket antes del POST, refleja los pasos y lo cierra al completar", async () => {
+    const validation = createDeferred<never>();
+    let socketExistedBeforeValidation = false;
+
+    apiPost.mockImplementation((url: string) => {
+      if (url.includes("/document/detection")) {
+        return Promise.resolve({ data: { documentoValido: true } });
+      }
+      if (url.includes("/document/front")) {
+        socketExistedBeforeValidation = MockWebSocket.instances.length > 0;
+        return validation.promise;
+      }
+      return Promise.reject(new Error(`URL inesperada: ${url}`));
+    });
+
+    const { container } = renderFormulario();
+    fireEvent.change(fileInputFrom(container), {
+      target: { files: [createFile()] },
+    });
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith(
+        expect.stringContaining("/document/front"),
+        expect.anything()
+      )
+    );
+
+    expect(socketExistedBeforeValidation).toBe(true);
+    const socket = MockWebSocket.instances[0];
+    expect(socket).toBeTruthy();
+    expect(socket.url).not.toContain("0.0.0.0");
+    expect(socket.url).toMatch(/\/ws\/1$/);
+
+    socket.open();
+    socket.emit({
+      efirma_id: "1",
+      step: "start",
+      message: "Iniciando verificación...",
+      status: "processing",
+      timestamp: Date.now(),
+    });
+
+    expect(await screen.findByText("Iniciando verificación...")).toBeTruthy();
+    const progressBar = screen.getByRole("progressbar", {
+      name: "Progreso de verificación del documento",
+    });
+    await waitFor(() =>
+      expect(progressBar.getAttribute("aria-valuenow")).toBe("10")
+    );
+
+    socket.emit({
+      efirma_id: "1",
+      step: "face_detection",
+      message: "Detectando rostro en el documento...",
+      status: "processing",
+      timestamp: Date.now(),
+    });
+    expect(
+      await screen.findByText("Detectando rostro en el documento...")
+    ).toBeTruthy();
+    await waitFor(() =>
+      expect(progressBar.getAttribute("aria-valuenow")).toBe("25")
+    );
+
+    socket.emit({
+      efirma_id: "1",
+      step: "mrz",
+      message: "Leyendo y validando zona MRZ...",
+      status: "processing",
+      timestamp: Date.now(),
+    });
+    await waitFor(() =>
+      expect(progressBar.getAttribute("aria-valuenow")).toBe("90")
+    );
+
+    socket.emit({
+      efirma_id: "1",
+      step: "completed",
+      message: "Verificación finalizada",
+      status: "success",
+      timestamp: Date.now(),
+      extra: { validSide: true, side: "anverso" },
+    });
+
+    expect(await screen.findByText("Verificación finalizada")).toBeTruthy();
+    await waitFor(() => {
+      expect(progressBar.getAttribute("aria-valuenow")).toBe("100");
+      expect(socket.closed).toBe(true);
+    });
+
+    // El cierre del socket no altera el resultado final de la petición HTTP.
+    validation.reject(new Error("fallo simulado de red"));
+    expect(
+      await screen.findByText(/No pudimos verificar el documento/)
+    ).toBeTruthy();
+  });
+
+  it("mantiene la validación HTTP y el loader genérico si el WebSocket no se puede crear", async () => {
+    const validation = createDeferred<never>();
+
+    apiPost.mockImplementation((url: string) => {
+      if (url.includes("/document/detection")) {
+        return Promise.resolve({ data: { documentoValido: true } });
+      }
+      if (url.includes("/document/front")) {
+        return validation.promise;
+      }
+      return Promise.reject(new Error(`URL inesperada: ${url}`));
+    });
+
+    class UnavailableWebSocket {
+      constructor() {
+        throw new Error("WebSocket bloqueado para la prueba");
+      }
+    }
+
+    vi.stubGlobal("WebSocket", UnavailableWebSocket);
+
+    const { container } = renderFormulario();
+    fireEvent.change(fileInputFrom(container), {
+      target: { files: [createFile()] },
+    });
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith(
+        expect.stringContaining("/document/front"),
+        expect.anything()
+      )
+    );
+
+    expect(
+      await screen.findByText(/Estamos verificando tu identidad/)
+    ).toBeTruthy();
+    expect(
+      screen
+        .getByRole("progressbar", {
+          name: "Progreso de verificación del documento",
+        })
+        .getAttribute("aria-valuenow")
+    ).toBeNull();
+    expect(
+      screen.queryByText(/No pudimos verificar el documento/)
+    ).toBeNull();
+
+    validation.reject(new Error("fallo simulado de red"));
     expect(
       await screen.findByText(/No pudimos verificar el documento/)
     ).toBeTruthy();

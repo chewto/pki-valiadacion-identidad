@@ -88,3 +88,107 @@ export const validationRedirects = {
   "EFIRMA": `/ekyc-efirma`,
   "EKYC_LLEIDA": `/ekyc`,
 }
+
+const WILDCARD_HOSTS = new Set(["0.0.0.0", "::", "[::]"]);
+
+const isWildcardHost = (hostname: string): boolean =>
+  WILDCARD_HOSTS.has(hostname.trim().toLowerCase());
+
+/**
+ * `0.0.0.0` y `::` son direcciones de escucha, no destinos válidos para el
+ * navegador. Si la configuración usa una, se reemplaza por el host desde el
+ * que se abrió la aplicación (o localhost como último recurso).
+ */
+const getBrowserHost = (): string => {
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    if (hostname && !isWildcardHost(hostname)) return hostname;
+  }
+
+  return "localhost";
+};
+
+const replaceWildcardHost = (parsed: URL): void => {
+  if (isWildcardHost(parsed.hostname)) {
+    parsed.hostname = getBrowserHost();
+  }
+};
+
+/**
+ * Normaliza la base configurada para WebSocket:
+ * - http(s) -> ws(s)
+ * - evita hosts comodín (0.0.0.0, ::)
+ * - evita mixed content cuando la página se sirve por HTTPS
+ * - elimina barras finales
+ * Devuelve null si el valor no es una URL válida.
+ */
+const normalizeWsBaseUrl = (rawBase?: string): string | null => {
+  const value = rawBase?.trim();
+  if (!value) return null;
+
+  try {
+    const parsed = new globalThis.URL(value);
+    if (parsed.protocol === "http:") {
+      parsed.protocol = "ws:";
+    } else if (parsed.protocol === "https:") {
+      parsed.protocol = "wss:";
+    } else if (parsed.protocol !== "ws:" && parsed.protocol !== "wss:") {
+      return null;
+    }
+
+    if (
+      parsed.protocol === "ws:" &&
+      typeof window !== "undefined" &&
+      window.location.protocol === "https:"
+    ) {
+      parsed.protocol = "wss:";
+    }
+
+    replaceWildcardHost(parsed);
+
+    const pathname = parsed.pathname.replace(/\/+$/, "");
+    return `${parsed.protocol}//${parsed.host}${pathname}`;
+  } catch {
+    return null;
+  }
+};
+
+const getDefaultWsBaseUrl = (): string => {
+  const candidate =
+    URL ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:4000");
+
+  try {
+    const parsed = new globalThis.URL(candidate);
+    parsed.protocol = parsed.protocol === "https:" ? "wss:" : "ws:";
+    parsed.port = "4001";
+    parsed.pathname = "";
+    parsed.search = "";
+    parsed.hash = "";
+    replaceWildcardHost(parsed);
+    return `${parsed.protocol}//${parsed.host}`;
+  } catch {
+    return "ws://localhost:4001";
+  }
+};
+
+/**
+ * Construye la URL del canal de progreso OCR para un trámite.
+ * `baseUrl` es opcional para pruebas; por defecto usa VITE_WS_BASE_URL.
+ */
+export const getValidationWsUrl = (
+  efirmaId: string | number | null | undefined,
+  baseUrl?: string,
+): string | null => {
+  if (efirmaId === null || efirmaId === undefined) return null;
+
+  const id = String(efirmaId).trim();
+  if (!id) return null;
+
+  const wsBase =
+    normalizeWsBaseUrl(baseUrl) ??
+    normalizeWsBaseUrl(import.meta.env.VITE_WS_BASE_URL) ??
+    getDefaultWsBaseUrl();
+
+  return `${wsBase}/ws/${encodeURIComponent(id)}`;
+};

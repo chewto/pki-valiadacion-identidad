@@ -33,6 +33,8 @@ import api from "@nucleo/api-urls/api";
 import type { ValidationFeedback } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { normalizeValidationFeedback, shouldAutoAdvanceAfterValidation } from "../../nucleo/services/validation-feedback.service";
 import { ValidationFeedbackPanel } from "../../components/ui/validation-feedback-panel";
+import { useValidationWebSocket } from "../../nucleo/hooks/useValidationWebSocket";
+import { getOcrStepProgress } from "../../nucleo/constants/ocr-progress";
 // import Camera from '@pages/efirma/nueva-camara'
 
 
@@ -122,6 +124,13 @@ export const FormularioDocumento: React.FC<Props> = ({
   const pruebaVida = useSelector((state: RootState) => state.pruebaVida);
   const times = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch();
+
+  const {
+    progress: ocrProgress,
+    connect: connectOcrProgress,
+    disconnect: disconnectOcrProgress,
+    resetProgress: resetOcrProgress,
+  } = useValidationWebSocket({ efirmaId: id });
 
   const passport = "PASAPORTE";
 
@@ -214,6 +223,28 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [ocrPercent, setOcrPercent] = useState(0);
+
+  // Ignora eventos de la otra cara del documento en la misma sala.
+  const visibleOcrProgress =
+    ocrProgress &&
+    (!ocrProgress.extra?.side || ocrProgress.extra.side === ladoDocumento)
+      ? ocrProgress
+      : null;
+
+  useEffect(() => {
+    if (!visibleOcrProgress) return;
+
+    // El porcentaje nunca retrocede aunque los pasos lleguen desordenados.
+    setOcrPercent((prev) =>
+      Math.max(prev, getOcrStepProgress(visibleOcrProgress.step))
+    );
+
+    // La verificación terminó: no hay razón para mantener el socket abierto.
+    if (visibleOcrProgress.step === "completed") {
+      disconnectOcrProgress();
+    }
+  }, [visibleOcrProgress, disconnectOcrProgress]);
 
   useEffect(() => {
     if (!loading) {
@@ -329,6 +360,9 @@ export const FormularioDocumento: React.FC<Props> = ({
   const beginAttempt = () => {
     attemptIdRef.current += 1;
     clearPendingAutoAdvance();
+    disconnectOcrProgress();
+    resetOcrProgress();
+    setOcrPercent(0);
     resetRequestStatuses();
     setLoading(true);
     setContinuarBoton(false);
@@ -531,6 +565,10 @@ export const FormularioDocumento: React.FC<Props> = ({
 
       setValidationReq(createRequestStatus());
 
+      // Se abre antes del POST para no perder los primeros eventos del backend.
+      // Si el WebSocket falla, el hook lo ignora y la petición HTTP continúa.
+      connectOcrProgress();
+
       try {
         const resValidacion = await api.post(urlValidacion, data);
         durationValidation = Date.now() - validationTimeStart;
@@ -612,8 +650,9 @@ export const FormularioDocumento: React.FC<Props> = ({
         setError(true);
         setRetry(true);
       } finally {
-        // La validación ya terminó: se libera el intento y se apaga el loading
-        // sin esperar al registro de tiempos, que es telemetría no crítica.
+        // La validación ya terminó: se cierra el canal de progreso y se libera
+        // el intento sin esperar al registro de tiempos (telemetría no crítica).
+        disconnectOcrProgress();
         if (attemptIdRef.current === attemptId) {
           inFlightRef.current = false;
           setLoading(false);
@@ -646,7 +685,8 @@ export const FormularioDocumento: React.FC<Props> = ({
       }
     } finally {
       // Red de seguridad para salidas tempranas (p. ej. documento inválido).
-      // Solo actúa si este intento sigue siendo el más reciente.
+      // Cerrar aquí es idempotente si el finally de la validación ya lo hizo.
+      disconnectOcrProgress();
       if (attemptIdRef.current === attemptId) {
         inFlightRef.current = false;
         setLoading(false);
@@ -792,12 +832,41 @@ export const FormularioDocumento: React.FC<Props> = ({
       {loading && (
         <div className="flex flex-col items-center justify-center w-full">
           <div className="loading-progress">
-            <p className="loading-message" role="status" aria-live="polite">
-              {loadingMessages[loadingMessageIndex]}
+            <p
+              className={`loading-message${
+                visibleOcrProgress ? ` is-${visibleOcrProgress.status}` : ""
+              }`}
+              role="status"
+              aria-live="polite"
+            >
+              {visibleOcrProgress?.message ??
+                loadingMessages[loadingMessageIndex]}
             </p>
-            <p className="loading-elapsed">
+            <div
+              className="loading-bar"
+              role="progressbar"
+              aria-label="Progreso de verificación del documento"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={visibleOcrProgress ? ocrPercent : undefined}
+            >
+              <div
+                className={`loading-bar-fill${
+                  visibleOcrProgress
+                    ? ` is-${visibleOcrProgress.status}`
+                    : " indeterminate"
+                }`}
+                style={
+                  visibleOcrProgress ? { width: `${ocrPercent}%` } : undefined
+                }
+              />
+            </div>
+            {visibleOcrProgress && (
+              <p className="loading-percent">{ocrPercent}%</p>
+            )}
+            {/* <p className="loading-elapsed">
               Tiempo transcurrido: {elapsedSeconds}s
-            </p>
+            </p> */}
           </div>
           <div className="loading-grid">
             {/* Fila 1 */}
