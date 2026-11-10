@@ -92,6 +92,19 @@ export interface Dato {
   pais?: string;
 }
 
+export type OrigenCampo = "ocr" | "mrz" | "manual";
+
+export interface CamposDocumento {
+  nombre?: string;
+  apellido?: string;
+  documento?: string;
+  fechaNacimiento?: string;
+  fechaExpiracion?: string;
+  nacionalidad?: string;
+  origen: OrigenCampo;
+  completado: boolean;
+}
+
 export interface ValidacionDocumento {
   ocr: OCR;
   face: boolean;
@@ -104,6 +117,7 @@ export interface ValidacionDocumento {
     back: boolean;
   }
   sides: CorrespondingSide;
+  campos?: CamposDocumento;
 }
 
 

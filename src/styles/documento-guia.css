@@ -1,0 +1,329 @@
+.document-guide-card,
+.document-fields-panel {
+  width: 100%;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  padding: 14px;
+  margin: 8px 0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  text-align: left;
+}
+
+.document-guide-title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.document-guide-text {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.document-guide-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.document-guide-actions,
+.document-fields-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.document-guide-primary,
+.document-guide-secondary {
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+
+.document-guide-primary {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.document-guide-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.document-guide-primary:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.document-guide-secondary {
+  background: #eef2f7;
+  color: #1e293b;
+}
+
+.document-guide-secondary:hover {
+  background: #e2e8f0;
+}
+
+.document-guide-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.document-guide-progress {
+  width: 100%;
+  min-width: 160px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.document-guide-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  transition: width 0.2s ease;
+}
+
+.document-guide-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.document-guide-error .document-guide-title {
+  color: #991b1b;
+}
+
+.document-guide {
+  width: 100%;
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.document-guide-frame {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+}
+
+.document-guide-frame.is-offscreen {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.document-guide-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.document-guide-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.document-guide-target {
+  position: absolute;
+  inset: 8% 6%;
+  border: 2px dashed rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.18);
+}
+
+.document-guide-box {
+  position: absolute;
+  border: 2px solid #f59e0b;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+  transition: all 0.2s ease;
+}
+
+.document-guide-box.is-ready {
+  border-color: #22c55e;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.7);
+}
+
+.document-guide-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.document-guide-message {
+  width: 100%;
+  max-width: 520px;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #7c2d12;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.document-guide-message.is-ready {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.document-guide-message span {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.document-guide-checklist {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 520px;
+}
+
+.document-guide-checklist li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.document-guide-checklist li.is-detected {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.document-guide-checklist li.is-required {
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15);
+}
+
+.document-guide-meta {
+  margin: 0;
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.document-fields-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.document-fields-header h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.document-fields-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #475569;
+}
+
+.document-fields-badge {
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.document-fields-badge.is-ok {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.document-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.document-fields-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.document-fields-field input {
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 7px 9px;
+  font-size: 13px;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+}
+
+.document-fields-field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+@media (max-width: 480px) {
+  .document-fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .document-guide-frame {
+    aspect-ratio: 3 / 4;
+  }
+}

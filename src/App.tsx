@@ -7,6 +7,8 @@ import Verify from "@pages/verify/verify";
 import NetworkDashboard from "@layouts/speed-test";
 import  TestCamera from "@components/test/test-camera";
 import TestModelo from "@components/test/test-modelo";
+import TestDocumentoVision from "@components/test/test-documento-vision";
+import TestLectorDocumentos from "@components/test/test-lector-documentos";
 import useCountry from "@nucleo/hooks/useCountry";
 
 function App() {
@@ -36,6 +38,8 @@ function App() {
           <Route path="net" element={<NetworkDashboard/>}/>
           <Route path="camera" element={<TestCamera/>}/>
           <Route path="modelo" element={<TestModelo/>}/>
+          <Route path="documento-vision" element={<TestDocumentoVision/>}/>
+          <Route path="lector" element={<TestLectorDocumentos/>}/>
         </Route>
       </Routes>
     </Router>

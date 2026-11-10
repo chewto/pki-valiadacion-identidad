@@ -228,9 +228,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
     const retryButton = await screen.findByRole("button", {
       name: "Reintentar",
     });
-    await waitFor(() =>
-      expect(screen.queryByText(/Tiempo transcurrido:/)).toBeNull()
-    );
 
     // Bloquea el OCR del segundo intento para comprobar que los pasos
     // anteriores vuelven a "en curso" en lugar de conservar checks viejos.
@@ -244,7 +241,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
       screen.getByLabelText("Identificando tipo de documento")
     ).toBeTruthy();
     expect(screen.getByLabelText("Procesando documento")).toBeTruthy();
-    expect(screen.getByText(/Tiempo transcurrido:/)).toBeTruthy();
     expect(
       screen.getByText(/Estamos verificando tu identidad/)
     ).toBeTruthy();
@@ -258,9 +254,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
     await waitFor(() => expect(requests.getValidationCalls()).toBe(2));
     secondValidation.reject(new Error("fallo simulado de red"));
 
-    await waitFor(() =>
-      expect(screen.queryByText(/Tiempo transcurrido:/)).toBeNull()
-    );
     expect(
       await screen.findByText(/No pudimos verificar el documento/)
     ).toBeTruthy();
@@ -295,9 +288,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
     const recaptureButton = await screen.findByRole("button", {
       name: "Volver a capturar documento",
     });
-    await waitFor(() =>
-      expect(screen.queryByText(/Tiempo transcurrido:/)).toBeNull()
-    );
 
     const retryOcr = createDeferred<unknown>();
     ocrGate = retryOcr;
@@ -312,7 +302,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
       screen.getByLabelText("Identificando tipo de documento")
     ).toBeTruthy();
     expect(screen.getByLabelText("Procesando documento")).toBeTruthy();
-    expect(screen.getByText(/Tiempo transcurrido:/)).toBeTruthy();
 
     retryOcr.resolve({ data: {} });
     ocrGate = null;
@@ -320,9 +309,6 @@ describe("FormularioDocumento - progreso al reintentar", () => {
     await waitFor(() => expect(requests.getValidationCalls()).toBe(2));
     secondValidation.reject(new Error("fallo simulado de red"));
 
-    await waitFor(() =>
-      expect(screen.queryByText(/Tiempo transcurrido:/)).toBeNull()
-    );
     expect(
       await screen.findByText(/No pudimos verificar el documento/)
     ).toBeTruthy();

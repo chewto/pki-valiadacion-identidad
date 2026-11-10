@@ -1,4 +1,5 @@
-import { DocumentData, MRZ, ValidacionDocumento } from "./../../interfaces/validacion-identidad/informacion-identidad.interface";
+import { CamposDocumento, DocumentData, MRZ, ValidacionDocumento } from "./../../interfaces/validacion-identidad/informacion-identidad.interface";
+import { isCamposCompleto } from "../../vision/document-fields";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 const initialState: ValidacionDocumento = {
   ocr: {
@@ -185,6 +186,43 @@ export const validacionDocumentolice = createSlice({
     },
     setBackDetection: (state) => {
       state.sides.back.detection = state.sides.back.detection + 1
+    },
+    setCamposDocumento: (
+      state,
+      action: PayloadAction<CamposDocumento | null | undefined>
+    ) => {
+      state.campos = action.payload ?? undefined;
+    },
+    setCampoDocumento: (
+      state,
+      action: PayloadAction<{
+        field: keyof Pick<
+          CamposDocumento,
+          | "nombre"
+          | "apellido"
+          | "documento"
+          | "fechaNacimiento"
+          | "fechaExpiracion"
+          | "nacionalidad"
+        >;
+        value: string;
+      }>
+    ) => {
+      const current: CamposDocumento = state.campos ?? {
+        origen: "manual",
+        completado: false,
+      };
+      const next: CamposDocumento = {
+        ...current,
+        [action.payload.field]: action.payload.value,
+        origen: "manual",
+        completado: false,
+      };
+      next.completado = isCamposCompleto(next);
+      state.campos = next;
+    },
+    clearCamposDocumento: (state) => {
+      state.campos = undefined;
     }
   },
 });
@@ -200,7 +238,10 @@ export const {
   setFrontResult,
   setBackResult,
   setFrontDetection,
-  setBackDetection
+  setBackDetection,
+  setCamposDocumento,
+  setCampoDocumento,
+  clearCamposDocumento
 } = validacionDocumentolice.actions;
 
 export default validacionDocumentolice.reducer;

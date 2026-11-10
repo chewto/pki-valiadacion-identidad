@@ -48,6 +48,7 @@ import {
   setValidacionCodigoBarras,
   setValidacionRostro,
   restoreValidationSides,
+  setCamposDocumento,
 } from "@nucleo/redux/slices/validacionDocumentoSlice";
 import { FormularioFotoPersona } from "@pages/efirma/formulario-foto-persona";
 // import FaceDetection from "./face-test";
@@ -711,6 +712,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
             sideResult: documentValidation.sideResult,
           })
         );
+      }
+      if (documentValidation.campos) {
+        dispatch(setCamposDocumento(documentValidation.campos));
       }
     }
 

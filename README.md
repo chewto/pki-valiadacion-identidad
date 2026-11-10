@@ -25,3 +25,76 @@ If you are developing a production application, we recommend updating the config
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+---
+
+## Guía de documentos con ONNX en el navegador
+
+La captura de documentos puede usar los modelos YOLO de Colombia y Honduras para
+guiar al usuario en tiempo real y marcar los campos que ya se ven.
+
+### Modelos
+
+| País | Archivo | Clases | Entrada | Salida |
+|---|---|---|---|---|
+| Colombia | `colombia-v0.1.onnx` | 33 | `1×3×640×640` | `[1,37,8400]` |
+| Honduras | `honduras-v0.1.onnx` | 18 | `1×3×640×640` | `[1,22,8400]` |
+
+Se sirven desde Hugging Face y el repositorio debe ser **público**:
+
+```text
+https://huggingface.co/chuito1503/noaexport-modelos/resolve/main/colombia-v0.1.onnx
+https://huggingface.co/chuito1503/noaexport-modelos/resolve/main/honduras-v0.1.onnx
+https://huggingface.co/chuito1503/noaexport-modelos/resolve/main/metadata.json
+```
+
+Los enlaces `/blob/main/...` no sirven el binario; se usa `/resolve/main/...`.
+El `metadata.json` es opcional: si no está publicado, la app usa los labels,
+tamaños y hashes de respaldo que coinciden con estos dos ONNX.
+
+### Variables de entorno
+
+```bash
+VITE_DOCUMENT_GUIDE_ENABLED=true
+VITE_DOCUMENT_MODEL_BASE_URL=https://huggingface.co/chuito1503/noaexport-modelos/resolve/main
+VITE_DOCUMENT_MODEL_VERIFY_HASH=true
+```
+
+- `VITE_DOCUMENT_GUIDE_ENABLED`: activa la guía. También se puede forzar con
+  `?guia=1` o desactivar con `?guia=0`.
+- `VITE_DOCUMENT_MODEL_BASE_URL`: base de los ONNX y del `metadata.json`.
+- `VITE_DOCUMENT_MODEL_VERIFY_HASH`: valida el SHA-256 del modelo contra el
+  manifiesto o contra los hashes de respaldo. Desactívalo solo si cambias de
+  modelo/CDN y actualizas los hashes.
+
+### Funcionamiento
+
+1. Al entrar al paso del documento se muestra un consentimiento porque la
+   primera descarga pesa ~77 MB (Colombia) o ~97 MB (Honduras).
+2. El modelo se descarga una sola vez, se cachea y se ejecuta en un Web Worker
+   con `onnxruntime-web` (WebGPU si está disponible; si no, WASM).
+3. La cámara muestra instrucciones para centrar, iluminar, voltear o acercar el
+   documento, y un checklist de campos detectados.
+4. La captura se dispara automáticamente cuando el documento está estable y
+   completo; también hay un botón manual.
+5. La imagen capturada sigue el flujo existente de OCR, detección y validación.
+6. Los datos de OCR/MRZ se muestran en un panel y se pueden corregir antes de
+   continuar.
+7. Si el modelo, el CDN o la cámara fallan, se ofrece la captura nativa.
+
+Ruta de diagnóstico sin backend: `/#/test/documento-vision` (permite elegir país,
+documento y lado, y probar cámara, modelo y detecciones).
+
+Lector de etiquetas con recortes: `/#/test/lector` (selecciona Colombia/Honduras,
+dibuja todas las cajas con su nombre y confianza, y genera recortes descargables
+de cada etiqueta).
+
+### Desarrollo
+
+```bash
+npm install
+npm run dev
+```
+
+`predev`/`prebuild` copian los archivos WASM de `onnxruntime-web` a `public/ort/`.
+No se versionan los ONNX en el frontend.

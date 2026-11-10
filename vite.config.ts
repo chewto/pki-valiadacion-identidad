@@ -18,6 +18,12 @@ export default defineConfig({
     }
   },
   plugins: [react(), mkcert()],
+  worker: {
+    format: 'es'
+  },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web']
+  },
   server: {
     https: false
   },

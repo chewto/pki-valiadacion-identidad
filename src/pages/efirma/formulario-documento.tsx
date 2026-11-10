@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import "@styles/styles.css";
 import "@styles/selfie-movil.component.css";
 import "@styles/formulario-style.component.css";
@@ -20,6 +20,8 @@ import {
   setBackResult,
   setFrontDetection,
   setBackDetection,
+  setCamposDocumento,
+  clearCamposDocumento,
 } from "../../nucleo/redux/slices/validacionDocumentoSlice";
 import { Alert, Spinner } from "reactstrap";
 import "react-html5-camera-photo/build/css/index.css";
@@ -30,9 +32,24 @@ import { Advertencia } from "@components/ui/advertencia";
 import SuccessStep from "@components/ui/success-step";
 import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
 import api from "@nucleo/api-urls/api";
-import type { ValidationFeedback } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
+import type {
+  CamposDocumento,
+  ValidationFeedback,
+} from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { normalizeValidationFeedback, shouldAutoAdvanceAfterValidation } from "../../nucleo/services/validation-feedback.service";
 import { ValidationFeedbackPanel } from "../../components/ui/validation-feedback-panel";
+import { CapturaDocumentoGuiada } from "../../components/validacion-identidad/captura-documento-guiada";
+import { CamposDocumentoPanel } from "../../components/validacion-identidad/campos-documento-panel";
+import {
+  getGuideProfile,
+  isDocumentGuideEnabled,
+} from "../../nucleo/vision/document-model.config";
+import type { GuideSide } from "../../nucleo/vision/document-model.config";
+import {
+  hasRequiredFieldValues,
+  mapFieldsFromValidationResponse,
+  mergeCampos,
+} from "../../nucleo/vision/document-fields";
 import { useValidationWebSocket } from "../../nucleo/hooks/useValidationWebSocket";
 import { getOcrStepProgress } from "../../nucleo/constants/ocr-progress";
 // import Camera from '@pages/efirma/nueva-camara'
@@ -166,6 +183,31 @@ export const FormularioDocumento: React.FC<Props> = ({
   // Identifica el intento actual para no pisar el estado de uno más nuevo.
   const attemptIdRef = useRef(0);
   const feedbackId = "document-validation-feedback";
+
+  const [guideActive, setGuideActive] = useState<boolean>(() =>
+    isDocumentGuideEnabled()
+  );
+  const [guideSessionKey, setGuideSessionKey] = useState<number>(0);
+  const [guideFallbackReason, setGuideFallbackReason] = useState<string | null>(
+    null
+  );
+  const camposDocumento = useSelector(
+    (state: RootState) => state.validacionDocumento.campos
+  );
+
+  const guideSide: GuideSide =
+    ladoDocumento === "reverso" ? "reverso" : "anverso";
+  const countryCode = getCountry();
+  const guideProfile = useMemo(
+    () =>
+      getGuideProfile(
+        countryCode,
+        tipoDocumentoNormalizado,
+        guideSide
+      ),
+    [countryCode, tipoDocumentoNormalizado, guideSide]
+  );
+  const guidePossible = guideActive && guideProfile !== null;
 
   useEffect(() => {
     // Si el modal no está visible, reseteamos todo y no ejecutamos el timer
@@ -366,6 +408,56 @@ export const FormularioDocumento: React.FC<Props> = ({
     return attemptIdRef.current;
   };
 
+  const procesarImagenDocumento = (dataURLImage: string) => {
+    if (inFlightRef.current) return;
+
+    if (dataURLImage.length <= 10) {
+      setIsCorrupted(true);
+      setLoading(false);
+      return;
+    }
+
+    dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
+
+    const data = {
+      id: id,
+      imagen: dataURLImage,
+      nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
+      apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
+      documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
+      ladoDocumento,
+      tipoDocumento: tipoDocumentoNormalizado,
+      imagenPersona: informacion.foto_persona,
+      country: informacionFirmador.pais,
+      tries: conteo,
+      allFrames: ladoDocumento === "anverso" ? pruebaVida.allFrames : [],
+    };
+
+    void validarDocumento(data);
+  };
+
+  const handleGuidedCapture = (dataUrl: string) => {
+    if (loading || inFlightRef.current) return;
+    setGuideFallbackReason(null);
+    procesarImagenDocumento(dataUrl);
+  };
+
+  const handleGuideFallback = (reason?: string) => {
+    setGuideActive(false);
+    setGuideFallbackReason(reason ?? null);
+  };
+
+  const handleCamposConfirm = (campos: CamposDocumento) => {
+    clearPendingAutoAdvance();
+    dispatch(setCamposDocumento(campos));
+    setFeedback(null);
+
+    if (ladoDocumento === "reverso") {
+      setContinuarBoton(true);
+    }
+    nextStep();
+  };
+
   const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = event.target.files?.[0];
     if (!archivo) return;
@@ -410,23 +502,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           throw new Error("La imagen procesada quedó vacía");
         }
 
-        dispatch(setFotos({ labelFoto: ladoDocumento, data: dataURLImage }));
-
-        const data = {
-          id: id,
-          imagen: dataURLImage,
-          nombre: informacionFirmador.nombre ?? validacionDocumento.ocr.data.name,
-          apellido: informacionFirmador.apellido ?? validacionDocumento.ocr.data.lastName,
-          documento: informacionFirmador.documento ?? validacionDocumento.ocr.data.ID,
-          ladoDocumento,
-          tipoDocumento: tipoDocumentoNormalizado,
-          imagenPersona: informacion.foto_persona,
-          country: informacionFirmador.pais,
-          tries: conteo,
-          allFrames: ladoDocumento === "anverso" ? pruebaVida.allFrames : [],
-        };
-
-        void validarDocumento(data);
+        procesarImagenDocumento(dataURLImage);
       } catch (processingError) {
         console.error("Error procesando la imagen del documento:", processingError);
         setIsCorrupted(true);
@@ -585,6 +661,21 @@ export const FormularioDocumento: React.FC<Props> = ({
             dispatch(setFotos({ labelFoto: "foto_persona", data: resData.bestFrame }));
           }
 
+          const mappedFields = mapFieldsFromValidationResponse(resData);
+          const mergedFields = mergeCampos(
+            validacionDocumento.campos,
+            mappedFields
+          );
+          if (mergedFields) {
+            dispatch(setCamposDocumento(mergedFields));
+          }
+
+          const fieldsNeedReview = Boolean(
+            guideActive &&
+              guideProfile &&
+              !hasRequiredFieldValues(mergedFields, guideProfile)
+          );
+
           if (validationFeedback.hasIssues) {
             setFeedback(validationFeedback);
             setRetry(true);
@@ -597,6 +688,10 @@ export const FormularioDocumento: React.FC<Props> = ({
             ) {
               scheduleAutoAdvance();
             }
+          } else if (fieldsNeedReview) {
+            // La guía está activa y faltan datos: esperamos confirmación o
+            // corrección manual antes de avanzar.
+            setContinuarBoton(false);
           } else if (resData.face && resData.faceDetected && resData.validSide) {
             setTimeout(() => nextStep(), 700);
           } else if (conteo >= detectionTries) {
@@ -613,6 +708,15 @@ export const FormularioDocumento: React.FC<Props> = ({
           dispatch(setBackSide(resData.document));
           dispatch(setBackResult({ sideResult: validationFeedback.canContinue }));
           dispatch(setFotos({ labelFoto: ladoDocumento, data: resData.image }));
+
+          const mappedFields = mapFieldsFromValidationResponse(resData);
+          const mergedFields = mergeCampos(
+            validacionDocumento.campos,
+            mappedFields
+          );
+          if (mergedFields) {
+            dispatch(setCamposDocumento(mergedFields));
+          }
 
           if (validationFeedback.hasIssues) {
             setFeedback(validationFeedback);
@@ -694,6 +798,14 @@ export const FormularioDocumento: React.FC<Props> = ({
     setIsCorrupted(false);
     setContinuarBoton(false);
     setRetry(true);
+    dispatch(clearCamposDocumento());
+
+    if (guidePossible) {
+      setGuideFallbackReason(null);
+      setGuideSessionKey((value) => value + 1);
+      return;
+    }
+
     fileInputRef.current?.click();
   };
 
@@ -967,13 +1079,38 @@ export const FormularioDocumento: React.FC<Props> = ({
         />
       )}
 
-      {ladoDocumento === "reverso" && tipoDocumento === passport ? (
+      {guidePossible && !loading && !success && (
+        <CapturaDocumentoGuiada
+          key={`${ladoDocumento}-${guideSessionKey}`}
+          active={guideActive}
+          country={countryCode}
+          tipoDocumento={tipoDocumentoNormalizado}
+          lado={guideSide}
+          onCapture={handleGuidedCapture}
+          onFallback={handleGuideFallback}
+        />
+      )}
+
+      {!loading && !success && guideActive && camposDocumento && (
+        <CamposDocumentoPanel
+          campos={camposDocumento}
+          onConfirm={handleCamposConfirm}
+          onRecapture={requestRecapture}
+        />
+      )}
+
+      {!guidePossible && guideFallbackReason && (
+        <Alert color="secondary" className="text-center">
+          {guideFallbackReason} Puedes continuar con la captura normal.
+        </Alert>
+      )}
+
+      {!guidePossible && (ladoDocumento === "reverso" && tipoDocumento === passport ? (
         <></>
       ) : (
         <>
           {mobile && (
             <>
-
               {!horizontal && (
                 <div className={`${loading ? "hidden" : "flex"} flex-col `}>
                   <span className="text-center font-bold text-sm md:text-base m-0">
@@ -1051,7 +1188,7 @@ export const FormularioDocumento: React.FC<Props> = ({
             </label>
           )}
         </>
-      )}
+      ))}
 
       {preview.length >= 1 && !loading && tipoDocumento != passport && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
