@@ -98,6 +98,20 @@
   transition: width 0.2s ease;
 }
 
+.document-guide-progress-fill.is-indeterminate {
+  width: 40%;
+  animation: document-guide-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes document-guide-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
 .document-guide-error {
   border-color: #fecaca;
   background: #fef2f2;

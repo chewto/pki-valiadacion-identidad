@@ -1,45 +1,30 @@
-import { useCallback, useState } from "react";
 import { Spinner } from "reactstrap";
 import type { GuideSide } from "../../nucleo/vision/document-model.config";
 import { useDocumentGuide } from "../../nucleo/hooks/use-document-guide";
+import { useDocumentVision } from "../../nucleo/hooks/use-document-vision";
 import { describeGuide } from "../../nucleo/vision/document-guide";
 import "@styles/documento-guia.css";
 
 interface Props {
-  active: boolean;
   country: string;
   tipoDocumento: string;
   lado: GuideSide;
   onCapture: (dataUrl: string) => void;
-  onFallback: (reason?: string) => void;
 }
-
-const CONSENT_KEY = "ekyc_document_guide_consent";
 
 const modelSizeLabel = (country: string): string =>
   country === "HND" ? "~97 MB" : "~77 MB";
 
-const readConsent = (): boolean => {
-  try {
-    return sessionStorage.getItem(CONSENT_KEY) === "1";
-  } catch {
-    return false;
-  }
-};
-
 export const CapturaDocumentoGuiada: React.FC<Props> = ({
-  active,
   country,
   tipoDocumento,
   lado,
   onCapture,
-  onFallback,
 }) => {
-  const [consent, setConsent] = useState(readConsent);
-  const consentGiven = active && consent;
+  // Estado de la precarga que arrancó al iniciar la validación.
+  const vision = useDocumentVision();
   const {
     phase,
-    progress,
     guide,
     checklist,
     provider,
@@ -49,62 +34,20 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
     captureNow,
     retry,
   } = useDocumentGuide({
-    active: consentGiven,
     country,
     tipoDocumento,
     lado,
     onCapture,
   });
 
-  const accept = useCallback(() => {
-    try {
-      sessionStorage.setItem(CONSENT_KEY, "1");
-    } catch {
-      // La sesión es opcional.
-    }
-    setConsent(true);
-  }, []);
-
-  const decline = useCallback(() => {
-    onFallback("El usuario prefirió la captura normal.");
-  }, [onFallback]);
-
-  if (!active) return null;
-
-  if (!consent) {
-    return (
-      <section
-        className="document-guide-card"
-        aria-labelledby="document-guide-consent-title"
-      >
-        <h3 id="document-guide-consent-title" className="document-guide-title">
-          Guía con IA para colocar el documento
-        </h3>
-        <p className="document-guide-text">
-          Podemos indicarte en tiempo real si el documento está bien alineado,
-          iluminado y si ya se ven los datos. Para eso se descarga un modelo de{" "}
-          <strong>{modelSizeLabel(country)}</strong> solo la primera vez.
-        </p>
-        <div className="document-guide-actions">
-          <button type="button" className="document-guide-primary" onClick={accept}>
-            Activar guía
-          </button>
-          <button
-            type="button"
-            className="document-guide-secondary"
-            onClick={decline}
-          >
-            Usar cámara normal
-          </button>
-        </div>
-      </section>
-    );
-  }
-
   const isRunning = phase === "running";
   const isCapturing = phase === "capturing";
-  const isLoading = phase === "idle" || phase === "loading";
   const isError = phase === "error" || phase === "unavailable";
+  const isPreparing = !isRunning && !isCapturing && !isError;
+  const isModelDownloading = vision.phase === "downloading";
+  const isModelInitializing = vision.phase === "initializing";
+  const progressPercent = Math.round(vision.progress * 100);
+
   const videoWidth = videoRef.current?.videoWidth ?? 0;
   const videoHeight = videoRef.current?.videoHeight ?? 0;
   const boxes = guide?.containerBoxes ?? [];
@@ -164,37 +107,52 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
         )}
       </div>
 
-      {isLoading && (
+      {isPreparing && (
         <section className="document-guide-card" aria-live="polite">
           <div className="document-guide-loading">
             <Spinner color="primary" />
             <div>
-              <p className="document-guide-title">Descargando el modelo...</p>
-              <div
-                className="document-guide-progress"
-                role="progressbar"
-                aria-label="Descarga del modelo de documentos"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(progress * 100)}
-              >
+              <p className="document-guide-title">
+                {isModelDownloading
+                  ? "Descargando el modelo..."
+                  : isModelInitializing
+                    ? "Preparando el motor de visión..."
+                    : "Preparando la cámara..."}
+              </p>
+
+              {(isModelDownloading || isModelInitializing) && (
                 <div
-                  className="document-guide-progress-fill"
-                  style={{ width: `${Math.round(progress * 100)}%` }}
-                />
-              </div>
+                  className="document-guide-progress"
+                  role="progressbar"
+                  aria-label="Carga del modelo de documentos"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={
+                    isModelDownloading ? progressPercent : undefined
+                  }
+                >
+                  <div
+                    className={`document-guide-progress-fill${
+                      isModelInitializing ? " is-indeterminate" : ""
+                    }`}
+                    style={
+                      isModelDownloading
+                        ? { width: `${progressPercent}%` }
+                        : undefined
+                    }
+                  />
+                </div>
+              )}
+
               <p className="document-guide-hint">
-                {Math.round(progress * 100)}% · Solo se descarga una vez.
+                {isModelDownloading
+                  ? `${progressPercent}% · ${modelSizeLabel(country)} · Solo se descarga una vez.`
+                  : isModelInitializing
+                    ? "El modelo ya está descargado, estamos activando la detección."
+                    : "En un momento podrás alinear el documento."}
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            className="document-guide-secondary"
-            onClick={() => onFallback("Descarga del modelo cancelada.")}
-          >
-            Prefiero la cámara normal
-          </button>
         </section>
       )}
 
@@ -207,8 +165,8 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
           <p className="document-guide-text">
             {error ?? "Ocurrió un problema con el modelo o con la cámara."}
           </p>
-          <div className="document-guide-actions">
-            {phase === "error" && (
+          {phase === "error" && (
+            <div className="document-guide-actions">
               <button
                 type="button"
                 className="document-guide-primary"
@@ -216,15 +174,8 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
               >
                 Reintentar
               </button>
-            )}
-            <button
-              type="button"
-              className="document-guide-secondary"
-              onClick={() => onFallback(error ?? "Guía no disponible.")}
-            >
-              Usar captura normal
-            </button>
-          </div>
+            </div>
+          )}
         </section>
       )}
 
@@ -265,13 +216,6 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
             onClick={captureNow}
           >
             Capturar ahora
-          </button>
-          <button
-            type="button"
-            className="document-guide-secondary"
-            onClick={() => onFallback("El usuario prefirió la captura normal.")}
-          >
-            Usar captura normal
           </button>
         </div>
       )}

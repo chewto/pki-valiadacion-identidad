@@ -17,7 +17,37 @@ export default defineConfig({
       '@assets': path.resolve(__dirname, './src/assets')
     }
   },
-  plugins: [react(), mkcert()],
+  plugins: [
+    react(),
+    mkcert(),
+    {
+      name: 'configure-wasm-headers',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url) {
+            if (req.url.endsWith('.mjs')) {
+              res.setHeader('Content-Type', 'application/javascript');
+            } else if (req.url.endsWith('.wasm')) {
+              res.setHeader('Content-Type', 'application/wasm');
+            }
+          }
+          next();
+        });
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url) {
+            if (req.url.endsWith('.mjs')) {
+              res.setHeader('Content-Type', 'application/javascript');
+            } else if (req.url.endsWith('.wasm')) {
+              res.setHeader('Content-Type', 'application/wasm');
+            }
+          }
+          next();
+        });
+      }
+    }
+  ],
   worker: {
     format: 'es'
   },
@@ -25,7 +55,11 @@ export default defineConfig({
     exclude: ['onnxruntime-web']
   },
   server: {
-    https: false
+    https: false,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp'
+    }
   },
   build: {
     chunkSizeWarningLimit: 1600, // Adjust as needed

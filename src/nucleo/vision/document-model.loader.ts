@@ -54,6 +54,10 @@ const labelsFromNames = (
 };
 
 const fetchManifest = async (): Promise<DocumentModelManifest | null> => {
+  if (!DOCUMENT_MODEL_MANIFEST_URL) {
+    return null;
+  }
+
   if (!manifestPromise) {
     manifestPromise = fetch(DOCUMENT_MODEL_MANIFEST_URL, {
       mode: "cors",

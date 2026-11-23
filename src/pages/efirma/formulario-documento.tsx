@@ -184,13 +184,7 @@ export const FormularioDocumento: React.FC<Props> = ({
   const attemptIdRef = useRef(0);
   const feedbackId = "document-validation-feedback";
 
-  const [guideActive, setGuideActive] = useState<boolean>(() =>
-    isDocumentGuideEnabled()
-  );
   const [guideSessionKey, setGuideSessionKey] = useState<number>(0);
-  const [guideFallbackReason, setGuideFallbackReason] = useState<string | null>(
-    null
-  );
   const camposDocumento = useSelector(
     (state: RootState) => state.validacionDocumento.campos
   );
@@ -207,7 +201,13 @@ export const FormularioDocumento: React.FC<Props> = ({
       ),
     [countryCode, tipoDocumentoNormalizado, guideSide]
   );
-  const guidePossible = guideActive && guideProfile !== null;
+  // Con la guía habilitada la detección es obligatoria: no se ofrece subir una
+  // imagen. Si el flag está apagado o el documento no tiene perfil, se conserva
+  // el flujo de captura normal.
+  const guidePossible = useMemo(
+    () => isDocumentGuideEnabled() && guideProfile !== null,
+    [guideProfile]
+  );
 
   useEffect(() => {
     // Si el modal no está visible, reseteamos todo y no ejecutamos el timer
@@ -438,13 +438,7 @@ export const FormularioDocumento: React.FC<Props> = ({
 
   const handleGuidedCapture = (dataUrl: string) => {
     if (loading || inFlightRef.current) return;
-    setGuideFallbackReason(null);
     procesarImagenDocumento(dataUrl);
-  };
-
-  const handleGuideFallback = (reason?: string) => {
-    setGuideActive(false);
-    setGuideFallbackReason(reason ?? null);
   };
 
   const handleCamposConfirm = (campos: CamposDocumento) => {
@@ -671,7 +665,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           }
 
           const fieldsNeedReview = Boolean(
-            guideActive &&
+            guidePossible &&
               guideProfile &&
               !hasRequiredFieldValues(mergedFields, guideProfile)
           );
@@ -801,7 +795,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     dispatch(clearCamposDocumento());
 
     if (guidePossible) {
-      setGuideFallbackReason(null);
       setGuideSessionKey((value) => value + 1);
       return;
     }
@@ -1082,27 +1075,19 @@ export const FormularioDocumento: React.FC<Props> = ({
       {guidePossible && !loading && !success && (
         <CapturaDocumentoGuiada
           key={`${ladoDocumento}-${guideSessionKey}`}
-          active={guideActive}
           country={countryCode}
           tipoDocumento={tipoDocumentoNormalizado}
           lado={guideSide}
           onCapture={handleGuidedCapture}
-          onFallback={handleGuideFallback}
         />
       )}
 
-      {!loading && !success && guideActive && camposDocumento && (
+      {!loading && !success && guidePossible && camposDocumento && (
         <CamposDocumentoPanel
           campos={camposDocumento}
           onConfirm={handleCamposConfirm}
           onRecapture={requestRecapture}
         />
-      )}
-
-      {!guidePossible && guideFallbackReason && (
-        <Alert color="secondary" className="text-center">
-          {guideFallbackReason} Puedes continuar con la captura normal.
-        </Alert>
       )}
 
       {!guidePossible && (ladoDocumento === "reverso" && tipoDocumento === passport ? (

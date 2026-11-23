@@ -23,6 +23,10 @@ vi.mock("@nucleo/api-urls/api", () => ({
   default: { post: apiPost },
 }));
 
+vi.mock("@components/validacion-identidad/captura-documento-guiada", () => ({
+  CapturaDocumentoGuiada: () => <div data-testid="captura-guiada" />,
+}));
+
 type Deferred<T> = {
   promise: Promise<T>;
   resolve: (value: T) => void;
@@ -464,5 +468,25 @@ describe("FormularioDocumento - progreso WebSocket OCR", () => {
     expect(
       await screen.findByText(/No pudimos verificar el documento/)
     ).toBeTruthy();
+  });
+});
+
+describe("FormularioDocumento - guía obligatoria", () => {
+  beforeEach(() => {
+    window.history.pushState({}, "", "/?guia=1");
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, "", "/");
+  });
+
+  it("no ofrece subir una imagen cuando la detección guiada está habilitada", () => {
+    const { container } = renderFormulario();
+
+    expect(screen.getByTestId("captura-guiada")).toBeTruthy();
+    expect(container.querySelector('input[type="file"]')).toBeNull();
+    expect(
+      screen.queryByLabelText(/Subir foto del frontal de su/i)
+    ).toBeNull();
   });
 });

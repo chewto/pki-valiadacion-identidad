@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { URLS } from "@nucleo/api-urls/urls";
-import { getCountry } from "@nucleo/hooks/useCountry";
+import { getCountry, useCountryValue } from "@nucleo/hooks/useCountry";
 import { useBrowser } from "@nucleo/hooks/useBrowser";
 import { useDevice } from "@nucleo/hooks/useDevice";
 import { useHour } from "@nucleo/hooks/useHour";
@@ -63,6 +63,11 @@ import {
   ValidationProgressPayload,
 } from "@nucleo/services/validation-progress.service";
 import api from "@nucleo/api-urls/api";
+import { ensureDocumentVision } from "@nucleo/vision/document-vision.service";
+import {
+  isDocumentCountry,
+  isDocumentGuideEnabled,
+} from "@nucleo/vision/document-model.config";
 // import Demo from "@components/validacion-identidad/demo";
 // import { useApproved } from "@nucleo/hooks/useApproved";
 
@@ -131,6 +136,8 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   };
 
   const esMobile = useMobile();
+
+  const countryValue = useCountryValue();
 
   const jwt = useJWT();
 
@@ -257,6 +264,18 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
       dispatch(setCountry({ country: country }));
     });
   }, [dispatch, getCountryUrl, jwt.token]);
+
+  // Descarga e inicializa el modelo de documentos en segundo plano desde el
+  // inicio de la validación. La barra de progreso solo se muestra al llegar al
+  // paso del documento y únicamente si todavía no está listo.
+  useEffect(() => {
+    if (!countryValue.resolved) return;
+    if (!isDocumentGuideEnabled()) return;
+    if (!isDocumentCountry(countryValue.country)) return;
+    void ensureDocumentVision(countryValue.country).catch(() => {
+      // El error se comunica en el paso del documento, con opción de reintentar.
+    });
+  }, [countryValue.country, countryValue.resolved]);
 
   useEffect(() => {
     if (!jwt.token) return;

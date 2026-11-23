@@ -52,7 +52,15 @@ export const COUNTRY_MODEL_FILE: Record<DocumentCountry, string> = {
   HND: "honduras-v0.1.onnx",
 };
 
-export const DOCUMENT_MODEL_MANIFEST_URL = `${DOCUMENT_MODEL_BASE_URL}/metadata.json`;
+/**
+ * URL del manifiesto opcional. Si la URL base es el repositorio por defecto
+ * en Hugging Face (que no cuenta con metadata.json), se define como null
+ * para evitar llamadas de red innecesarias y errores 404 en la consola.
+ */
+export const DOCUMENT_MODEL_MANIFEST_URL: string | null =
+  DOCUMENT_MODEL_BASE_URL === DEFAULT_DOCUMENT_MODEL_BASE_URL
+    ? null
+    : `${DOCUMENT_MODEL_BASE_URL}/metadata.json`;
 
 export const COLOMBIA_LABELS: readonly string[] = [
   "CEDULA_CIUDADANIA_FRONTAL",

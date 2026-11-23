@@ -69,18 +69,26 @@ VITE_DOCUMENT_MODEL_VERIFY_HASH=true
 
 ### Funcionamiento
 
-1. Al entrar al paso del documento se muestra un consentimiento porque la
-   primera descarga pesa ~77 MB (Colombia) o ~97 MB (Honduras).
-2. El modelo se descarga una sola vez, se cachea y se ejecuta en un Web Worker
-   con `onnxruntime-web` (WebGPU si está disponible; si no, WASM).
-3. La cámara muestra instrucciones para centrar, iluminar, voltear o acercar el
+1. El modelo se descarga e inicializa en segundo plano al iniciar la
+   validación, sin mostrar progreso. La primera descarga pesa ~77 MB
+   (Colombia) o ~97 MB (Honduras).
+2. La barra de carga aparece únicamente al llegar al paso del documento y solo
+   si el modelo todavía no está listo; si ya se descargó, la cámara guiada
+   arranca de inmediato. La sesión ONNX se reutiliza entre el anverso y el
+   reverso.
+3. Con la guía habilitada la captura guiada es obligatoria: no se muestra el
+   consentimiento ni se ofrece subir una imagen.
+4. La cámara muestra instrucciones para centrar, iluminar, voltear o acercar el
    documento, y un checklist de campos detectados.
-4. La captura se dispara automáticamente cuando el documento está estable y
+5. La captura se dispara automáticamente cuando el documento está estable y
    completo; también hay un botón manual.
-5. La imagen capturada sigue el flujo existente de OCR, detección y validación.
-6. Los datos de OCR/MRZ se muestran en un panel y se pueden corregir antes de
+6. La imagen capturada sigue el flujo existente de OCR, detección y validación.
+7. Los datos de OCR/MRZ se muestran en un panel y se pueden corregir antes de
    continuar.
-7. Si el modelo, el CDN o la cámara fallan, se ofrece la captura nativa.
+8. Si el modelo, el CDN o la cámara fallan, se bloquea el paso con un mensaje y
+   la opción de reintentar; no hay captura alternativa.
+9. El modelo se ejecuta en un Web Worker con `onnxruntime-web` (WebGPU si está
+   disponible; si no, WASM) y se cachea para las siguientes validaciones.
 
 Ruta de diagnóstico sin backend: `/#/test/documento-vision` (permite elegir país,
 documento y lado, y probar cámara, modelo y detecciones).

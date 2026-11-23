@@ -75,14 +75,12 @@ const TestDocumentoVision: React.FC = () => {
 
       <CapturaDocumentoGuiada
         key={`${country}-${tipoDocumento}-${lado}`}
-        active
         country={country}
         tipoDocumento={tipoDocumento}
         lado={lado}
         onCapture={(dataUrl) => {
           setCaptures((previous) => [dataUrl, ...previous].slice(0, 3));
         }}
-        onFallback={(reason) => console.log("Guía desactivada:", reason)}
       />
 
       {captures.length > 0 && (
