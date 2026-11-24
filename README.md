@@ -104,5 +104,23 @@ npm install
 npm run dev
 ```
 
-`predev`/`prebuild` copian los archivos WASM de `onnxruntime-web` a `public/ort/`.
+`predev`/`prebuild` copian a `public/ort/` el binario `.wasm` de
+`onnxruntime-web` y su factory como `ort-wasm-simd-threaded.jsep.js` (no `.mjs`).
 No se versionan los ONNX en el frontend.
+
+### Despliegue y MIME
+
+El factory de ONNX Runtime se publica con extensión `.js` porque nginx (y por
+tanto BunkerWeb, que está construido sobre nginx) no mapea `.mjs` en su
+`mime.types`: sin esa extensión el archivo se entrega como
+`application/octet-stream` y el navegador rechaza el module script con
+`Failed to load module script`.
+
+- La app solicita `/<base>/ort/ort-wasm-simd-threaded.jsep.js` y
+  `/<base>/ort/ort-wasm-simd-threaded.jsep.wasm`.
+- Despliega siempre un `dist/` generado con `npm run build` (incluye el
+  `prebuild`) o con el `dockerfile`; no reutilices un `dist/` antiguo.
+- Si necesitas desbloquear un servidor nginx/BunkerWeb sin desplegar el build
+  nuevo, añade `types { application/javascript mjs; }` a su configuración
+  (BunkerWeb: `/etc/bunkerweb/configs/http/*.conf`) y verifica con
+  `curl -sI .../ort/ort-wasm-simd-threaded.jsep.mjs`.

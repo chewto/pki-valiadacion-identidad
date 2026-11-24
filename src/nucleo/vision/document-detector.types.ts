@@ -1,12 +1,19 @@
 import type { FrameQuality } from "./document-guide";
 import type { DocumentDetection } from "./document-postprocess";
 
+export interface DetectorWasmPaths {
+  /** URL del factory `.js` de onnxruntime-web (antes `.mjs`). */
+  mjs?: string;
+  /** URL del binario `.wasm`. */
+  wasm?: string;
+}
+
 export interface DetectorInitMessage {
   type: "init";
   modelBytes: ArrayBuffer;
   labels: readonly string[];
   inputSize: number;
-  wasmPaths: string;
+  wasmPaths: DetectorWasmPaths;
 }
 
 export interface DetectorFrameMessage {

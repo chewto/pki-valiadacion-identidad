@@ -3,6 +3,7 @@ import type { DocumentDetection } from "./document-postprocess";
 import type {
   DetectorRequest,
   DetectorResponse,
+  DetectorWasmPaths,
 } from "./document-detector.types";
 
 export interface DetectorFrameResult {
@@ -17,7 +18,7 @@ export interface DetectorInitOptions {
   modelBytes: ArrayBuffer;
   labels: readonly string[];
   inputSize: number;
-  wasmPaths: string;
+  wasmPaths: DetectorWasmPaths;
 }
 
 interface PendingFrame {

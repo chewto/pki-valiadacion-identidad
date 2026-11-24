@@ -11,7 +11,10 @@ vi.mock("./document-model.loader", () => ({
 }));
 
 vi.mock("./document-runtime", () => ({
-  getDocumentWasmPaths: () => "/ort/",
+  getDocumentWasmPaths: () => ({
+    mjs: "/ort/ort-wasm-simd-threaded.jsep.js",
+    wasm: "/ort/ort-wasm-simd-threaded.jsep.wasm",
+  }),
 }));
 
 vi.mock("./document-detector.client", () => {
