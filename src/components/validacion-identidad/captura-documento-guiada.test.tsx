@@ -168,6 +168,24 @@ describe("CapturaDocumentoGuiada", () => {
     expect(screen.getByText("Motor: wasm · 42 ms/frame")).toBeTruthy();
   });
 
+  it("mantiene la guía lista aunque falten campos por detectar", () => {
+    runGuideMocks();
+    mocks.guide.checklist = [
+      {
+        label: "APELLIDOS",
+        displayName: "Apellidos",
+        detected: false,
+        required: true,
+      },
+    ];
+    renderGuide();
+
+    expect(screen.getByText("Documento listo")).toBeTruthy();
+    expect(screen.getByText("Mantén el documento quieto")).toBeTruthy();
+    expect(screen.getByLabelText("Campos detectados")).toBeTruthy();
+    expect(screen.queryByText(/Aún no se ven/)).toBeNull();
+  });
+
   it("con detectionOnly deja solo la cámara, la guía y los estados", () => {
     runGuideMocks();
     const { container } = renderGuide({ detectionOnly: true });

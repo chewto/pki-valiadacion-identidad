@@ -58,18 +58,20 @@ describe("document-guide", () => {
     expect(state.fit.state).toBe("unknown");
   });
 
-  it("indica los campos que faltan", () => {
+  it("permite capturar aunque no se distingan los campos", () => {
     const state = buildGuideState({
       ...baseInput(),
       detections: [detection("CEDULA_CIUDADANIA_FRONTAL", ALIGNED_BOX)],
     });
-    expect(state.code).toBe("missing_fields");
+    expect(state.code).toBe("ready");
+    expect(state.canCapture).toBe(true);
+    expect(state.fit.state).toBe("aligned");
+    // Los campos no vistos se reportan solo como información de diagnóstico.
     expect(state.missing).toEqual([
       "Nombres",
       "Apellidos",
       "N.º de documento",
     ]);
-    expect(state.fit.state).toBe("aligned");
   });
 
   it("pide acercar cuando el documento se ve demasiado pequeño", () => {
@@ -109,16 +111,45 @@ describe("document-guide", () => {
     expect(state.hint).toContain("recuadro");
   });
 
-  it("marca listo cuando el documento y los campos están completos", () => {
+  it("marca listo cuando el documento está alineado", () => {
     const state = buildGuideState({
       ...baseInput(),
       detections: withFields(),
     });
     expect(state.code).toBe("ready");
     expect(state.canCapture).toBe(true);
+    expect(state.missing).toEqual([]);
     expect(state.containerBoxes).toHaveLength(1);
     expect(state.fit.state).toBe("aligned");
     expect(state.fit.scalePercent).toBe(91);
+  });
+
+  it("sigue bloqueando cuando la imagen no tiene calidad suficiente", () => {
+    const aligned = [detection("CEDULA_CIUDADANIA_FRONTAL", ALIGNED_BOX)];
+
+    expect(
+      buildGuideState({
+        ...baseInput(),
+        quality: { ...quality, luminance: 10 },
+        detections: aligned,
+      }).code
+    ).toBe("dark");
+
+    expect(
+      buildGuideState({
+        ...baseInput(),
+        quality: { ...quality, glareRatio: 0.5 },
+        detections: aligned,
+      }).code
+    ).toBe("glare");
+
+    expect(
+      buildGuideState({
+        ...baseInput(),
+        quality: { ...quality, sharpness: 10 },
+        detections: aligned,
+      }).code
+    ).toBe("blurry");
   });
 
   it("respeta una tolerancia sobrescrita en la entrada", () => {

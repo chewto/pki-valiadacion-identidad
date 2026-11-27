@@ -89,8 +89,10 @@ VITE_DOCUMENT_MODEL_VERIFY_HASH=true
    compara los bordes del documento con los suyos: indica el porcentaje que
    ocupa (`Acerca · N%` / `Aleja · N%`) y se ilumina en verde cuando el tamaño
    entra en `VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE`.
-5. La captura se dispara automáticamente, en segundo plano, cuando el documento
-   está estable y completo; no hay botón manual en el proceso real.
+5. La captura se dispara automáticamente, en segundo plano, en cuanto el
+   documento está estable y alineado al recuadro (tamaño y encuadre correctos).
+   No se espera a que el modelo reconozca todos los campos: esos datos los lee y
+   valida el backend. No hay botón manual en el proceso real.
 6. La imagen capturada sigue el flujo existente de OCR, detección y validación,
    pero no se muestra en pantalla.
 7. Los datos de OCR/MRZ se guardan para la validación, pero no se muestran ni se

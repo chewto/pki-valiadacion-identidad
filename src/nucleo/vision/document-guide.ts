@@ -36,7 +36,6 @@ export type GuideCode =
   | "dark"
   | "bright"
   | "glare"
-  | "missing_fields"
   | "ready";
 
 export interface GuideState {
@@ -44,6 +43,11 @@ export interface GuideState {
   message: string;
   hint: string;
   canCapture: boolean;
+  /**
+   * Campos del perfil que el modelo no alcanzó a ver. Es informativo: ya no
+   * bloquean la captura, porque el tamaño y el encuadre son lo único que el
+   * front necesita para tomar la foto que procesará el backend.
+   */
   missing: string[];
   detectedLabels: string[];
   /** Encaje del documento contra el recuadro (tamaño y bordes). */
@@ -73,8 +77,6 @@ export interface FieldChecklistItem {
   detected: boolean;
   required: boolean;
 }
-
-const REQUIRED_ERROR = "Aún no se ven algunos datos del documento.";
 
 const getUnionBox = (detections: readonly DocumentDetection[]) => {
   if (detections.length === 0) return null;
@@ -375,29 +377,19 @@ export const buildGuideState = (input: GuideInput): GuideState => {
     }
   }
 
+  // Los campos no bloquean: si el documento está alineado y del tamaño del
+  // recuadro se captura igual. El backend se encarga de leer y validar los
+  // datos; el front solo necesita la imagen en el tamaño correcto.
   const missing = getMissingRequiredLabels(profile, detectedSet).map(
     (label) => FIELD_DISPLAY_NAMES[label] ?? label
   );
 
-  if (missing.length > 0) {
-    return {
-      code: "missing_fields",
-      message: REQUIRED_ERROR,
-      hint: `Aún no se ven: ${missing.join(", ")}.`,
-      canCapture: false,
-      missing,
-      detectedLabels,
-      fit,
-      containerBoxes,
-    };
-  }
-
   return {
     code: "ready",
     message: "Perfecto, no muevas.",
-    hint: "Tamaño y campos correctos. Capturaremos la foto automáticamente.",
+    hint: "Tamaño y encuadre correctos. Capturaremos la foto automáticamente.",
     canCapture: true,
-    missing: [],
+    missing,
     detectedLabels,
     fit,
     containerBoxes,
