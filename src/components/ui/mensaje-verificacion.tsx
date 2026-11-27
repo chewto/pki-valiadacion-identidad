@@ -13,6 +13,10 @@ export const MensajeVerificacion: React.FC<Props> = ({
   mensaje
 }) => {
 
+  const handleReload = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="mensaje-container">
       <div className="mensaje-content">
@@ -24,9 +28,18 @@ export const MensajeVerificacion: React.FC<Props> = ({
         )}
 
         {(error && !loading) && (
-          <Alert color="danger">
-            Error con la conexion al servidor
-          </Alert>
+          <>
+            <Alert color="danger" className="text-center w-full">
+              {mensaje || "Error con la conexión al servidor"}
+            </Alert>
+            <button
+              type="button"
+              onClick={handleReload}
+              className="mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors shadow-sm"
+            >
+              Reintentar
+            </button>
+          </>
         )} 
       </div>
     </div>

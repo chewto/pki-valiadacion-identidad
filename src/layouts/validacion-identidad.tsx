@@ -31,6 +31,7 @@ import { Header } from "@components/ui/header";
 import { PasosEnumerados } from "@components/ui/pasos-enumerados";
 import { Advertencia } from "@components/ui/advertencia";
 import { MensajeVerificacion } from "@components/ui/mensaje-verificacion";
+import { ErrorBoundary } from "@components/ui/error-boundary";
 import Card from "@components/ui/card";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -164,6 +165,7 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [mostrarMensaje, setMostrar] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("Error con la conexión al servidor");
 
   const [generated, setGenerated] = useState<boolean>(true);
 
@@ -197,9 +199,9 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
 
     api.get(userDataUrl)
       .then((res) => {
-
-        if (res.data.dato == null) {
+        if (!res.data || res.data.dato == null) {
           setGenerated(false);
+          return;
         }
 
         dispatch(setFirmador(res.data.dato));
@@ -214,7 +216,11 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
           );
         }
       })
-      .catch((err) => console.log(err))
+      .catch((err) => {
+        console.error("Error al obtener datos del usuario:", err);
+        setError(true);
+        setErrorMessage("No se pudieron obtener los datos de la validación. Por favor, recarga la página.");
+      })
       .finally(() => setLoading(false));
 
     // if (!standalone) {
@@ -817,26 +823,28 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
         className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-start  justify-center"
         onContextMenu={handleContextMenu}
       >
-        <Card isBlocked={!retry}>
+        <Card isBlocked={retry === false}>
           <Header titulo="Validación de identidad" />
-<div className="m-0">
+          <div className="m-0">
+            <ErrorBoundary>
               {!isLoadingProgress && (
                 <>
                   <PasosEnumerados tipo="3" paso={activeSteps} />
                   <div className="content-buttons"></div>
-                  <>{componentsSteps[activeSteps] ?? null}</>
+                  <>{componentsSteps[activeSteps] ?? componentsSteps[0] ?? null}</>
                 </>
               )}
-            </div>
-            <>
-              {isLoadingProgress && (
-                <MensajeVerificacion
-                  loading={isLoadingProgress}
-                  error={false}
-                  mensaje="Consultando progreso"
-                />
-              )}
-            </>
+            </ErrorBoundary>
+          </div>
+          <>
+            {isLoadingProgress && (
+              <MensajeVerificacion
+                loading={isLoadingProgress}
+                error={false}
+                mensaje="Consultando progreso"
+              />
+            )}
+          </>
           <>
             {mostrarMensaje && loading && (
               <MensajeVerificacion
@@ -850,6 +858,13 @@ export const ValidacionIdentidad: React.FC<Props> = ({ standalone }) => {
                 loading={loading}
                 error={error}
                 mensaje="Cargando Información"
+              />
+            )}
+            {!loading && error && (
+              <MensajeVerificacion
+                loading={false}
+                error={true}
+                mensaje={errorMessage}
               />
             )}
           </>

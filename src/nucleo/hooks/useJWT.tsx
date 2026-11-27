@@ -1,48 +1,36 @@
-import { URLS } from '@nucleo/api-urls/urls';
-import { getCountry } from '@nucleo/hooks/useCountry';
+import { ensureToken } from '@nucleo/api-urls/api';
 import { useState, useEffect, useCallback } from 'react';
-
-export interface TokenResponse {
-    token: string;
-    expires_at: string;
-}
 
 export interface UseJWTReturn {
     token: string | null;
     loading: boolean;
     error: string | null;
     clearToken: () => void;
+    refreshToken: () => Promise<string | null>;
 }
 
 const useJWT = (): UseJWTReturn => {
-    const [token, setToken] = useState<string | null>(() => sessionStorage.getItem('ekyc_token'));
+    const [token, setToken] = useState<string | null>(() => {
+        try {
+            return sessionStorage.getItem('ekyc_token');
+        } catch {
+            return null;
+        }
+    });
     const [loading, setLoading] = useState<boolean>(!token);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchToken = useCallback(async () => {
+    const fetchToken = useCallback(async (forceRefresh = false) => {
         try {
             setLoading(true);
-            const fetchUrl = `${URLS.generateToken}${URLS.generateToken.includes('?') ? '&' : '?'}t=${Date.now()}&country=${getCountry()}`;
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                cache: 'no-store',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': import.meta.env.VITE_FRONTEND_API_KEY
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: No se pudo obtener el token`);
-            }
-
-            const data: TokenResponse = await response.json();
-
-            sessionStorage.setItem('ekyc_token', data.token);
-            setToken(data.token);
+            const newToken = await ensureToken(forceRefresh);
+            setToken(newToken);
             setError(null);
+            return newToken;
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
+            const msg = err instanceof Error ? err.message : 'Error al obtener token';
+            setError(msg);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -55,11 +43,19 @@ const useJWT = (): UseJWTReturn => {
     }, [token, fetchToken]);
 
     const clearToken = () => {
-        sessionStorage.removeItem('ekyc_token');
+        try {
+            sessionStorage.removeItem('ekyc_token');
+        } catch {
+            // sessionStorage opcional
+        }
         setToken(null);
     };
 
-    return { token, loading, error, clearToken };
+    const refreshToken = async () => {
+        return fetchToken(true);
+    };
+
+    return { token, loading, error, clearToken, refreshToken };
 };
 
-export default useJWT;
+export default useJWT;

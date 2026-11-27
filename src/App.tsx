@@ -1,5 +1,6 @@
 import { HashRouter as Router, Route, Routes } from "react-router-dom";
 import { ValidacionIdentidad } from "@layouts/validacion-identidad";
+import { ErrorBoundary } from "@components/ui/error-boundary";
 // import EKYCLleida from "@layouts/ekyc-lleida";
 import BarcodeCapture from "@components/validacion-identidad/barcode-capture";
 import TestBrowser from "@components/validacion-identidad/test-browser";
@@ -14,31 +15,33 @@ function App() {
   useCountry();
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/ekyc-efirma"
-          element={<ValidacionIdentidad standalone={false} />}
-        />
-        <Route
-          path="/verify/:payload"
-          element={<Verify/>}
-        />
-        <Route path="/ekyc">
+    <ErrorBoundary>
+      <Router>
+        <Routes>
           <Route
-            path="validation/:hash"
-            element={<ValidacionIdentidad standalone={true} />}
+            path="/ekyc-efirma"
+            element={<ValidacionIdentidad standalone={false} />}
           />
-        </Route>
-        <Route path="test">
-          <Route path="barcode-test" element={<BarcodeCapture/>}/>
-          <Route path="deteccion" element={<TestBrowser/>}/>
-          <Route path="net" element={<NetworkDashboard/>}/>
-          <Route path="camera" element={<TestCamera/>}/>
-          <Route path="modelo" element={<TestModelo/>}/>
-        </Route>
-      </Routes>
-    </Router>
+          <Route
+            path="/verify/:payload"
+            element={<Verify/>}
+          />
+          <Route path="/ekyc">
+            <Route
+              path="validation/:hash"
+              element={<ValidacionIdentidad standalone={true} />}
+            />
+          </Route>
+          <Route path="test">
+            <Route path="barcode-test" element={<BarcodeCapture/>}/>
+            <Route path="deteccion" element={<TestBrowser/>}/>
+            <Route path="net" element={<NetworkDashboard/>}/>
+            <Route path="camera" element={<TestCamera/>}/>
+            <Route path="modelo" element={<TestModelo/>}/>
+          </Route>
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 }
 

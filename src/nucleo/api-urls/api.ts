@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { URLS } from './urls';
-import { getCountry } from '@nucleo/hooks/useCountry';
+import { getCountry, ensureCountry } from '@nucleo/hooks/useCountry';
 
 // Token manager singleton
 let tokenPromise: Promise<string> | null = null;
@@ -21,7 +21,9 @@ async function obtainToken(forceRefresh = false): Promise<string> {
   }
   tokenPromise = (async () => {
     try {
-      const res = await axios.get(`${URLS.generateToken}?country=${getCountry()}`, {
+      // Garantizar que el país esté resuelto antes de pedir el token
+      const country = await ensureCountry();
+      const res = await axios.get(`${URLS.generateToken}?country=${country}`, {
         headers: {
           'x-api-key': import.meta.env.VITE_FRONTEND_API_KEY,
         },
@@ -43,8 +45,6 @@ async function obtainToken(forceRefresh = false): Promise<string> {
 export async function ensureToken(forceRefresh = false): Promise<string> {
   return obtainToken(forceRefresh);
 }
-
-
 
 // Creamos la instancia personalizada
 const api = axios.create({
@@ -109,8 +109,8 @@ api.interceptors.response.use(
             try {
                 console.warn("JWT Expirado. Intentando renovación con API Key...");
 
-                // Pedimos un nuevo token usando la API Key del .env (Vite usa import.meta.env)
-                const res = await axios.get(`${URLS.generateToken}?country=${getCountry()}`, {
+                const country = await ensureCountry();
+                const res = await axios.get(`${URLS.generateToken}?country=${country}`, {
                     headers: {
                         'x-api-key': import.meta.env.VITE_FRONTEND_API_KEY
                     }
@@ -131,7 +131,6 @@ api.interceptors.response.use(
                 isRefreshing = false;
                 console.error("No se pudo renovar el token. Sesión cerrada.");
                 sessionStorage.removeItem('ekyc_token');
-                // Opcional: Redirigir al inicio o mostrar modal de error
                 return Promise.reject(refreshError);
             }
         }
