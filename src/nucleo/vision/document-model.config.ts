@@ -1,3 +1,5 @@
+import { normalizeScaleTolerance } from "./document-fit";
+
 export type DocumentCountry = "COL" | "HND";
 
 export type GuideSide = "anverso" | "reverso";
@@ -17,8 +19,6 @@ export type GuideProfiles = Record<string, GuideDocumentProfile>;
 export interface GuideThresholds {
   confidence: number;
   iou: number;
-  minAreaRatio: number;
-  maxAreaRatio: number;
   maxCenterOffset: number;
   minLuminance: number;
   maxLuminance: number;
@@ -142,8 +142,6 @@ export const FALLBACK_MODEL_BYTES: Record<DocumentCountry, number> = {
 export const GUIDE_THRESHOLDS: GuideThresholds = {
   confidence: 0.25,
   iou: 0.45,
-  minAreaRatio: 0.18,
-  maxAreaRatio: 0.92,
   maxCenterOffset: 0.18,
   minLuminance: 45,
   maxLuminance: 215,
@@ -152,6 +150,15 @@ export const GUIDE_THRESHOLDS: GuideThresholds = {
   stableMs: 1200,
   inferenceIntervalMs: 850,
 };
+
+/**
+ * Tolerancia de tamaño entre el documento y el recuadro. Se configura con
+ * `VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE` (fracción 0.01–0.5; un valor > 1 se
+ * interpreta como porcentaje). Por defecto ±12 %.
+ */
+export const GUIDE_SCALE_TOLERANCE = normalizeScaleTolerance(
+  import.meta.env.VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE
+);
 
 const CEDULA_COLOMBIA_ANVERSO: GuideSideProfile = {
   containers: ["CEDULA_CIUDADANIA_FRONTAL", "CEDULA_DIGITAL_FRONTAL"],

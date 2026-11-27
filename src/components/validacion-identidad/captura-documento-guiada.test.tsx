@@ -42,6 +42,15 @@ const renderGuide = (options: { detectionOnly?: boolean } = {}) =>
     />
   );
 
+const alignedFit = () => ({
+  state: "aligned" as const,
+  scaleRatio: 0.91,
+  scalePercent: 91,
+  closeness: 0.93,
+  tolerance: 0.12,
+  overflow: { left: 0, right: 0, top: 0, bottom: 0 },
+});
+
 const runGuideMocks = () => {
   mocks.vision.phase = "ready";
   mocks.vision.progress = 1;
@@ -53,6 +62,7 @@ const runGuideMocks = () => {
     canCapture: true,
     missing: [],
     detectedLabels: ["NOMBRES"],
+    fit: alignedFit(),
     containerBoxes: [],
   };
   mocks.guide.checklist = [
@@ -184,5 +194,63 @@ describe("CapturaDocumentoGuiada", () => {
     expect(
       screen.getByRole("button", { name: "Reintentar" })
     ).toBeTruthy();
+  });
+
+  it("ilumina el recuadro en verde y muestra el tamaño ideal", () => {
+    runGuideMocks();
+    const { container } = renderGuide({ detectionOnly: true });
+
+    const target = container.querySelector(".document-guide-target");
+    expect(target).toBeTruthy();
+    expect(target?.classList.contains("is-aligned")).toBe(true);
+    expect(screen.getByText("Tamaño ideal")).toBeTruthy();
+  });
+
+  it("indica acercar con el porcentaje que ocupa el documento", () => {
+    runGuideMocks();
+    mocks.guide.guide = {
+      ...(mocks.guide.guide as Record<string, unknown>),
+      code: "too_far",
+      canCapture: false,
+      fit: {
+        ...alignedFit(),
+        state: "too_far",
+        scaleRatio: 0.45,
+        scalePercent: 45,
+        closeness: 0.38,
+      },
+    };
+    const { container } = renderGuide({ detectionOnly: true });
+
+    const target = container.querySelector(".document-guide-target");
+    expect(target?.classList.contains("is-aligned")).toBe(false);
+    expect(target?.classList.contains("is-near")).toBe(false);
+    expect(screen.getByText("Acerca · 45%")).toBeTruthy();
+  });
+
+  it("no muestra el indicador de tamaño sin documento", () => {
+    mocks.vision.phase = "ready";
+    mocks.guide.phase = "running";
+    mocks.guide.guide = {
+      code: "no_document",
+      message: "Coloca el documento dentro del marco.",
+      hint: "Muestra el documento completo.",
+      canCapture: false,
+      missing: [],
+      detectedLabels: [],
+      fit: {
+        ...alignedFit(),
+        state: "unknown",
+        scaleRatio: 0,
+        scalePercent: 0,
+        closeness: 0,
+      },
+      containerBoxes: [],
+    };
+    renderGuide({ detectionOnly: true });
+
+    expect(screen.queryByText(/Acerca ·/)).toBeNull();
+    expect(screen.queryByText(/Aleja ·/)).toBeNull();
+    expect(screen.queryByText("Tamaño ideal")).toBeNull();
   });
 });

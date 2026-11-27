@@ -1,5 +1,10 @@
+import { useState, type CSSProperties } from "react";
 import { Spinner } from "reactstrap";
 import type { GuideSide } from "../../nucleo/vision/document-model.config";
+import {
+  GUIDE_TARGET_RECT,
+  NO_FIT,
+} from "../../nucleo/vision/document-fit";
 import { useDocumentGuide } from "../../nucleo/hooks/use-document-guide";
 import { useDocumentVision } from "../../nucleo/hooks/use-document-vision";
 import { describeGuide } from "../../nucleo/vision/document-guide";
@@ -56,9 +61,37 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
   const isModelInitializing = vision.phase === "initializing";
   const progressPercent = Math.round(vision.progress * 100);
 
-  const videoWidth = videoRef.current?.videoWidth ?? 0;
-  const videoHeight = videoRef.current?.videoHeight ?? 0;
+  const [videoSize, setVideoSize] = useState({ width: 0, height: 0 });
+
+  const videoWidth =
+    videoSize.width > 0 ? videoSize.width : (videoRef.current?.videoWidth ?? 0);
+  const videoHeight =
+    videoSize.height > 0
+      ? videoSize.height
+      : (videoRef.current?.videoHeight ?? 0);
   const boxes = guide?.containerBoxes ?? [];
+  const fit = guide?.fit ?? NO_FIT;
+  const fitVisible = isRunning && fit.state !== "unknown";
+  const fitLabel =
+    fit.state === "aligned"
+      ? "Tamaño ideal"
+      : fit.state === "too_far"
+        ? `Acerca · ${fit.scalePercent}%`
+        : `Aleja · ${fit.scalePercent}%`;
+  const targetClassName = `document-guide-target${
+    fit.state === "aligned"
+      ? " is-aligned"
+      : fit.closeness >= 0.8
+        ? " is-near"
+        : ""
+  }`;
+  const targetStyle = {
+    left: `${GUIDE_TARGET_RECT.x1 * 100}%`,
+    top: `${GUIDE_TARGET_RECT.y1 * 100}%`,
+    width: `${(GUIDE_TARGET_RECT.x2 - GUIDE_TARGET_RECT.x1) * 100}%`,
+    height: `${(GUIDE_TARGET_RECT.y2 - GUIDE_TARGET_RECT.y1) * 100}%`,
+    "--guide-closeness": String(fit.closeness),
+  } as CSSProperties;
   const guideText = isRunning
     ? describeGuide(guide)
     : {
@@ -86,6 +119,13 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
           muted
           playsInline
           autoPlay
+          onLoadedMetadata={(event) => {
+            const video = event.currentTarget;
+            setVideoSize({
+              width: video.videoWidth,
+              height: video.videoHeight,
+            });
+          }}
         />
         {(isRunning || isCapturing) && (
           <>
@@ -106,7 +146,17 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
                   />
                 ) : null
               )}
-              <div className="document-guide-target" />
+              <div className={targetClassName} style={targetStyle} />
+              {fitVisible && (
+                <div
+                  className={`document-guide-fit${
+                    fit.state === "aligned" ? " is-aligned" : ""
+                  }`}
+                  aria-hidden="true"
+                >
+                  {fitLabel}
+                </div>
+              )}
             </div>
             <div className="document-guide-badge">
               {isCapturing ? "Procesando..." : "Guía activa"}

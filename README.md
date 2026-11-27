@@ -56,12 +56,17 @@ tamaños y hashes de respaldo que coinciden con estos dos ONNX.
 
 ```bash
 VITE_DOCUMENT_GUIDE_ENABLED=true
+VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE=0.12
 VITE_DOCUMENT_MODEL_BASE_URL=https://huggingface.co/chuito1503/noaexport-modelos/resolve/main
 VITE_DOCUMENT_MODEL_VERIFY_HASH=true
 ```
 
 - `VITE_DOCUMENT_GUIDE_ENABLED`: activa la guía. También se puede forzar con
   `?guia=1` o desactivar con `?guia=0`.
+- `VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE`: tolerancia de tamaño entre el documento
+  y el recuadro, como fracción entre `0.01` y `0.5` (por defecto `0.12`, es
+  decir ±12 %). Un valor mayor que `1` se interpreta como porcentaje
+  (`15` = 15 %). Dentro de la tolerancia el recuadro se ilumina en verde.
 - `VITE_DOCUMENT_MODEL_BASE_URL`: base de los ONNX y del `metadata.json`.
 - `VITE_DOCUMENT_MODEL_VERIFY_HASH`: valida el SHA-256 del modelo contra el
   manifiesto o contra los hashes de respaldo. Desactívalo solo si cambias de
@@ -80,7 +85,10 @@ VITE_DOCUMENT_MODEL_VERIFY_HASH=true
    consentimiento ni se ofrece subir una imagen.
 4. La cámara muestra solo el video con los recuadros de detección y las
    instrucciones para centrar, iluminar, voltear o acercar el documento. No se
-   muestran checklist de campos ni datos leídos del documento.
+   muestran checklist de campos ni datos leídos del documento. El recuadro guía
+   compara los bordes del documento con los suyos: indica el porcentaje que
+   ocupa (`Acerca · N%` / `Aleja · N%`) y se ilumina en verde cuando el tamaño
+   entra en `VITE_DOCUMENT_GUIDE_SCALE_TOLERANCE`.
 5. La captura se dispara automáticamente, en segundo plano, cuando el documento
    está estable y completo; no hay botón manual en el proceso real.
 6. La imagen capturada sigue el flujo existente de OCR, detección y validación,

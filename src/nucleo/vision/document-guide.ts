@@ -2,11 +2,18 @@ import type { GuideSideProfile } from "./document-model.config";
 import {
   DOCUMENT_CONTAINERS,
   FIELD_DISPLAY_NAMES,
+  GUIDE_SCALE_TOLERANCE,
   GUIDE_THRESHOLDS,
   isDocumentCountry,
   normalizeDocumentType,
 } from "./document-model.config";
 import type { DocumentDetection } from "./document-postprocess";
+import type { DocumentFit } from "./document-fit";
+import {
+  assessDocumentFit,
+  GUIDE_TARGET_RECT,
+  NO_FIT,
+} from "./document-fit";
 
 export interface FrameQuality {
   luminance: number;
@@ -39,6 +46,8 @@ export interface GuideState {
   canCapture: boolean;
   missing: string[];
   detectedLabels: string[];
+  /** Encaje del documento contra el recuadro (tamaño y bordes). */
+  fit: DocumentFit;
   containerBoxes: Array<{
     label: string;
     box: { x1: number; y1: number; x2: number; y2: number };
@@ -54,6 +63,8 @@ export interface GuideInput {
   quality: FrameQuality | null;
   frameWidth: number;
   frameHeight: number;
+  /** Sobrescribe la tolerancia de entorno (útil en pruebas). */
+  tolerance?: number;
 }
 
 export interface FieldChecklistItem {
@@ -101,6 +112,7 @@ const getWrongSide = (
       canCapture: false,
       missing: [],
       detectedLabels: [...detected],
+      fit: NO_FIT,
       containerBoxes: [],
     };
   }
@@ -113,6 +125,7 @@ const getWrongSide = (
       canCapture: false,
       missing: [],
       detectedLabels: [...detected],
+      fit: NO_FIT,
       containerBoxes: [],
     };
   }
@@ -183,6 +196,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
         canCapture: false,
         missing: [],
         detectedLabels,
+        fit: NO_FIT,
         containerBoxes,
       };
     }
@@ -194,6 +208,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit: NO_FIT,
       containerBoxes,
     };
   }
@@ -206,6 +221,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit: NO_FIT,
       containerBoxes,
     };
   }
@@ -219,20 +235,26 @@ export const buildGuideState = (input: GuideInput): GuideState => {
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit: NO_FIT,
       containerBoxes,
     };
   }
 
-  const boxWidth = Math.max(0, union.x2 - union.x1);
-  const boxHeight = Math.max(0, union.y2 - union.y1);
-  const areaRatio =
-    frameWidth > 0 && frameHeight > 0
-      ? (boxWidth * boxHeight) / (frameWidth * frameHeight)
-      : 0;
+  const fit = assessDocumentFit({
+    box: union,
+    frameWidth,
+    frameHeight,
+    tolerance: input.tolerance ?? GUIDE_SCALE_TOLERANCE,
+  });
+
   const centerX = (union.x1 + union.x2) / 2;
   const centerY = (union.y1 + union.y2) / 2;
-  const offsetX = Math.abs(centerX / Math.max(frameWidth, 1) - 0.5);
-  const offsetY = Math.abs(centerY / Math.max(frameHeight, 1) - 0.5);
+  const targetCenterX = ((GUIDE_TARGET_RECT.x1 + GUIDE_TARGET_RECT.x2) / 2) *
+    Math.max(frameWidth, 1);
+  const targetCenterY = ((GUIDE_TARGET_RECT.y1 + GUIDE_TARGET_RECT.y2) / 2) *
+    Math.max(frameHeight, 1);
+  const offsetX = Math.abs(centerX - targetCenterX) / Math.max(frameWidth, 1);
+  const offsetY = Math.abs(centerY - targetCenterY) / Math.max(frameHeight, 1);
   const touchesEdge =
     union.x1 < frameWidth * 0.01 ||
     union.y1 < frameHeight * 0.01 ||
@@ -240,6 +262,8 @@ export const buildGuideState = (input: GuideInput): GuideState => {
     union.y2 > frameHeight * 0.99;
 
   if (touchesEdge) {
+    // Con los bordes del frame cortados la distancia no es la instrucción
+    // útil, así que el recuadro se mantiene neutro.
     return {
       code: "out_of_frame",
       message: "Muestra todo el documento.",
@@ -247,30 +271,33 @@ export const buildGuideState = (input: GuideInput): GuideState => {
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit: NO_FIT,
       containerBoxes,
     };
   }
 
-  if (areaRatio < GUIDE_THRESHOLDS.minAreaRatio) {
+  if (fit.state === "too_far") {
     return {
       code: "too_far",
       message: "Acerca el documento.",
-      hint: "Que ocupe la mayor parte del marco.",
+      hint: `Ocupa el ${fit.scalePercent}% del recuadro; acércalo hasta llenarlo.`,
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit,
       containerBoxes,
     };
   }
 
-  if (areaRatio > GUIDE_THRESHOLDS.maxAreaRatio) {
+  if (fit.state === "too_close") {
     return {
       code: "too_close",
       message: "Aleja un poco el documento.",
-      hint: "Necesitamos ver todos los bordes.",
+      hint: `Ocupa el ${fit.scalePercent}% del recuadro; aléjalo un poco para que quepa completo.`,
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit,
       containerBoxes,
     };
   }
@@ -282,10 +309,11 @@ export const buildGuideState = (input: GuideInput): GuideState => {
     return {
       code: "off_center",
       message: "Centra el documento.",
-      hint: "Alinea el documento con el marco.",
+      hint: "Alinea el documento con el recuadro.",
       canCapture: false,
       missing: [],
       detectedLabels,
+      fit,
       containerBoxes,
     };
   }
@@ -299,6 +327,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
         canCapture: false,
         missing: [],
         detectedLabels,
+        fit,
         containerBoxes,
       };
     }
@@ -311,6 +340,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
         canCapture: false,
         missing: [],
         detectedLabels,
+        fit,
         containerBoxes,
       };
     }
@@ -323,6 +353,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
         canCapture: false,
         missing: [],
         detectedLabels,
+        fit,
         containerBoxes,
       };
     }
@@ -338,6 +369,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
         canCapture: false,
         missing: [],
         detectedLabels,
+        fit,
         containerBoxes,
       };
     }
@@ -355,6 +387,7 @@ export const buildGuideState = (input: GuideInput): GuideState => {
       canCapture: false,
       missing,
       detectedLabels,
+      fit,
       containerBoxes,
     };
   }
@@ -362,10 +395,11 @@ export const buildGuideState = (input: GuideInput): GuideState => {
   return {
     code: "ready",
     message: "Perfecto, no muevas.",
-    hint: "Capturaremos la foto automáticamente.",
+    hint: "Tamaño y campos correctos. Capturaremos la foto automáticamente.",
     canCapture: true,
     missing: [],
     detectedLabels,
+    fit,
     containerBoxes,
   };
 };
