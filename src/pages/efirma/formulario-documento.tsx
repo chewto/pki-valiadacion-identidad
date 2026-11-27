@@ -33,13 +33,11 @@ import SuccessStep from "@components/ui/success-step";
 import { setBackTime, setFrontTime } from "@nucleo/redux/slices/timerSlice";
 import api from "@nucleo/api-urls/api";
 import type {
-  CamposDocumento,
   ValidationFeedback,
 } from "../../nucleo/interfaces/validacion-identidad/informacion-identidad.interface";
 import { normalizeValidationFeedback, shouldAutoAdvanceAfterValidation } from "../../nucleo/services/validation-feedback.service";
 import { ValidationFeedbackPanel } from "../../components/ui/validation-feedback-panel";
 import { CapturaDocumentoGuiada } from "../../components/validacion-identidad/captura-documento-guiada";
-import { CamposDocumentoPanel } from "../../components/validacion-identidad/campos-documento-panel";
 import {
   getGuideProfile,
   isDocumentGuideEnabled,
@@ -162,7 +160,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   const publicPath =
     "./svg/prod/" +
     `${placeholder}_${tipoDocumentoNormalizado.toLowerCase().replace(/ /g, "_")}.svg`;
-  console.log(publicPath)
   // const [detectCount, setDetectCount] = useState<number>(1)
   const [triesCounter, setTriesCounter] = useState<number>(tries);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -185,9 +182,6 @@ export const FormularioDocumento: React.FC<Props> = ({
   const feedbackId = "document-validation-feedback";
 
   const [guideSessionKey, setGuideSessionKey] = useState<number>(0);
-  const camposDocumento = useSelector(
-    (state: RootState) => state.validacionDocumento.campos
-  );
 
   const guideSide: GuideSide =
     ladoDocumento === "reverso" ? "reverso" : "anverso";
@@ -441,17 +435,6 @@ export const FormularioDocumento: React.FC<Props> = ({
     procesarImagenDocumento(dataUrl);
   };
 
-  const handleCamposConfirm = (campos: CamposDocumento) => {
-    clearPendingAutoAdvance();
-    dispatch(setCamposDocumento(campos));
-    setFeedback(null);
-
-    if (ladoDocumento === "reverso") {
-      setContinuarBoton(true);
-    }
-    nextStep();
-  };
-
   const handleCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = event.target.files?.[0];
     if (!archivo) return;
@@ -683,9 +666,12 @@ export const FormularioDocumento: React.FC<Props> = ({
               scheduleAutoAdvance();
             }
           } else if (fieldsNeedReview) {
-            // La guía está activa y faltan datos: esperamos confirmación o
-            // corrección manual antes de avanzar.
-            setContinuarBoton(false);
+            // Sin panel de datos en pantalla, confirmamos automáticamente para
+            // no bloquear el flujo esperando una corrección manual que ya no
+            // se ofrece. Es el mismo efecto que tenía "Confirmar datos".
+            clearPendingAutoAdvance();
+            setFeedback(null);
+            setTimeout(() => nextStep(), 700);
           } else if (resData.face && resData.faceDetected && resData.validSide) {
             setTimeout(() => nextStep(), 700);
           } else if (conteo >= detectionTries) {
@@ -818,13 +804,13 @@ export const FormularioDocumento: React.FC<Props> = ({
     <div className="documento-container">
       <SuccessStep show={success} />
 
-      {tipoDocumento === passport && ladoDocumento === "anverso" && (
+      {!guidePossible && tipoDocumento === passport && ladoDocumento === "anverso" && (
         <h2 className="documento-title">
           Subir foto del {placeholder} de su {tipoDocumento}
         </h2>
       )}
 
-      {tipoDocumento !== passport && (
+      {!guidePossible && tipoDocumento !== passport && (
         <h2 className="documento-title">
           Subir foto del {placeholder} de su {tipoDocumento}
         </h2>
@@ -1079,14 +1065,7 @@ export const FormularioDocumento: React.FC<Props> = ({
           tipoDocumento={tipoDocumentoNormalizado}
           lado={guideSide}
           onCapture={handleGuidedCapture}
-        />
-      )}
-
-      {!loading && !success && guidePossible && camposDocumento && (
-        <CamposDocumentoPanel
-          campos={camposDocumento}
-          onConfirm={handleCamposConfirm}
-          onRecapture={requestRecapture}
+          detectionOnly
         />
       )}
 
@@ -1175,11 +1154,12 @@ export const FormularioDocumento: React.FC<Props> = ({
         </>
       ))}
 
-      {preview.length >= 1 && !loading && tipoDocumento != passport && (
+      {!guidePossible && preview.length >= 1 && !loading && tipoDocumento != passport && (
         <Previsualizacion preview={preview} nombrePreview={ladoDocumento} />
       )}
 
-      {preview.length >= 1 &&
+      {!guidePossible &&
+        preview.length >= 1 &&
         !loading &&
         tipoDocumento == passport &&
         ladoDocumento == "anverso" && (

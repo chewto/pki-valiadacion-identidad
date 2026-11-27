@@ -78,20 +78,23 @@ VITE_DOCUMENT_MODEL_VERIFY_HASH=true
    reverso.
 3. Con la guía habilitada la captura guiada es obligatoria: no se muestra el
    consentimiento ni se ofrece subir una imagen.
-4. La cámara muestra instrucciones para centrar, iluminar, voltear o acercar el
-   documento, y un checklist de campos detectados.
-5. La captura se dispara automáticamente cuando el documento está estable y
-   completo; también hay un botón manual.
-6. La imagen capturada sigue el flujo existente de OCR, detección y validación.
-7. Los datos de OCR/MRZ se muestran en un panel y se pueden corregir antes de
-   continuar.
+4. La cámara muestra solo el video con los recuadros de detección y las
+   instrucciones para centrar, iluminar, voltear o acercar el documento. No se
+   muestran checklist de campos ni datos leídos del documento.
+5. La captura se dispara automáticamente, en segundo plano, cuando el documento
+   está estable y completo; no hay botón manual en el proceso real.
+6. La imagen capturada sigue el flujo existente de OCR, detección y validación,
+   pero no se muestra en pantalla.
+7. Los datos de OCR/MRZ se guardan para la validación, pero no se muestran ni se
+   editan en el paso del documento.
 8. Si el modelo, el CDN o la cámara fallan, se bloquea el paso con un mensaje y
    la opción de reintentar; no hay captura alternativa.
 9. El modelo se ejecuta en un Web Worker con `onnxruntime-web` (WebGPU si está
    disponible; si no, WASM) y se cachea para las siguientes validaciones.
 
 Ruta de diagnóstico sin backend: `/#/test/documento-vision` (permite elegir país,
-documento y lado, y probar cámara, modelo y detecciones).
+documento y lado, y probar cámara, modelo y detecciones). Esta página conserva el
+checklist de campos, el botón de captura manual y la galería de capturas.
 
 Lector de etiquetas con recortes: `/#/test/lector` (selecciona Colombia/Honduras,
 dibuja todas las cajas con su nombre y confianza, y genera recortes descargables

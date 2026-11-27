@@ -24,7 +24,25 @@ vi.mock("@nucleo/api-urls/api", () => ({
 }));
 
 vi.mock("@components/validacion-identidad/captura-documento-guiada", () => ({
-  CapturaDocumentoGuiada: () => <div data-testid="captura-guiada" />,
+  CapturaDocumentoGuiada: ({
+    detectionOnly,
+    onCapture,
+  }: {
+    detectionOnly?: boolean;
+    onCapture: (dataUrl: string) => void;
+  }) => (
+    <div
+      data-testid="captura-guiada"
+      data-detection-only={detectionOnly ? "true" : "false"}
+    >
+      <button
+        type="button"
+        onClick={() => onCapture("data:image/jpeg;base64,AAAA")}
+      >
+        captura-test
+      </button>
+    </div>
+  ),
 }));
 
 type Deferred<T> = {
@@ -58,13 +76,15 @@ const buildStore = () =>
     },
   });
 
-const renderFormulario = () =>
+const renderFormulario = (
+  options: { preview?: string; nextStep?: () => void } = {}
+) =>
   render(
     <Provider store={buildStore()}>
       <FormularioDocumento
         id={1}
         tipoDocumento="CEDULA DE CIUDADANIA"
-        preview=""
+        preview={options.preview ?? ""}
         continuarBoton={false}
         setContinuarBoton={vi.fn()}
         ladoDocumento="anverso"
@@ -73,7 +93,7 @@ const renderFormulario = () =>
         detectionTries={3}
         attendance=""
         setMainCounter={vi.fn()}
-        nextStep={vi.fn()}
+        nextStep={options.nextStep ?? vi.fn()}
         returnStep={vi.fn()}
       />
     </Provider>
@@ -471,6 +491,36 @@ describe("FormularioDocumento - progreso WebSocket OCR", () => {
   });
 });
 
+const guidedValidationResponse = {
+  ocr: {
+    data: { name: "", lastName: "", ID: "" },
+    percentage: { name: "", lastName: "", ID: "" },
+  },
+  mrz: {
+    code: "",
+    data: { name: "", lastName: "" },
+    percentages: { name: "", lastName: "" },
+    extractedData: {},
+  },
+  barcode: "",
+  face: false,
+  confidence: 0,
+  documentFace: null,
+  document: {
+    code: "",
+    country: "",
+    countryCheck: false,
+    type: "",
+    typeCheck: false,
+    isExpired: null,
+  },
+  image: "data:image/jpeg;base64,AAAA",
+  validSide: true,
+  faceDetected: false,
+  mismatches: [],
+  messages: [],
+};
+
 describe("FormularioDocumento - guía obligatoria", () => {
   beforeEach(() => {
     window.history.pushState({}, "", "/?guia=1");
@@ -484,9 +534,44 @@ describe("FormularioDocumento - guía obligatoria", () => {
     const { container } = renderFormulario();
 
     expect(screen.getByTestId("captura-guiada")).toBeTruthy();
+    expect(
+      screen.getByTestId("captura-guiada").getAttribute("data-detection-only")
+    ).toBe("true");
     expect(container.querySelector('input[type="file"]')).toBeNull();
     expect(
       screen.queryByLabelText(/Subir foto del frontal de su/i)
     ).toBeNull();
+  });
+
+  it("no muestra la imagen capturada ni el panel de datos leídos", () => {
+    const { container } = renderFormulario({
+      preview: "data:image/jpeg;base64,AAAA",
+    });
+
+    expect(screen.queryByText("Datos leídos del documento")).toBeNull();
+    expect(container.querySelector('img[alt="anverso"]')).toBeNull();
+    expect(screen.queryByText(/Subir foto del frontal/i)).toBeNull();
+  });
+
+  it("continúa automáticamente tras la captura aunque falten datos", async () => {
+    const nextStep = vi.fn();
+
+    apiPost.mockImplementation((url: string) => {
+      if (url.includes("/document/detection")) {
+        return Promise.resolve({ data: { documentoValido: true } });
+      }
+      if (url.includes("/document/front")) {
+        return Promise.resolve({ data: guidedValidationResponse });
+      }
+      return Promise.reject(new Error(`URL inesperada: ${url}`));
+    });
+
+    renderFormulario({ nextStep });
+
+    fireEvent.click(screen.getByRole("button", { name: "captura-test" }));
+
+    await waitFor(() => expect(nextStep).toHaveBeenCalledTimes(1), {
+      timeout: 2500,
+    });
   });
 });

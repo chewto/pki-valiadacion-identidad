@@ -10,6 +10,13 @@ interface Props {
   tipoDocumento: string;
   lado: GuideSide;
   onCapture: (dataUrl: string) => void;
+  /**
+   * Deja únicamente la cámara con las detecciones y los estados de carga/error.
+   * Oculta el checklist de campos, el botón de captura manual y los datos del
+   * motor. La captura automática sigue funcionando. La página de diagnóstico
+   * usa el modo completo por defecto.
+   */
+  detectionOnly?: boolean;
 }
 
 const modelSizeLabel = (country: string): string =>
@@ -20,6 +27,7 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
   tipoDocumento,
   lado,
   onCapture,
+  detectionOnly = false,
 }) => {
   // Estado de la precarga que arrancó al iniciar la validación.
   const vision = useDocumentVision();
@@ -192,7 +200,7 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
         </div>
       )}
 
-      {isRunning && checklist.length > 0 && (
+      {!detectionOnly && isRunning && checklist.length > 0 && (
         <ul className="document-guide-checklist" aria-label="Campos detectados">
           {checklist.map((item) => (
             <li
@@ -208,7 +216,7 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
         </ul>
       )}
 
-      {isRunning && (
+      {!detectionOnly && isRunning && (
         <div className="document-guide-actions">
           <button
             type="button"
@@ -220,7 +228,7 @@ export const CapturaDocumentoGuiada: React.FC<Props> = ({
         </div>
       )}
 
-      {isRunning && (
+      {!detectionOnly && isRunning && (
         <p className="document-guide-meta">
           {provider ? `Motor: ${provider}` : "Motor: —"}
           {inferenceMs !== null ? ` · ${inferenceMs} ms/frame` : ""}
